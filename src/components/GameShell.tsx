@@ -1,15 +1,18 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Phaser from 'phaser';
 import { createPhaserGame } from '@/game/PhaserGame';
 import { bus } from '@/game/events';
 import { useApp } from '@/state/store';
 import { BrickPalette } from './BrickPalette';
 import { LessonModal } from './LessonModal';
+import { LessonsPanel } from './LessonsPanel';
 import { LESSONS } from '@/data/lessons';
+import { useLessonUnlock } from '@/lessons/useLessonUnlock';
 
 export function GameShell() {
   const hostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
 
   const setScreen = useApp((s) => s.setScreen);
   const addPlacedBrick = useApp((s) => s.addPlacedBrick);
@@ -18,6 +21,8 @@ export function GameShell() {
   const placedBricks = useApp((s) => s.placedBricks);
   const unlockedLessons = useApp((s) => s.unlockedLessons);
   const resetBoard = useApp((s) => s.resetBoard);
+
+  const { currentLessonId, queueLength, dismissCurrent } = useLessonUnlock();
 
   useEffect(() => {
     if (!hostRef.current) return;
@@ -81,9 +86,13 @@ export function GameShell() {
             <span className="bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick">
               Bricks: {placedBricks.length}
             </span>
-            <span className="bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick">
+            <button
+              type="button"
+              onClick={() => setPanelOpen(true)}
+              className="bg-brand-blue text-white font-bold text-sm px-3 py-2 rounded-brick shadow-brick"
+            >
               Lessons: {unlockedLessons.length} / {LESSONS.length}
-            </span>
+            </button>
             <button
               type="button"
               onClick={handleReset}
@@ -97,7 +106,12 @@ export function GameShell() {
       <div className="order-1 lg:order-2">
         <BrickPalette />
       </div>
-      <LessonModal lessonId={null} onClose={() => {}} />
+      <LessonsPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
+      <LessonModal
+        lessonId={currentLessonId}
+        queueLength={queueLength}
+        onClose={dismissCurrent}
+      />
     </div>
   );
 }

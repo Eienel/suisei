@@ -1,18 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LESSON_BY_ID } from '@/data/lessons';
+import { BRICK_BY_ID } from '@/game/bricks/brickTypes';
 
-/**
- * Sprint 0: stub. Sprint 2 will mount this from the combo detector.
- * For now, exposes a toggleable shell so we can preview styling later.
- */
 export function LessonModal({
   lessonId,
+  queueLength,
   onClose,
 }: {
   lessonId: string | null;
+  queueLength: number;
   onClose: () => void;
 }) {
   const [closing, setClosing] = useState(false);
+
+  // Reset closing state when a new lesson appears.
+  useEffect(() => {
+    setClosing(false);
+  }, [lessonId]);
+
   if (!lessonId) return null;
   const lesson = LESSON_BY_ID[lessonId];
   if (!lesson) return null;
@@ -33,17 +38,38 @@ export function LessonModal({
         className="bg-brand-cream max-w-md w-full rounded-2xl shadow-brick-lg p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-brand-blue font-bold uppercase tracking-widest text-xs mb-2">
-          Lesson unlocked
-        </p>
-        <h3 className="font-extrabold text-2xl text-brand-ink mb-3">{lesson.title}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-brand-blue font-bold uppercase tracking-widest text-xs">
+            Lesson unlocked
+          </p>
+          {queueLength > 1 && (
+            <span className="text-xs font-bold text-brand-ink-soft">
+              +{queueLength - 1} more
+            </span>
+          )}
+        </div>
+        <h3 className="font-extrabold text-2xl text-brand-ink mb-2">{lesson.title}</h3>
+        <div className="flex flex-wrap gap-1 mb-4">
+          {lesson.triggerCombo.map((t, i) => {
+            const def = BRICK_BY_ID[t];
+            return (
+              <span
+                key={`${t}-${i}`}
+                className="text-[10px] font-extrabold text-white px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: def.color }}
+              >
+                {def.shortLabel}
+              </span>
+            );
+          })}
+        </div>
         <p className="text-brand-ink-soft leading-relaxed mb-6">{lesson.body}</p>
         <button
           type="button"
           onClick={handleClose}
           className="bg-brand-blue text-white font-bold px-5 py-3 rounded-brick shadow-brick"
         >
-          Got it
+          {queueLength > 1 ? 'Next →' : 'Got it'}
         </button>
       </div>
     </div>
