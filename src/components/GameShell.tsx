@@ -6,6 +6,7 @@ import { useApp } from '@/state/store';
 import { BrickPalette } from './BrickPalette';
 import { LessonModal } from './LessonModal';
 import { LessonsPanel } from './LessonsPanel';
+import { HowToModal } from './HowToModal';
 import { LESSONS } from '@/data/lessons';
 import { useLessonUnlock } from '@/lessons/useLessonUnlock';
 import { sfx } from '@/audio/sfx';
@@ -30,6 +31,9 @@ function GameShellInner() {
   const gameRef = useRef<Phaser.Game | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [muted, setMuted] = useState(sfx.isMuted());
+  const seenHowTo = useApp((s) => s.seenHowTo);
+  const markHowToSeen = useApp((s) => s.markHowToSeen);
+  const [howToOpen, setHowToOpen] = useState(!seenHowTo);
   const [minting, setMinting] = useState(false);
   const [mintResult, setMintResult] = useState<string | null>(null);
 
@@ -138,13 +142,23 @@ function GameShellInner() {
           )}
         </div>
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-          <button
-            type="button"
-            onClick={() => setScreen('landing')}
-            className="pointer-events-auto bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick"
-          >
-            ← Home
-          </button>
+          <div className="pointer-events-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setScreen('landing')}
+              className="bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick"
+            >
+              ← Home
+            </button>
+            <button
+              type="button"
+              aria-label="How to play"
+              onClick={() => setHowToOpen(true)}
+              className="bg-white text-brand-ink font-extrabold text-sm w-9 h-9 flex items-center justify-center rounded-brick shadow-brick"
+            >
+              ?
+            </button>
+          </div>
           <div className="pointer-events-auto flex items-center gap-2 flex-wrap justify-end">
             <span className="hidden sm:inline-flex bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick">
               Bricks: {placedBricks.length}
@@ -198,6 +212,13 @@ function GameShellInner() {
         lessonId={currentLessonId}
         queueLength={queueLength}
         onClose={dismissCurrent}
+      />
+      <HowToModal
+        open={howToOpen}
+        onClose={() => {
+          setHowToOpen(false);
+          markHowToSeen();
+        }}
       />
     </div>
   );

@@ -11,6 +11,14 @@ export class SandboxScene extends Phaser.Scene {
   private pressTimer: ReturnType<typeof setTimeout> | null = null;
   private pressTarget: Brick | null = null;
   private pressDidMove = false;
+  private pressStartX = 0;
+  private pressStartY = 0;
+
+  private cancelPress = () => {
+    if (this.pressTimer) clearTimeout(this.pressTimer);
+    this.pressTimer = null;
+    this.pressTarget = null;
+  };
 
   constructor() {
     super('SandboxScene');
@@ -45,7 +53,16 @@ export class SandboxScene extends Phaser.Scene {
     this.input.on(
       'dragstart',
       (_p: Phaser.Input.Pointer, obj: Phaser.GameObjects.GameObject) => {
-        if (obj instanceof Brick) this.children.bringToTop(obj);
+        if (!(obj instanceof Brick)) return;
+        // Cancel any pending long-press removal so a slow drag isn't
+        // mistaken for a tap-and-hold.
+        this.cancelPress();
+        // Kill any in-flight flash tweens so the brick follows the
+        // pointer immediately instead of fighting a yoyo.
+        this.tweens.killTweensOf(obj);
+        obj.setScale(1);
+        obj.clearOutline();
+        this.children.bringToTop(obj);
       }
     );
 
@@ -81,9 +98,12 @@ export class SandboxScene extends Phaser.Scene {
           this.removeBrick(target);
           return;
         }
-        // Start long-press timer for touch removal.
+        // Reset any previous press state before starting a new timer.
+        this.cancelPress();
         this.pressTarget = target;
         this.pressDidMove = false;
+        this.pressStartX = pointer.x;
+        this.pressStartY = pointer.y;
         this.pressTimer = setTimeout(() => {
           if (this.pressTarget && !this.pressDidMove) {
             this.removeBrick(this.pressTarget);
@@ -94,18 +114,17 @@ export class SandboxScene extends Phaser.Scene {
       }
     );
 
-    this.input.on('pointermove', () => {
-      this.pressDidMove = true;
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      // Treat any meaningful pointer travel as "moved" so a tap that
+      // wiggles a few pixels can still drag.
+      const dx = pointer.x - this.pressStartX;
+      const dy = pointer.y - this.pressStartY;
+      if (dx * dx + dy * dy > 9) this.pressDidMove = true;
     });
 
-    const cancelPress = () => {
-      if (this.pressTimer) clearTimeout(this.pressTimer);
-      this.pressTimer = null;
-      this.pressTarget = null;
-    };
-    this.input.on('pointerup', cancelPress);
-    this.input.on('pointerupoutside', cancelPress);
-    this.input.on('gameout', cancelPress);
+    this.input.on('pointerup', this.cancelPress);
+    this.input.on('pointerupoutside', this.cancelPress);
+    this.input.on('gameout', this.cancelPress);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       bus.off('SPAWN_BRICK');

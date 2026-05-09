@@ -1,6 +1,7 @@
 import { LESSONS } from '@/data/lessons';
 import { useApp } from '@/state/store';
 import { BRICK_BY_ID } from '@/game/bricks/brickTypes';
+import { comboCounts } from '@/lessons/comboCounts';
 
 export function LessonsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const unlocked = useApp((s) => s.unlockedLessons);
@@ -51,12 +52,14 @@ export function LessonsPanel({ open, onClose }: { open: boolean; onClose: () => 
                   >
                     {isUnlocked ? l.title : 'Locked'}
                   </h3>
-                  <div className="flex flex-wrap gap-1 justify-end">
-                    {l.triggerCombo.map((t, i) => {
-                      const def = BRICK_BY_ID[t];
+                  <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
+                    {comboCounts(l.triggerCombo).map(({ type, count }) => {
+                      const def = BRICK_BY_ID[type];
+                      const label =
+                        def.shortLabel + (count > 1 ? ` ×${count}` : '');
                       return (
                         <span
-                          key={`${t}-${i}`}
+                          key={type}
                           className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                             isUnlocked ? 'text-white' : 'text-brand-ink-soft'
                           }`}
@@ -65,7 +68,7 @@ export function LessonsPanel({ open, onClose }: { open: boolean; onClose: () => 
                             border: isUnlocked ? 'none' : '1px dashed currentColor',
                           }}
                         >
-                          {def.shortLabel}
+                          {label}
                         </span>
                       );
                     })}

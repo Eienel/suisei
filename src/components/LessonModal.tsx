@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LESSON_BY_ID } from '@/data/lessons';
 import { BRICK_BY_ID } from '@/game/bricks/brickTypes';
+import { comboCounts } from '@/lessons/comboCounts';
 
 export function LessonModal({
   lessonId,
@@ -50,15 +51,16 @@ export function LessonModal({
         </div>
         <h3 className="font-extrabold text-2xl text-brand-ink mb-2">{lesson.title}</h3>
         <div className="flex flex-wrap gap-1 mb-4">
-          {lesson.triggerCombo.map((t, i) => {
-            const def = BRICK_BY_ID[t];
+          {comboCounts(lesson.triggerCombo).map(({ type, count }) => {
+            const def = BRICK_BY_ID[type];
             return (
               <span
-                key={`${t}-${i}`}
+                key={type}
                 className="text-[10px] font-extrabold text-white px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: def.color }}
               >
                 {def.shortLabel}
+                {count > 1 ? ` ×${count}` : ''}
               </span>
             );
           })}

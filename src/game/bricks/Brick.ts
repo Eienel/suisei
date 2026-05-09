@@ -164,6 +164,10 @@ export class Brick extends Phaser.GameObjects.Container {
     this.drawBody();
   }
 
+  clearOutline() {
+    this.outline.clear();
+  }
+
   override destroy(fromScene?: boolean) {
     this.outline.destroy();
     this.gfx.destroy();

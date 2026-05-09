@@ -6,6 +6,7 @@ interface AppState {
   screen: Screen;
   placedBricks: PlacedBrick[];
   unlockedLessons: string[];
+  seenHowTo: boolean;
 
   setScreen: (s: Screen) => void;
   addPlacedBrick: (b: PlacedBrick) => void;
@@ -13,6 +14,7 @@ interface AppState {
   removePlacedBrick: (uid: string) => void;
   unlockLesson: (id: string) => void;
   resetBoard: () => void;
+  markHowToSeen: () => void;
 }
 
 export const useApp = create<AppState>()(
@@ -21,6 +23,7 @@ export const useApp = create<AppState>()(
       screen: 'landing',
       placedBricks: [],
       unlockedLessons: [],
+      seenHowTo: false,
 
       setScreen: (s) => set({ screen: s }),
       addPlacedBrick: (b) =>
@@ -42,12 +45,14 @@ export const useApp = create<AppState>()(
             : { unlockedLessons: [...state.unlockedLessons, id] }
         ),
       resetBoard: () => set({ placedBricks: [] }),
+      markHowToSeen: () => set({ seenHowTo: true }),
     }),
     {
       name: 'blockbuilders-state',
       partialize: (s) => ({
         placedBricks: s.placedBricks,
         unlockedLessons: s.unlockedLessons,
+        seenHowTo: s.seenHowTo,
       }),
     }
   )
