@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useApp } from '@/state/store';
 import { findNewlyUnlocked } from './detect';
+import { sfx } from '@/audio/sfx';
 
 /**
  * Subscribes to placedBricks. Whenever the board changes, checks every
@@ -27,6 +28,7 @@ export function useLessonUnlock() {
       seenRef.current.add(l.id);
       unlockLesson(l.id);
     });
+    sfx.chime();
     setQueue((q) => [...q, ...fresh.map((l) => l.id)]);
   }, [placedBricks, unlockLesson]);
 

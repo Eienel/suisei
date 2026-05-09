@@ -20,7 +20,7 @@ export function Landing() {
           <p className="text-brand-blue font-bold uppercase tracking-widest text-sm mb-4">
             Bags hackathon · MVP
           </p>
-          <h1 className="font-extrabold leading-[0.95] tracking-tight text-5xl sm:text-6xl lg:text-7xl mb-6">
+          <h1 className="font-extrabold leading-[0.95] tracking-tight text-4xl sm:text-6xl lg:text-7xl mb-6">
             think Lego
             <br />
             <span className="text-brand-blue">but for crypto.</span>

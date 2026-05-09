@@ -1,5 +1,6 @@
 import { BRICK_DEFS, type BrickDef } from '@/game/bricks/brickTypes';
 import { bus } from '@/game/events';
+import { sfx } from '@/audio/sfx';
 
 export function BrickPalette() {
   return (
@@ -22,6 +23,7 @@ export function BrickPalette() {
 function PaletteItem({ def }: { def: BrickDef }) {
   const onClick = () => {
     if (!def.enabled) return;
+    sfx.click();
     bus.emit('SPAWN_BRICK', { type: def.id });
   };
 

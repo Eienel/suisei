@@ -8,11 +8,13 @@ import { LessonModal } from './LessonModal';
 import { LessonsPanel } from './LessonsPanel';
 import { LESSONS } from '@/data/lessons';
 import { useLessonUnlock } from '@/lessons/useLessonUnlock';
+import { sfx } from '@/audio/sfx';
 
 export function GameShell() {
   const hostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [muted, setMuted] = useState(sfx.isMuted());
 
   const setScreen = useApp((s) => s.setScreen);
   const addPlacedBrick = useApp((s) => s.addPlacedBrick);
@@ -83,7 +85,7 @@ export function GameShell() {
             ← Home
           </button>
           <div className="pointer-events-auto flex items-center gap-2">
-            <span className="bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick">
+            <span className="hidden sm:inline-flex bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick">
               Bricks: {placedBricks.length}
             </span>
             <button
@@ -92,6 +94,18 @@ export function GameShell() {
               className="bg-brand-blue text-white font-bold text-sm px-3 py-2 rounded-brick shadow-brick"
             >
               Lessons: {unlockedLessons.length} / {LESSONS.length}
+            </button>
+            <button
+              type="button"
+              aria-label={muted ? 'Unmute' : 'Mute'}
+              onClick={() => {
+                const next = !muted;
+                sfx.setMuted(next);
+                setMuted(next);
+              }}
+              className="bg-white text-brand-ink font-bold text-sm px-3 py-2 rounded-brick shadow-brick"
+            >
+              {muted ? 'Sound: Off' : 'Sound: On'}
             </button>
             <button
               type="button"
