@@ -30,7 +30,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#FFC83D',
     studColor: '#E0A91A',
     blurb: 'Holds your keys. The thing that proves you, you.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'block',
@@ -48,7 +48,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#22C55E',
     studColor: '#4ADE80',
     blurb: 'A signed message: "I send X to Y."',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'token',
@@ -57,7 +57,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#F472B6',
     studColor: '#F9A8D4',
     blurb: 'Programmable units of value living on a chain.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'validator',
@@ -66,7 +66,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#A855F7',
     studColor: '#C084FC',
     blurb: 'Checks blocks and gets rewarded for honest work.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'miner',
@@ -75,7 +75,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#F97316',
     studColor: '#FB923C',
     blurb: 'Burns energy to earn the right to add a block.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'smart-contract',
@@ -84,7 +84,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#06B6D4',
     studColor: '#22D3EE',
     blurb: 'Code that runs when you send it a transaction.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'oracle',
@@ -93,7 +93,7 @@ export const BRICK_DEFS: readonly BrickDef[] = [
     color: '#EAB308',
     studColor: '#FACC15',
     blurb: 'Pipes outside-world data onto the chain.',
-    enabled: false,
+    enabled: true,
   },
 ];
 

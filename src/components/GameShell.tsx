@@ -14,6 +14,7 @@ export function GameShell() {
   const setScreen = useApp((s) => s.setScreen);
   const addPlacedBrick = useApp((s) => s.addPlacedBrick);
   const movePlacedBrick = useApp((s) => s.movePlacedBrick);
+  const removePlacedBrick = useApp((s) => s.removePlacedBrick);
   const placedBricks = useApp((s) => s.placedBricks);
   const unlockedLessons = useApp((s) => s.unlockedLessons);
   const resetBoard = useApp((s) => s.resetBoard);
@@ -33,17 +34,22 @@ export function GameShell() {
     const onMoved = (b: { uid: string; gridX: number; gridY: number }) => {
       movePlacedBrick(b.uid, b.gridX, b.gridY);
     };
+    const onRemoved = ({ uid }: { uid: string }) => {
+      removePlacedBrick(uid);
+    };
 
     bus.on('BRICK_PLACED', onPlaced);
     bus.on('BRICK_MOVED', onMoved);
+    bus.on('BRICK_REMOVED', onRemoved);
 
     return () => {
       bus.off('BRICK_PLACED', onPlaced);
       bus.off('BRICK_MOVED', onMoved);
+      bus.off('BRICK_REMOVED', onRemoved);
       gameRef.current?.destroy(true);
       gameRef.current = null;
     };
-  }, [addPlacedBrick, movePlacedBrick]);
+  }, [addPlacedBrick, movePlacedBrick, removePlacedBrick]);
 
   const handleReset = () => {
     bus.emit('RESET_BOARD');
@@ -53,7 +59,16 @@ export function GameShell() {
   return (
     <div className="h-screen w-screen flex flex-col lg:flex-row bg-brand-cream font-display">
       <div className="flex-1 relative order-2 lg:order-1">
-        <div ref={hostRef} className="absolute inset-0" />
+        <div
+          ref={hostRef}
+          className="absolute inset-0"
+          style={{ touchAction: 'none' }}
+        />
+        <div className="absolute bottom-3 left-3 pointer-events-none">
+          <span className="bg-brand-ink/85 text-white text-xs font-bold px-2.5 py-1.5 rounded-brick">
+            right-click or long-press a brick to remove
+          </span>
+        </div>
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
           <button
             type="button"

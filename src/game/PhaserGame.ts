@@ -16,7 +16,13 @@ export function createPhaserGame(parent: HTMLElement): Phaser.Game {
     scene: [BootScene, SandboxScene],
     input: {
       activePointers: 3,
+      mouse: {
+        preventDefaultWheel: false,
+        // Allow right-click to be captured by the scene without browser menu.
+        // The Scene listens via input 'pointerdown' + rightButtonDown().
+      },
     },
+    disableContextMenu: true,
     render: {
       antialias: true,
       roundPixels: false,
