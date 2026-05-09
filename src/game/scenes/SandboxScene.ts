@@ -25,6 +25,7 @@ export class SandboxScene extends Phaser.Scene {
 
     bus.on('SPAWN_BRICK', ({ type }) => this.spawnBrick(type));
     bus.on('RESET_BOARD', () => this.resetBoard());
+    bus.on('SET_COSMETIC', ({ skin }) => this.applyCosmetic(skin));
 
     this.input.on(
       'drag',
@@ -109,8 +110,13 @@ export class SandboxScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       bus.off('SPAWN_BRICK');
       bus.off('RESET_BOARD');
+      bus.off('SET_COSMETIC');
       this.scale.off('resize', this.handleResize, this);
     });
+  }
+
+  private applyCosmetic(skin: string | null) {
+    this.allBricks().forEach((b) => b.applyCosmetic(skin));
   }
 
   private spawnBrick(type: BrickType) {

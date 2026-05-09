@@ -10,6 +10,7 @@ import type { PlacedBrick } from '@/types';
 export type GameEvents = {
   SPAWN_BRICK: { type: BrickType };
   RESET_BOARD: undefined;
+  SET_COSMETIC: { skin: string | null };
   BRICK_PLACED: PlacedBrick;
   BRICK_MOVED: PlacedBrick;
   BRICK_REMOVED: { uid: string };

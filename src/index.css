@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .bb-wallet .wallet-adapter-button {
+    background-color: #1A1F2E;
+    color: #FFFFFF;
+    font-family: Nunito, system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.875rem;
+    height: auto;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  .bb-wallet .wallet-adapter-button:not([disabled]):hover {
+    background-color: #3D4555;
+  }
+}
+
 @layer base {
   html,
   body,

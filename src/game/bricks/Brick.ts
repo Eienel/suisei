@@ -23,6 +23,8 @@ export class Brick extends Phaser.GameObjects.Container {
   lastValidGridX = 0;
   lastValidGridY = 0;
 
+  private cosmeticSkin: string | null = null;
+
   constructor(scene: Phaser.Scene, x: number, y: number, def: BrickDef, uid: string) {
     super(scene, x, y);
     this.uid = uid;
@@ -66,7 +68,9 @@ export class Brick extends Phaser.GameObjects.Container {
     g.fillStyle(color, 1);
     g.fillRoundedRect(-BRICK_W / 2, -BRICK_H / 2, BRICK_W, BRICK_H, 12);
 
-    const stud = Phaser.Display.Color.HexStringToColor(this.def.studColor).color;
+    const studHex =
+      this.cosmeticSkin === 'gold-stud' ? '#FFD700' : this.def.studColor;
+    const stud = Phaser.Display.Color.HexStringToColor(studHex).color;
     g.fillStyle(stud, 1);
     g.fillRoundedRect(-BRICK_W / 2, -BRICK_H / 2, BRICK_W, 10, { tl: 12, tr: 12, bl: 0, br: 0 });
 
@@ -152,6 +156,12 @@ export class Brick extends Phaser.GameObjects.Container {
     o.clear();
     o.lineStyle(3, color, alpha);
     o.strokeRoundedRect(-BRICK_W / 2 - 2, -BRICK_H / 2 - 2, BRICK_W + 4, BRICK_H + 4, 14);
+  }
+
+  applyCosmetic(skin: string | null) {
+    if (this.cosmeticSkin === skin) return;
+    this.cosmeticSkin = skin;
+    this.drawBody();
   }
 
   override destroy(fromScene?: boolean) {
