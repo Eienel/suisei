@@ -18,21 +18,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('phaser')) return 'phaser';
-            if (
-              id.includes('@solana') ||
-              id.includes('@walletconnect') ||
-              id.includes('@web3auth') ||
-              id.includes('@toruslabs') ||
-              id.includes('@reown') ||
-              id.includes('@solana-mobile')
-            ) {
-              return 'solana';
-            }
-            if (id.includes('react') || id.includes('zustand') || id.includes('mitt')) {
-              return 'react-vendor';
-            }
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('three') || id.includes('@react-three')) return 'three';
+          if (id.includes('postprocessing')) return 'postprocessing';
+          if (id.includes('@mysten')) return 'sui';
+          if (id.includes('@tanstack/react-query')) return 'query';
+          if (id.includes('react') || id.includes('zustand') || id.includes('mitt') || id.includes('zod')) {
+            return 'vendor';
           }
           return undefined;
         },

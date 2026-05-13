@@ -4,27 +4,54 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          blue: '#1E6BFF',
-          'blue-dark': '#1450C7',
-          'blue-light': '#5C95FF',
-          yellow: '#FFC83D',
-          'yellow-dark': '#E0A91A',
-          cream: '#FAF7F2',
-          ink: '#1A1F2E',
-          'ink-soft': '#3D4555',
+        ink: {
+          DEFAULT: '#0A0E1A',
+          soft: '#131826',
+          line: '#1F2638',
+          mute: '#2A3147',
+        },
+        fg: {
+          DEFAULT: '#F5F7FF',
+          dim: '#B7BFD5',
+          mute: '#7B8298',
+        },
+        accent: {
+          cyan: '#00E5FF',
+          violet: '#8B5CF6',
+          magenta: '#FF2D92',
+          amber: '#FFB020',
         },
       },
       fontFamily: {
-        display: ['Nunito', 'system-ui', 'sans-serif'],
-        body: ['Nunito', 'system-ui', 'sans-serif'],
+        sans: ['"Geist Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
-        brick: '0 4px 0 rgba(0,0,0,0.18), 0 6px 18px rgba(0,0,0,0.12)',
-        'brick-lg': '0 6px 0 rgba(0,0,0,0.2), 0 12px 30px rgba(0,0,0,0.15)',
+        glow: '0 0 24px rgba(0, 229, 255, 0.35)',
+        'glow-soft': '0 0 12px rgba(0, 229, 255, 0.2)',
+        glass: '0 8px 32px rgba(0, 0, 0, 0.5)',
       },
-      borderRadius: {
-        brick: '12px',
+      backdropBlur: {
+        xs: '2px',
+      },
+      animation: {
+        'fade-in': 'fadeIn 220ms ease-out',
+        'rise-in': 'riseIn 320ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'pulse-soft': 'pulseSoft 2.4s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        riseIn: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        pulseSoft: {
+          '0%, 100%': { opacity: '0.7' },
+          '50%': { opacity: '1' },
+        },
       },
     },
   },

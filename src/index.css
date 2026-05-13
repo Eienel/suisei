@@ -2,23 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .bb-wallet .wallet-adapter-button {
-    background-color: #1A1F2E;
-    color: #FFFFFF;
-    font-family: Nunito, system-ui, sans-serif;
-    font-weight: 800;
-    font-size: 0.875rem;
-    height: auto;
-    padding: 0.5rem 0.75rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 6px 18px rgba(0, 0, 0, 0.12);
-  }
-  .bb-wallet .wallet-adapter-button:not([disabled]):hover {
-    background-color: #3D4555;
-  }
-}
-
 @layer base {
   html,
   body,
@@ -26,10 +9,54 @@
     height: 100%;
   }
   body {
-    @apply font-display bg-brand-cream text-brand-ink antialiased;
+    @apply bg-ink text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
     overscroll-behavior: none;
   }
-  button {
-    font-family: inherit;
+  /* Cinematic dark scroll bars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(123, 130, 152, 0.25);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(123, 130, 152, 0.45);
+  }
+}
+
+@layer components {
+  /* Glass panel — frosted dark surface */
+  .glass {
+    @apply bg-ink-soft/70 backdrop-blur-md border border-ink-line/80;
+  }
+  /* Subtle hover-glow for interactive panels */
+  .glow-hover {
+    transition: box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .glow-hover:hover {
+    @apply shadow-glow-soft border-accent-cyan/40;
+  }
+  /* Primary CTA */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg font-semibold text-ink bg-fg hover:bg-white transition-colors;
+  }
+  .btn-ghost {
+    @apply px-3 py-1.5 rounded-md font-medium text-fg-dim hover:text-fg hover:bg-ink-line/60 transition-colors;
+  }
+  .kbd {
+    @apply font-mono text-[10px] px-1.5 py-0.5 rounded bg-ink-line/80 text-fg-dim border border-ink-mute/60;
+  }
+}
+
+/* Force the R3F canvas to fill its container */
+canvas {
+  display: block;
+  outline: none;
+  touch-action: none;
 }
