@@ -31,3 +31,7 @@ pnpm-debug.log*
 # hosting
 .vercel
 .netlify
+
+# Move build cache
+move/**/build/
+move/**/Move.lock

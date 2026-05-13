@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
-import { Trash2, RotateCw, Save, MousePointer, Plus } from 'lucide-react';
+import { Trash2, RotateCw, MousePointer, Plus } from 'lucide-react';
 import { useWorld } from '@/state/world';
+import { AuthButton } from './AuthButton';
+import { SaveWorldButton } from './SaveWorldButton';
 
 export function HUD() {
   const blocks = useWorld((s) => s.blocks);
@@ -54,10 +56,8 @@ export function HUD() {
           <span className="glass rounded-lg px-3 py-1.5 text-xs font-mono text-fg-dim">
             {blocks.length} {blocks.length === 1 ? 'block' : 'blocks'}
           </span>
-          <button type="button" className="btn-ghost flex items-center gap-1.5 text-sm" disabled>
-            <Save size={14} />
-            Save World
-          </button>
+          <SaveWorldButton />
+          <AuthButton />
         </div>
       </header>
 
