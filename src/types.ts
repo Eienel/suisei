@@ -7,4 +7,4 @@ export interface PlacedBrick {
   gridY: number;
 }
 
-export type Screen = 'landing' | 'sandbox';
+export type Screen = 'landing' | 'lessons' | 'lesson' | 'sandbox';

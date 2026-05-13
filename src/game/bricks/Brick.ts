@@ -4,6 +4,8 @@ import { sfx } from '@/audio/sfx';
 
 export const BRICK_W = 96;
 export const BRICK_H = 64;
+export const PUZZLE_BRICK_W = 144;
+export const PUZZLE_BRICK_H = 76;
 export const STUD_R = 12;
 export const GRID = 32;
 
@@ -23,12 +25,30 @@ export class Brick extends Phaser.GameObjects.Container {
   lastValidGridX = 0;
   lastValidGridY = 0;
 
+  /** Puzzle-mode bricks are wider with a custom step label. */
+  readonly puzzleMode: boolean;
+  readonly width: number;
+  readonly height: number;
+
+  /** True once the brick has been correctly slotted in puzzle mode. */
+  locked = false;
+
   private cosmeticSkin: string | null = null;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, def: BrickDef, uid: string) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    def: BrickDef,
+    uid: string,
+    opts: { displayLabel?: string; puzzleMode?: boolean } = {}
+  ) {
     super(scene, x, y);
     this.uid = uid;
     this.def = def;
+    this.puzzleMode = !!opts.puzzleMode;
+    this.width = this.puzzleMode ? PUZZLE_BRICK_W : BRICK_W;
+    this.height = this.puzzleMode ? PUZZLE_BRICK_H : BRICK_H;
 
     this.outline = scene.add.graphics();
     this.add(this.outline);
@@ -37,19 +57,23 @@ export class Brick extends Phaser.GameObjects.Container {
     this.drawBody();
     this.add(this.gfx);
 
+    const labelText = opts.displayLabel ?? def.shortLabel;
+    const labelOffsetX = this.puzzleMode ? 18 : 14;
     this.label = scene.add
-      .text(14, 4, def.shortLabel, {
+      .text(labelOffsetX, 6, labelText, {
         fontFamily: 'Nunito, system-ui, sans-serif',
-        fontSize: '13px',
+        fontSize: this.puzzleMode ? '13px' : '13px',
         fontStyle: 'bold',
         color: '#FFFFFF',
+        align: 'center',
+        wordWrap: { width: this.width - 32 },
       })
       .setOrigin(0.5);
     this.add(this.label);
 
-    this.setSize(BRICK_W, BRICK_H);
+    this.setSize(this.width, this.height);
     this.setInteractive(
-      new Phaser.Geom.Rectangle(-BRICK_W / 2, -BRICK_H / 2, BRICK_W, BRICK_H),
+      new Phaser.Geom.Rectangle(-this.width / 2, -this.height / 2, this.width, this.height),
       Phaser.Geom.Rectangle.Contains
     );
     scene.input.setDraggable(this);
