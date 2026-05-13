@@ -1,7 +1,11 @@
-import { Check, ArrowRight, Home } from 'lucide-react';
+import { Check, ArrowRight, Home, Cuboid } from 'lucide-react';
 import type { Lesson } from '@/data/lessons';
+import { LESSONS, SANDBOX_UNLOCK_COUNT, totalQuestions } from '@/data/lessons';
 import { useApp } from '@/state/app';
-import { LESSONS, SANDBOX_UNLOCK_COUNT } from '@/data/lessons';
+import { useWorld } from '@/state/world';
+import { SaveWorldButton } from './SaveWorldButton';
+import { ShareButton } from './ShareButton';
+import { AuthButton } from './AuthButton';
 
 export function LessonDone({
   lesson,
@@ -17,31 +21,53 @@ export function LessonDone({
   const sandboxUnlocked = useApp((s) => s.isSandboxUnlocked());
   const justUnlockedSandbox =
     completed.length === SANDBOX_UNLOCK_COUNT && sandboxUnlocked;
+  const placed = useWorld((s) => s.blocks.length);
+  const isFinal = completed.length === LESSONS.length;
+  const totalQs = totalQuestions();
 
   return (
     <div className="fixed inset-0 bg-ink flex items-center justify-center p-6">
-      <div className="glass rounded-2xl p-8 max-w-md w-full shadow-glass text-center animate-rise-in">
+      <div className="rounded-2xl p-8 max-w-md w-full bg-ink-soft border border-ink-line text-center animate-rise-in">
         <div className="w-16 h-16 rounded-full bg-accent-cyan/15 text-accent-cyan flex items-center justify-center mx-auto mb-4">
           <Check size={32} />
         </div>
         <p className="font-mono text-xs uppercase tracking-widest text-accent-cyan mb-1">
-          Lesson complete
+          {isFinal ? 'Town complete' : 'Lesson complete'}
         </p>
         <h2 className="text-2xl font-semibold text-fg mb-2 tracking-tight">{lesson.title}</h2>
-        <p className="text-sm text-fg-mute mb-1">
-          {completed.length} of {LESSONS.length} lessons mastered.
+        <p className="text-sm text-fg-mute mb-4">
+          {lesson.district} added · {placed} blocks placed of {totalQs} possible
         </p>
 
-        {justUnlockedSandbox && (
-          <div className="mt-4 mb-2 rounded-xl border border-accent-violet/40 bg-accent-violet/10 p-3 text-left animate-fade-in">
+        {isFinal && (
+          <div className="mt-4 mb-2 rounded-xl border border-accent-cyan/40 bg-accent-cyan/10 p-3 text-left">
+            <p className="text-accent-cyan text-xs font-mono uppercase tracking-widest mb-1">
+              All six districts built
+            </p>
+            <p className="text-fg-dim text-sm leading-relaxed">
+              Your full crypto town is on the map. Save it onchain so others can visit, or
+              head to Sandbox to keep building with the AI.
+            </p>
+          </div>
+        )}
+
+        {!isFinal && justUnlockedSandbox && (
+          <div className="mt-4 mb-2 rounded-xl border border-accent-violet/40 bg-accent-violet/10 p-3 text-left">
             <p className="text-accent-violet text-xs font-mono uppercase tracking-widest mb-1">
               Sandbox unlocked
             </p>
             <p className="text-fg-dim text-sm leading-relaxed">
-              You finished 3 lessons — free-play mode with the AI Builder Agent is now available.
+              You finished 3 lessons — free-play with the AI Builder Agent is now open.
             </p>
           </div>
         )}
+
+        {/* Onchain row — surface save + auth + share inline */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 border-t border-ink-line/60 pt-5">
+          <SaveWorldButton />
+          <ShareButton />
+          <AuthButton />
+        </div>
 
         <div className="flex flex-col gap-2 mt-6">
           {onNext && (
@@ -54,13 +80,14 @@ export function LessonDone({
               <ArrowRight size={14} />
             </button>
           )}
-          {justUnlockedSandbox && (
+          {(isFinal || justUnlockedSandbox) && (
             <button
               type="button"
               onClick={() => setScreen('sandbox')}
-              className="rounded-lg px-4 py-2 font-semibold bg-accent-violet text-ink hover:bg-accent-violet/90 transition-colors"
+              className="rounded-lg px-4 py-2 font-semibold bg-accent-violet text-ink hover:bg-accent-violet/90 transition-colors flex items-center justify-center gap-1.5"
             >
-              Try the Sandbox
+              <Cuboid size={14} />
+              Open Sandbox
             </button>
           )}
           <button
@@ -69,7 +96,7 @@ export function LessonDone({
             className="btn-ghost flex items-center justify-center gap-1.5"
           >
             <Home size={14} />
-            All lessons
+            Back to lessons
           </button>
         </div>
       </div>

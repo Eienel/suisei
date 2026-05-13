@@ -1,15 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { LESSONS, SANDBOX_UNLOCK_COUNT } from '@/data/lessons';
+import { LESSONS, SANDBOX_UNLOCK_COUNT, questionId } from '@/data/lessons';
 
 export type Screen = 'landing' | 'lessons' | 'lesson' | 'sandbox';
-export type LessonStage = 'read' | 'check' | 'build' | 'done';
+export type LessonStage = 'read' | 'check' | 'done';
 
 interface AppState {
   screen: Screen;
   currentLessonId: string | null;
   lessonStage: LessonStage;
   completedLessons: string[];
+  /** Stable ids of questions answered correctly — prevents double-placing blocks on revisit. */
+  correctlyAnswered: string[];
   seenHowTo: boolean;
 
   setScreen: (s: Screen) => void;
@@ -17,8 +19,11 @@ interface AppState {
   closeLesson: () => void;
   setLessonStage: (s: LessonStage) => void;
   completeLesson: (id: string) => void;
+  recordCorrect: (lessonId: string, idx: number) => boolean; // returns true if newly correct
+  hasAnsweredCorrect: (lessonId: string, idx: number) => boolean;
   markHowToSeen: () => void;
   resetHowTo: () => void;
+  resetProgress: () => void;
 
   isSandboxUnlocked: () => boolean;
 }
@@ -30,6 +35,7 @@ export const useApp = create<AppState>()(
       currentLessonId: null,
       lessonStage: 'read',
       completedLessons: [],
+      correctlyAnswered: [],
       seenHowTo: false,
 
       setScreen: (s) => set({ screen: s }),
@@ -52,8 +58,25 @@ export const useApp = create<AppState>()(
             ? state
             : { completedLessons: [...state.completedLessons, id] }
         ),
+      recordCorrect: (lessonId, idx) => {
+        const key = questionId(lessonId, idx);
+        const { correctlyAnswered } = get();
+        if (correctlyAnswered.includes(key)) return false;
+        set({ correctlyAnswered: [...correctlyAnswered, key] });
+        return true;
+      },
+      hasAnsweredCorrect: (lessonId, idx) =>
+        get().correctlyAnswered.includes(questionId(lessonId, idx)),
       markHowToSeen: () => set({ seenHowTo: true }),
       resetHowTo: () => set({ seenHowTo: false }),
+      resetProgress: () =>
+        set({
+          completedLessons: [],
+          correctlyAnswered: [],
+          currentLessonId: null,
+          lessonStage: 'read',
+          screen: 'landing',
+        }),
 
       isSandboxUnlocked: () => get().completedLessons.length >= SANDBOX_UNLOCK_COUNT,
     }),
@@ -61,6 +84,7 @@ export const useApp = create<AppState>()(
       name: 'blockbuilders-app',
       partialize: (s) => ({
         completedLessons: s.completedLessons,
+        correctlyAnswered: s.correctlyAnswered,
         seenHowTo: s.seenHowTo,
         screen: s.screen,
       }),
@@ -68,5 +92,4 @@ export const useApp = create<AppState>()(
   )
 );
 
-// Re-export for convenience so consumers don't need two imports
 export { LESSONS, SANDBOX_UNLOCK_COUNT };

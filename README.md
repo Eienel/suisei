@@ -1,103 +1,111 @@
 # BlockBuilders
 
-> AI co-creative 3D world builder on Sui. Built for Sui Overflow (AI track).
+> Learn crypto by building your own town. Onchain on Sui.
 
-Prompt an AI Builder Agent to construct evolving 3D knowledge worlds. Edit them
-yourself. Own them onchain via dynamic World NFTs on Sui.
+A learn-by-playing town builder. Read short lessons, answer multiple-choice
+questions, and earn Tetris-style pieces you place anywhere on a 3D map.
+Finish all six lessons and you've built — and own — a small crypto-themed
+town that anyone can visit at a public URL.
 
-## What's live
+Built for **Sui Overflow · AI track**.
 
-- **3D world (R3F)** — 10 distinct block materials (zk crystal, data core,
-  DeFi vault, governance marble, AI neural, security bunker, wallet keystone,
-  oracle lens, token prism, contract obelisk). Soft shadows, bloom, tone
-  mapping, idle pulses, placement spring. Manual place / select / rotate /
-  delete with hotkeys.
-- **AI Builder Agent** — `/api/agent` proxies Gemini 2.5 Flash with a strict
-  `responseSchema`. Returns `{ narration, actions: place_block | remove_block }`,
-  Zod-validated, applied with a staggered animation so the world builds in
-  front of the user.
-- **Sui auth** — both Enoki zkLogin (Google sign-in) **and** dapp-kit wallet,
-  side-by-side. Auto-detect: Google button hides if Enoki keys aren't set.
-- **Save World** — serializes world JSON, uploads to Walrus testnet, mints
-  (or updates) a `World` NFT on Sui via the published Move package. Links
-  out to Suiscan for the tx receipt.
-- **Move package** — published on Sui testnet:
-  `0x888787d0d2848499ba22fa09afdcbc593c3ba637d04807345abab501a1f56daf`
+## What's in
 
-## Stack
-
-| Layer | Tech |
+| Feature | How |
 |---|---|
-| Shell | Vite + React 18 + TypeScript + Tailwind (dark cinematic theme, Geist Sans) |
-| 3D | `@react-three/fiber` + `@react-three/drei` + `@react-three/postprocessing` |
-| State | Zustand (persisted to localStorage) |
-| AI | Google **Gemini 2.5 Flash** via Vercel Function (`/api/agent`) — provider-agnostic seam at `src/agent/runAgent.ts` |
-| Auth | `@mysten/dapp-kit` + `@mysten/enoki` (zkLogin) |
-| Storage | Walrus testnet HTTP publisher/aggregator |
-| Chain | `@mysten/sui` programmable transactions, Move 2024 |
-
-Landing chunk: ~30 KB. Three / Sui / Postprocessing / Vendor split into their
-own immutable chunks.
+| **Lessons** | 6 districts (Wallets · Tokens · Smart Contracts · Validators · ZK · DeFi). Each: 1–2 read pages + 4-question quiz. |
+| **Tetris-piece building** | Every correct answer hands you a piece (single block → 4-block tetromino). Rotate with `R`, click on the map to drop it. |
+| **AI tutor** | "Explain it differently" button on every read page calls Gemini 2.5 Flash to rephrase the concept with a fresh metaphor. |
+| **AI Builder Agent** | Sandbox mode (unlocks after 3 lessons). Prompt anything → AI returns structured JSON actions → world builds itself. |
+| **Save to Sui** | World NFT minted/updated on Sui testnet. Metadata stored on Walrus. |
+| **Open worlds** | Public read-only viewer at `/town/<address>` — anyone with the URL can walk around your town. |
+| **Auth** | Enoki zkLogin (Google sign-in) + dapp-kit wallet, side-by-side. |
 
 ## Run
 
 ```bash
-cp .env.example .env
-# Fill in GEMINI_API_KEY (server, required for AI)
-# Optionally fill VITE_ENOKI_API_KEY + VITE_ENOKI_GOOGLE_CLIENT_ID for zkLogin
-
+cp .env.example .env   # fill in GEMINI_API_KEY at minimum
 npm install
-npm run dev        # http://localhost:5173 — /api/agent works locally via Vite middleware
+npm run dev            # http://localhost:5173 — /api/* routes work locally via Vite middleware
 npm run build
 npm run preview
 npm run typecheck
 ```
 
-## Environment variables
+## Environment
 
 ```
-# Server-only (Vercel Function)
-GEMINI_API_KEY=                # AI Builder Agent. Get at aistudio.google.com
+GEMINI_API_KEY=                # server-only. /api/agent + /api/tutor.
+                               # aistudio.google.com → free key.
 
-# Client (VITE_*)
 VITE_SUI_NETWORK=testnet
 VITE_WORLD_NFT_PACKAGE_ID=0x888787d0d2848499ba22fa09afdcbc593c3ba637d04807345abab501a1f56daf
-VITE_ENOKI_API_KEY=            # optional — Google sign-in. portal.enoki.mystenlabs.com
-VITE_ENOKI_GOOGLE_CLIENT_ID=   # optional — Google Cloud Console OAuth Web client
-VITE_WALRUS_PUBLISHER_URL=     # optional — defaults to public testnet publisher
-VITE_WALRUS_AGGREGATOR_URL=    # optional — defaults to public testnet aggregator
+VITE_ENOKI_API_KEY=            # optional — Google sign-in
+VITE_ENOKI_GOOGLE_CLIENT_ID=   # optional
+VITE_WALRUS_PUBLISHER_URL=     # optional — public testnet default
+VITE_WALRUS_AGGREGATOR_URL=    # optional — public testnet default
 ```
 
-For production: add the same vars in **Vercel → Project Settings → Environment
-Variables**. The `GEMINI_API_KEY` must NOT be prefixed `VITE_` — it's read
-server-side only.
+## Stack
+
+| Layer | Tech |
+|---|---|
+| Shell | Vite + React 18 + TypeScript + Tailwind |
+| 3D | `@react-three/fiber` + `@react-three/drei` |
+| State | Zustand (persisted) |
+| AI | Google **Gemini 2.5 Flash** via Vercel Functions. Two routes: `/api/agent` (Builder Agent) + `/api/tutor` (lesson rephrasing). |
+| Auth | `@mysten/dapp-kit` + `@mysten/enoki` |
+| Storage | Walrus testnet HTTP publisher / aggregator |
+| Chain | `@mysten/sui` programmable transactions, Move 2024 |
 
 ## Project map
 
 ```
 api/
-  agent.ts            # Vercel Edge Function entry → runAgent
+  agent.ts, tutor.ts         # Vercel Edge Functions
 src/
-  agent/              # AI agent: schema, prompt, runAgent, apply, hook
-  audio/              # Procedural WebAudio SFX
-  components/         # World, Block, BlockMaterial, BlockAccent,
-                      # HUD, Toolbar, PromptBar, NarrationOverlay,
-                      # AuthButton, SaveWorldButton, HowToModal
-  state/              # world (blocks, tools) + app (UI flags)
-  sui/                # providers, config, walrus, useUserWorld, useSaveWorld
-  world/              # block taxonomy + grid math
-  types.ts
-move/blockbuilders/   # Move package source (published)
+  agent/                     # runAgent (builder) + runTutor (rephraser)
+  audio/                     # procedural WebAudio sfx
+  components/
+    Landing                  # editorial hero
+    LessonsList              # curriculum + save/share/auth
+    LessonRead               # paginated read pages + AskTutor button
+    LessonCheck              # quiz + live 3D world; correct = piece spawn
+    LessonDone               # completion + onchain CTAs
+    Sandbox                  # V1 AI builder
+    VisitPage                # public read-only town viewer
+    PieceGhost               # 3D ghost preview of the pending piece
+    PlacementGrid            # raycast floor + ghost + commit-piece
+    Block, BlockMaterial,    # block rendering
+    BlockAccent, World
+    AuthButton, SaveWorldButton, ShareButton, AskTutor, HowToModal,
+    ErrorBoundary
+  data/lessons.ts            # 6 lessons × 4 questions × piece rewards
+  state/app.ts               # screen + lessons + correctlyAnswered
+  state/world.ts             # blocks + pendingPiece (Tetris flow)
+  sui/                       # config / providers / walrus / useSaveWorld
+  world/
+    pieces.ts                # piece library + rotation math
+    blockTypes.ts            # 10 block categories + materials
+    grid.ts
+move/blockbuilders/          # published Move package source
 ```
 
-## Architecture, three sentences
+## Three sentences
 
-1. **Single source of truth** is `useWorld` — an array of `Block` records with
-   integer grid positions; everything renders from it.
-2. **AI actions and manual edits flow through the same reducers** in
-   `state/world.ts`, so the AI can't bypass any rule the user is also bound by.
-3. **Sui touches one folder.** `src/sui/` owns auth + Walrus + Move calls;
-   the rest of the app doesn't know about chains.
+1. **Single source of truth** is `useWorld.blocks` — an array of `Block` records. Everything renders from it; the visit page reads the same shape from chain.
+2. **Manual placement and AI builds share reducers** — `placeBlock` is called from quiz commits, from manual sandbox clicks, and from the AI executor. No bypass paths.
+3. **Sui touches one folder.** `src/sui/` owns auth + Walrus + Move calls; the rest of the app stays chain-agnostic.
+
+## Move package
+
+Published to Sui **testnet**:
+- Package: `0x888787d0d2848499ba22fa09afdcbc593c3ba637d04807345abab501a1f56daf`
+- Module: `blockbuilders::world`
+- Entry funcs: `mint_world(name, uri, block_count)`, `update_world(world, uri, block_count)`, `rename(world, name)`
+- Events: `WorldMinted`, `WorldUpdated`
+
+Source under `move/blockbuilders/`.
 
 ## Demo
 
@@ -105,12 +113,5 @@ See [`DEMO.md`](DEMO.md) for the hackathon storyboard.
 
 ## Branches
 
-- `claude/v1-sui-ai` (this branch) — V1 production work
-- `claude/scaffold-blockbuilders-mvp-Av5g1` — the original 2D Phaser MVP
-  (preserved as a reference, kept for git history)
-- `claude/lesson-puzzle-wip` — WIP lesson-puzzle pivot, abandoned with
-  the larger Sui/AI redesign
-
-## License
-
-For Sui Overflow hackathon use.
+- `claude/v1-sui-ai` — V1 → V4 development branch
+- `claude/scaffold-blockbuilders-mvp-Av5g1` — original 2D Phaser MVP, preserved for reference
