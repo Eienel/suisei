@@ -1,0 +1,37 @@
+# dependencies
+node_modules
+
+# build
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.swp
+
+# os
+.DS_Store
+Thumbs.db
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# hosting
+.vercel
+.netlify
+
+# Move build cache
+move/**/build/
+move/**/Move.lock

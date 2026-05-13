@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-ink text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    overscroll-behavior: none;
+  }
+  /* Cinematic dark scroll bars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(123, 130, 152, 0.25);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(123, 130, 152, 0.45);
+  }
+}
+
+@layer components {
+  /* Glass panel — frosted dark surface */
+  .glass {
+    @apply bg-ink-soft/70 backdrop-blur-md border border-ink-line/80;
+  }
+  /* Subtle hover-glow for interactive panels */
+  .glow-hover {
+    transition: box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .glow-hover:hover {
+    @apply shadow-glow-soft border-accent-cyan/40;
+  }
+  /* Primary CTA */
+  .btn-primary {
+    @apply px-4 py-2 rounded-lg font-semibold text-ink bg-fg hover:bg-white transition-colors;
+  }
+  .btn-ghost {
+    @apply px-3 py-1.5 rounded-md font-medium text-fg-dim hover:text-fg hover:bg-ink-line/60 transition-colors;
+  }
+  .kbd {
+    @apply font-mono text-[10px] px-1.5 py-0.5 rounded bg-ink-line/80 text-fg-dim border border-ink-mute/60;
+  }
+}
+
+/* Force the R3F canvas to fill its container */
+canvas {
+  display: block;
+  outline: none;
+  touch-action: none;
+}
