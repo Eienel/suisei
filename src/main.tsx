@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useState } from 'react';
+import { StrictMode, useEffect, useState, lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/geist-sans/400.css';
 import '@fontsource/geist-sans/500.css';
@@ -8,17 +8,17 @@ import '@fontsource/geist-mono/400.css';
 import '@fontsource/geist-mono/500.css';
 import './index.css';
 import App from './App';
-import { SuiProviders } from './sui/providers';
-import { VisitPage } from './components/VisitPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 /**
- * Tiny path router — supports `/town/<address>` for public read-only
- * town viewers, everything else falls through to <App />.
- *
- * The visit route uses its own SuiClient and doesn't need a wallet,
- * but we still wrap in SuiProviders so dapp-kit hooks don't crash if
- * any child needs them.
+ * VisitPage is lazy-loaded so the Sui chunk is only fetched when a
+ * visitor lands on /town/... — keeps the Landing path bulletproof on
+ * older WebKit (which has had module-init issues with @mysten/sui).
  */
+const VisitPage = lazy(() =>
+  import('./components/VisitPage').then((m) => ({ default: m.VisitPage }))
+);
+
 function Router() {
   const [path, setPath] = useState<string>(window.location.pathname);
   useEffect(() => {
@@ -29,15 +29,30 @@ function Router() {
 
   const townMatch = path.match(/^\/town\/(0x[0-9a-fA-F]+)\/?$/);
   if (townMatch) {
-    return <VisitPage address={townMatch[1]} />;
+    return (
+      <Suspense fallback={<LoadingScreen />}>
+        <VisitPage address={townMatch[1]} />
+      </Suspense>
+    );
   }
   return <App />;
 }
 
+function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 bg-ink flex items-center justify-center">
+      <div className="text-fg-mute text-sm font-mono flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse-soft" />
+        loading…
+      </div>
+    </div>
+  );
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SuiProviders>
+    <ErrorBoundary>
       <Router />
-    </SuiProviders>
+    </ErrorBoundary>
   </StrictMode>
 );
