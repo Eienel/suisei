@@ -6,6 +6,7 @@ import {
 import { Transaction } from '@mysten/sui/transactions';
 import { useCallback } from 'react';
 import { useWorld } from '@/state/world';
+import { sfx } from '@/audio/sfx';
 import { useUserWorld } from './useUserWorld';
 import { uploadBlob, jsonToBytes } from './walrus';
 import { WORLD_PACKAGE_ID, PACKAGE_CONFIGURED } from './config';
@@ -92,6 +93,7 @@ export function useSaveWorld() {
         // dapp-kit and @mysten/sui resolve Transaction across nested
         // package copies; the runtime shape matches.
         const result = await signAndExecute({ transaction: tx as never });
+        sfx.sparkle();
         status.set({ phase: 'success', txDigest: result.digest });
         // Give Sui a beat then refetch so the next save updates rather than mints.
         setTimeout(() => refetch(), 2000);

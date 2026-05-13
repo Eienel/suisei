@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { Trash2, RotateCw, MousePointer, Plus } from 'lucide-react';
+import { Trash2, RotateCw, MousePointer, Plus, HelpCircle } from 'lucide-react';
 import { useWorld } from '@/state/world';
+import { useApp } from '@/state/app';
 import { AuthButton } from './AuthButton';
 import { SaveWorldButton } from './SaveWorldButton';
 
@@ -13,6 +14,7 @@ export function HUD() {
   const rotateBlock = useWorld((s) => s.rotateBlock);
   const clearWorld = useWorld((s) => s.clearWorld);
   const setSelected = useWorld((s) => s.setSelected);
+  const resetHowTo = useApp((s) => s.resetHowTo);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -51,6 +53,15 @@ export function HUD() {
             <div className="font-semibold tracking-tight text-fg">BlockBuilders</div>
             <div className="text-[11px] text-fg-mute font-mono">v0.1 · sui testnet</div>
           </div>
+          <button
+            type="button"
+            onClick={() => resetHowTo()}
+            aria-label="How to play"
+            title="How to play"
+            className="ml-1 w-7 h-7 rounded-md flex items-center justify-center text-fg-mute hover:text-fg hover:bg-ink-line/60 transition-colors"
+          >
+            <HelpCircle size={16} />
+          </button>
         </div>
         <div className="flex items-center gap-2 pointer-events-auto">
           <span className="glass rounded-lg px-3 py-1.5 text-xs font-mono text-fg-dim">

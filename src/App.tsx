@@ -3,6 +3,7 @@ import { HUD } from './components/HUD';
 import { Toolbar } from './components/Toolbar';
 import { PromptBar } from './components/PromptBar';
 import { NarrationOverlay } from './components/NarrationOverlay';
+import { HowToModal } from './components/HowToModal';
 
 export default function App() {
   return (
@@ -16,6 +17,8 @@ export default function App() {
         <Toolbar />
         <PromptBar />
       </div>
+
+      <HowToModal />
     </div>
   );
 }

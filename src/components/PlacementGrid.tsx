@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { useWorld } from '@/state/world';
 import { snapToGrid, WORLD_HALF_EXTENT } from '@/world/grid';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
+import { sfx } from '@/audio/sfx';
 
 const GRID_SIZE = WORLD_HALF_EXTENT * 2;
 
@@ -55,7 +56,8 @@ export function PlacementGrid() {
     }
     const p = e.point;
     const cell = snapToGrid([p.x, 0, p.z]);
-    placeBlock(activeBlockType, cell);
+    const placed = placeBlock(activeBlockType, cell);
+    if (placed) sfx.thud();
   };
 
   return (

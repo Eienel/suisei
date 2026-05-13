@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useWorld } from '@/state/world';
+import { sfx } from '@/audio/sfx';
 import { AgentResponseSchema, type AgentResponse } from './schema';
 import { applyActions } from './applyActions';
 
@@ -95,6 +96,7 @@ export const useAgent = create<AgentState>((set, get) => ({
         await applyActions([result.actions[i]], controller.signal);
         set({ appliedActions: i + 1 });
       }
+      sfx.chime();
       set({ phase: 'idle' });
     } catch (err) {
       if ((err as Error)?.name === 'AbortError') {
