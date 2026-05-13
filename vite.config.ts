@@ -84,7 +84,6 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (!id.includes('node_modules')) return undefined;
             if (id.includes('three') || id.includes('@react-three')) return 'three';
-            if (id.includes('postprocessing')) return 'postprocessing';
             if (id.includes('@mysten')) return 'sui';
             if (id.includes('@tanstack/react-query')) return 'query';
             if (

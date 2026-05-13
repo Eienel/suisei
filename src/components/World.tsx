@@ -1,11 +1,15 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, SoftShadows } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing';
 import { Suspense } from 'react';
 import * as THREE from 'three';
 import { useWorld } from '@/state/world';
 import { Block } from './Block';
 import { PlacementGrid } from './PlacementGrid';
+
+/* Postprocessing (Bloom/Vignette/SMAA) is intentionally disabled — the
+   library hit a temporal-dead-zone error in production minification
+   that crashed the entire app at module load. Look + perf are fine
+   without it; reintroduce once the upstream issue is sorted. */
 
 /** Mobile heuristic — disable expensive features on phones to keep boot snappy. */
 const isMobile =
@@ -75,12 +79,6 @@ export function World() {
             RIGHT: THREE.MOUSE.ROTATE,
           }}
         />
-
-        <EffectComposer multisampling={0} enabled={!isMobile}>
-          <SMAA />
-          <Bloom mipmapBlur intensity={0.6} luminanceThreshold={0.6} luminanceSmoothing={0.4} />
-          <Vignette eskil={false} offset={0.15} darkness={0.55} />
-        </EffectComposer>
       </Suspense>
     </Canvas>
   );
