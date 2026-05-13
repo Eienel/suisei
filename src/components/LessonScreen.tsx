@@ -2,7 +2,6 @@ import { useApp } from '@/state/app';
 import { LESSON_BY_ID, nextLessonId } from '@/data/lessons';
 import { LessonRead } from './LessonRead';
 import { LessonCheck } from './LessonCheck';
-import { LessonBuild } from './LessonBuild';
 import { LessonDone } from './LessonDone';
 
 export function LessonScreen() {
@@ -25,35 +24,21 @@ export function LessonScreen() {
     return (
       <LessonCheck
         lesson={lesson}
-        onPass={() => setStage('build')}
-        onRetry={() => setStage('read')}
-      />
-    );
-  }
-
-  if (stage === 'build') {
-    return (
-      <LessonBuild
-        lesson={lesson}
-        onComplete={() => {
+        onPass={() => {
           completeLesson(lesson.id);
           setStage('done');
         }}
-        onBack={closeLesson}
+        onReread={() => setStage('read')}
       />
     );
   }
 
-  // stage === 'done'
+  // done
   const next = nextLessonId(lesson.id);
   return (
     <LessonDone
       lesson={lesson}
-      onNext={
-        next
-          ? () => openLesson(next)
-          : null
-      }
+      onNext={next ? () => openLesson(next) : null}
       onHome={closeLesson}
     />
   );

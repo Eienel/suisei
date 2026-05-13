@@ -1,13 +1,22 @@
 import type { BlockType, Vec3 } from '@/types';
 
 /**
- * Six core crypto lessons. Each lesson is a 3-stage flow:
- *   READ  — short copy explaining the concept (1-2 pages)
- *   CHECK — multiple-choice quiz to confirm comprehension
- *   BUILD — place blocks in the 3D world to match a target structure
+ * BlockBuilders lessons — quiz-only flow.
  *
- * Lesson 1 is unlocked by default; each next lesson unlocks when the
- * previous is completed (build accepted). Sandbox unlocks after lesson 3.
+ * Each correct answer drops one block into the world at a pre-planned
+ * coordinate. By the end of all 6 lessons the user has unknowingly
+ * assembled a small crypto-themed town with 6 districts:
+ *
+ *                            ZK lab (north)
+ *                                |
+ *   Wallet homes  ---  TOWN  ---  Validator HQ
+ *      (west)         CENTRE         (east)
+ *                       |
+ *                  Tokens & DeFi
+ *                     (south)
+ *
+ * Lessons stage: READ -> CHECK (quiz drops blocks live) -> DONE.
+ * No separate "build" stage — the quiz IS the build.
  */
 
 export interface ReadPage {
@@ -19,155 +28,209 @@ export interface QuizQuestion {
   prompt: string;
   options: string[];
   correctIndex: number;
-}
-
-export interface TargetBlock {
-  type: BlockType;
-  /** Position in the lesson's local frame (origin at center, y>=0). */
-  position: Vec3;
+  /** Block placed in the world when this question is first answered correctly. */
+  reward: { type: BlockType; position: Vec3 };
 }
 
 export interface Lesson {
   id: string;
   title: string;
   blurb: string;
+  district: string;
   pages: ReadPage[];
   quiz: QuizQuestion[];
-  target: TargetBlock[];
-  /** One-line task description shown next to the blueprint. */
-  challenge: string;
 }
 
 export const LESSONS: readonly Lesson[] = [
+  // -------------- 1. WALLETS — west district -----------------------------
   {
     id: 'wallets',
     title: 'Wallets',
     blurb: 'The keychain that proves you are you.',
+    district: 'The wallet homes',
     pages: [
       {
         heading: 'A wallet is a keychain',
         body:
-          "A wallet does NOT actually hold coins. It holds a tiny secret code called a private key. That key is what proves you control your address. Lose the key, lose the money. Keep it safe.",
+          'A wallet does NOT hold coins. It holds a tiny secret code called a private key. The key is what proves you control your address. Lose the key, lose the money. Keep it safe.',
       },
       {
         heading: 'Public and private',
         body:
-          "Every wallet has TWO keys. The public key (or address) is like your email — you can share it. The private key is like your password — you keep it secret. Anything signed with your private key can be checked with your public key. That's the magic.",
+          "Every wallet has TWO keys. The public key (or address) is like your email — share it freely. The private key is like your password — keep it secret. Anything signed with your private key can be verified with your public key. That's the math trick that powers everything else.",
       },
     ],
     quiz: [
       {
         prompt: 'What does a wallet actually hold?',
-        options: ['Cryptocurrency coins', 'Your keys', 'Your password', 'A list of your friends'],
+        options: ['Cryptocurrency coins', 'Your keys', 'Your password', 'A list of contacts'],
         correctIndex: 1,
+        reward: { type: 'wallet_keystone', position: [-5, 0, -1] },
       },
       {
-        prompt: 'Which key do you share with people who pay you?',
-        options: ['Your private key', 'Your public key (address)', 'Both keys', 'Neither'],
+        prompt: 'Which key do you share with people who want to pay you?',
+        options: ['Your private key', 'Your public key', 'Both keys', 'Neither key'],
         correctIndex: 1,
+        reward: { type: 'wallet_keystone', position: [-5, 0, 0] },
       },
-    ],
-    challenge: 'Build a keychain — 3 wallets in a row.',
-    target: [
-      { type: 'wallet_keystone', position: [-1, 0, 0] },
-      { type: 'wallet_keystone', position: [0, 0, 0] },
-      { type: 'wallet_keystone', position: [1, 0, 0] },
+      {
+        prompt: 'If you lose your private key…',
+        options: [
+          'Customer support will email it back',
+          'A new key is auto-generated',
+          'You lose access — there is no recovery',
+          'The chain freezes for safety',
+        ],
+        correctIndex: 2,
+        reward: { type: 'wallet_keystone', position: [-5, 0, 1] },
+      },
+      {
+        prompt: 'A wallet "signs" a transaction. What does that do?',
+        options: [
+          'Encrypts the transaction so nobody can read it',
+          'Proves the transaction came from this wallet, without revealing the key',
+          'Sends a fee to the network',
+          'Writes the transaction onto paper',
+        ],
+        correctIndex: 1,
+        reward: { type: 'wallet_keystone', position: [-5, 1, 0] },
+      },
     ],
   },
 
+  // -------------- 2. TOKENS — south district -----------------------------
   {
     id: 'tokens',
     title: 'Tokens',
     blurb: 'Programmable units of value.',
+    district: 'The marketplace',
     pages: [
       {
         heading: 'Tokens are numbers',
         body:
-          "A token is a programmable unit of value living on a chain. It can be money, a game item, a ticket, or a share. The chain just keeps score of who owns how many.",
+          'A token is a programmable unit of value living on a chain. It can be money, a game item, a ticket, or a share. The chain just keeps score of who owns how many.',
       },
       {
-        heading: 'Sending a token',
+        heading: "Sending without moving",
         body:
-          "When you 'send' a token, no physical thing moves. The chain just updates a ledger: 'A goes down by 5, B goes up by 5.' That ledger is public and locked in forever. No bank involved.",
+          "When you 'send' a token, no physical thing moves. The chain just updates a ledger: A goes down by 5, B goes up by 5. That ledger is public and locked in forever. No bank involved.",
       },
     ],
     quiz: [
       {
-        prompt: 'When you send 5 tokens to a friend, what actually moves?',
+        prompt: 'When you send 5 tokens to a friend, what really happens?',
         options: [
           'A physical coin travels on the network',
-          'Nothing — the ledger just updates two rows',
-          'The token is teleported',
-          'Your wallet flies across the internet',
+          'Nothing — two ledger rows just update',
+          'The token teleports',
+          'A bank logs the transfer',
         ],
         correctIndex: 1,
+        reward: { type: 'token_prism', position: [-1, 0, 4] },
       },
       {
-        prompt: 'Who keeps the official record of who owns how many tokens?',
+        prompt: 'Who keeps the official record of token ownership?',
         options: ['A bank', 'The chain itself', 'A trusted person', 'Nobody'],
         correctIndex: 1,
+        reward: { type: 'token_prism', position: [0, 0, 4] },
       },
-    ],
-    challenge: 'Two wallets, one token bridge — token flows between them.',
-    target: [
-      { type: 'wallet_keystone', position: [-2, 0, 0] },
-      { type: 'token_prism', position: [-1, 0, 0] },
-      { type: 'token_prism', position: [0, 0, 0] },
-      { type: 'token_prism', position: [1, 0, 0] },
-      { type: 'wallet_keystone', position: [2, 0, 0] },
+      {
+        prompt: 'Two tokens with the same name from different chains are…',
+        options: [
+          'Always the same token',
+          'Different — they live on separate ledgers',
+          'Mergeable by a bank',
+          "Always exchangeable 1-for-1",
+        ],
+        correctIndex: 1,
+        reward: { type: 'token_prism', position: [1, 0, 4] },
+      },
+      {
+        prompt: 'Can a token represent something other than money?',
+        options: [
+          'No, only money',
+          'Yes — game items, tickets, shares, anything countable',
+          'Only with permission',
+          'Only on Solana',
+        ],
+        correctIndex: 1,
+        reward: { type: 'token_prism', position: [0, 1, 4] },
+      },
     ],
   },
 
+  // -------------- 3. SMART CONTRACTS — north-west district ---------------
   {
     id: 'smart-contracts',
     title: 'Smart Contracts',
     blurb: 'Code that runs on the chain.',
+    district: 'The code towers',
     pages: [
       {
         heading: "It's just code",
         body:
-          "A smart contract is a small program parked on the chain. Send it a transaction and it runs — the same way for everyone, every time. No one can change the rules halfway.",
+          'A smart contract is a small program parked on the chain. Send it a transaction and it runs — the same way for everyone, every time. No one can change the rules halfway.',
       },
       {
         heading: 'Holding value',
         body:
-          "Smart contracts can hold tokens. They can lend them, swap them, lock them, give them back when conditions are met. That's how DeFi, NFTs, and on-chain games work — programs holding the bag.",
+          'Smart contracts can hold tokens. They lend, swap, lock, return them when conditions are met. DeFi, NFTs, on-chain games — all of it is programs holding the bag and following code.',
       },
     ],
     quiz: [
       {
         prompt: 'What is a smart contract?',
         options: [
-          'A legal document signed by both parties',
-          'A program that lives on the chain and runs when called',
-          'An AI agent',
-          "A type of NFT",
+          'A legal document on paper',
+          'A program on the chain that runs when called',
+          'An AI chatbot',
+          'A type of wallet',
         ],
         correctIndex: 1,
+        reward: { type: 'contract_obelisk', position: [-3, 0, -4] },
       },
       {
-        prompt: "Can a smart contract's rules be changed after deployment?",
+        prompt: "Can a deployed contract's rules be changed by the author later?",
         options: [
-          'Yes, anytime by the owner',
-          'No — the code is what runs, every time',
-          'Only on Tuesdays',
-          'Only if the user pays a fee',
+          'Yes, any time',
+          'No — the code that runs is locked in (usually)',
+          'Only on weekends',
+          "Only if the user pays a fee",
         ],
         correctIndex: 1,
+        reward: { type: 'contract_obelisk', position: [-3, 1, -4] },
       },
-    ],
-    challenge: 'A contract holding two tokens — code in the middle, value on the sides.',
-    target: [
-      { type: 'token_prism', position: [-1, 0, 0] },
-      { type: 'contract_obelisk', position: [0, 0, 0] },
-      { type: 'token_prism', position: [1, 0, 0] },
+      {
+        prompt: "Why do people say smart contracts are 'trustless'?",
+        options: [
+          "Because the author can't be trusted",
+          'Because anyone can read the code and the network runs it as written',
+          "Because they don't work",
+          'Because trust is illegal in DeFi',
+        ],
+        correctIndex: 1,
+        reward: { type: 'contract_obelisk', position: [-3, 2, -4] },
+      },
+      {
+        prompt: 'What can a smart contract hold?',
+        options: [
+          'Tokens, on-chain data, NFTs, basically anything the chain tracks',
+          'Only one specific token',
+          "Nothing — contracts can't hold value",
+          "Only the chain's native coin",
+        ],
+        correctIndex: 0,
+        reward: { type: 'data_core', position: [-4, 0, -4] },
+      },
     ],
   },
 
+  // -------------- 4. VALIDATORS — east district --------------------------
   {
     id: 'validators',
     title: 'Validators',
     blurb: 'Who keeps the chain honest.',
+    district: 'The validator HQ',
     pages: [
       {
         heading: 'Skin in the game',
@@ -177,49 +240,63 @@ export const LESSONS: readonly Lesson[] = [
       {
         heading: 'Governance lives here',
         body:
-          'Many networks let validators (and token holders) vote on upgrades. A vote weighted by stake decides the future of the chain. The same group that secures the network also decides where it goes.',
+          'Many networks let validators (and token holders) vote on upgrades. A vote weighted by stake decides where the chain goes. The same group that secures the network also steers it.',
       },
     ],
     quiz: [
       {
-        prompt: 'What happens to a validator that tries to cheat?',
+        prompt: 'What does a validator lock up as a deposit?',
+        options: ['A house', 'Tokens (called the stake)', 'Their identity', 'Nothing'],
+        correctIndex: 1,
+        reward: { type: 'security_bunker', position: [4, 0, -1] },
+      },
+      {
+        prompt: 'What happens to a validator that cheats?',
         options: [
           'They get a warning',
-          'They lose part of their stake',
-          'Their account is frozen',
+          'Part of their stake is destroyed (slashed)',
+          'Their account is frozen for a day',
           'Nothing — there are no consequences',
         ],
         correctIndex: 1,
+        reward: { type: 'security_bunker', position: [4, 0, 1] },
       },
       {
         prompt: 'Who decides on big upgrades to a proof-of-stake chain?',
         options: [
           'A single CEO',
-          'Stakers and validators voting',
+          'Validators and stakers via on-chain votes',
           'Random users',
           'The chain decides automatically',
         ],
         correctIndex: 1,
+        reward: { type: 'governance_marble', position: [4, 0, 0] },
       },
-    ],
-    challenge: 'Two security bunkers flanking a governance pillar.',
-    target: [
-      { type: 'security_bunker', position: [-1, 0, 0] },
-      { type: 'governance_marble', position: [0, 0, 0] },
-      { type: 'governance_marble', position: [0, 1, 0] },
-      { type: 'security_bunker', position: [1, 0, 0] },
+      {
+        prompt: 'Why does staking make the chain secure?',
+        options: [
+          'Validators are paid extra to be careful',
+          'Cheating costs more than playing fair — incentives align with honesty',
+          "They're all watched by a referee",
+          'Cheaters get banned by social media',
+        ],
+        correctIndex: 1,
+        reward: { type: 'governance_marble', position: [4, 1, 0] },
+      },
     ],
   },
 
+  // -------------- 5. ZERO KNOWLEDGE — north district ---------------------
   {
     id: 'zk',
     title: 'Zero Knowledge',
     blurb: 'Prove a fact without revealing it.',
+    district: 'The proof lab',
     pages: [
       {
         heading: 'Math that hides',
         body:
-          'A zero-knowledge proof lets you prove something is true WITHOUT showing the data behind it. Like proving you know a password without typing it. Or proving you are over 18 without showing your ID.',
+          'A zero-knowledge proof lets you prove something is true WITHOUT showing the data behind it. Prove you know a password without typing it. Prove you are over 18 without showing your ID.',
       },
       {
         heading: 'Why crypto cares',
@@ -232,36 +309,55 @@ export const LESSONS: readonly Lesson[] = [
         prompt: 'What does a zero-knowledge proof reveal?',
         options: [
           'All the underlying data',
-          'Nothing besides that the claim is true',
+          'Nothing — besides that the claim is true',
           'Half the data',
-          "Only the person's name",
+          "Just the person's name",
         ],
         correctIndex: 1,
+        reward: { type: 'zk_crystal', position: [-1, 0, -4] },
       },
       {
-        prompt: 'A real-world use of ZK is...',
+        prompt: 'A real-world use of ZK is…',
         options: [
           'Proving age without showing ID',
-          'Sharing your full medical record publicly',
           'Posting your password to the chain',
+          'Sharing your full medical record publicly',
           'Sending a normal email',
         ],
         correctIndex: 0,
+        reward: { type: 'zk_crystal', position: [0, 0, -4] },
       },
-    ],
-    challenge: 'A ZK crystal verifying two data cores.',
-    target: [
-      { type: 'data_core', position: [-1, 0, 0] },
-      { type: 'zk_crystal', position: [0, 0, 0] },
-      { type: 'zk_crystal', position: [0, 1, 0] },
-      { type: 'data_core', position: [1, 0, 0] },
+      {
+        prompt: 'Why is ZK useful for blockchains specifically?',
+        options: [
+          'It lets you keep data private while still being verifiable on-chain',
+          'It makes blocks bigger',
+          'It removes the need for validators',
+          'It runs the chain itself',
+        ],
+        correctIndex: 0,
+        reward: { type: 'zk_crystal', position: [1, 0, -4] },
+      },
+      {
+        prompt: 'A ZK proof feeds on…',
+        options: [
+          'Validator votes',
+          'Math + the secret data you want to keep hidden',
+          'Random network noise',
+          'A trusted authority',
+        ],
+        correctIndex: 1,
+        reward: { type: 'data_core', position: [2, 0, -4] },
+      },
     ],
   },
 
+  // -------------- 6. DEFI — south-east district --------------------------
   {
     id: 'defi',
     title: 'DeFi',
     blurb: 'Banking without the bank.',
+    district: 'The vault',
     pages: [
       {
         heading: 'A bank made of code',
@@ -271,7 +367,7 @@ export const LESSONS: readonly Lesson[] = [
       {
         heading: 'Vaults and pools',
         body:
-          'A DeFi vault holds tokens from many users. The contract decides how to use them — earn interest, swap for other tokens, lend to borrowers. You can pull your share out anytime (usually). The contract is the bank.',
+          'A DeFi vault holds tokens from many users. The contract decides how to use them — earn interest, swap for other tokens, lend to borrowers. You can withdraw your share. The contract is the bank.',
       },
     ],
     quiz: [
@@ -279,24 +375,41 @@ export const LESSONS: readonly Lesson[] = [
         prompt: 'What replaces the bank in DeFi?',
         options: ['A government', 'A smart contract', 'A celebrity', 'A telephone hotline'],
         correctIndex: 1,
+        reward: { type: 'defi_vault', position: [3, 0, 4] },
       },
       {
         prompt: "What's typically inside a DeFi vault?",
         options: [
           'Physical gold',
-          "A pile of tokens managed by code",
+          'A pile of tokens managed by code',
           'A list of bank customers',
-          'Smart contracts only, no tokens',
+          "Just contracts, no tokens",
         ],
         correctIndex: 1,
+        reward: { type: 'token_prism', position: [4, 0, 4] },
       },
-    ],
-    challenge: 'A DeFi vault flanked by tokens, with a contract overseeing.',
-    target: [
-      { type: 'token_prism', position: [-1, 0, 0] },
-      { type: 'defi_vault', position: [0, 0, 0] },
-      { type: 'token_prism', position: [1, 0, 0] },
-      { type: 'contract_obelisk', position: [0, 1, 0] },
+      {
+        prompt: 'A "yield" in DeFi is…',
+        options: [
+          'A traffic sign',
+          'The return your deposited tokens earn from being lent or used',
+          'A penalty for withdrawing',
+          'A bank fee',
+        ],
+        correctIndex: 1,
+        reward: { type: 'token_prism', position: [3, 0, 5] },
+      },
+      {
+        prompt: 'Why is DeFi available to everyone, 24/7?',
+        options: [
+          'A bank app is always running',
+          "The contracts live on-chain — there's no office, no closing hours",
+          'Governments require it',
+          'Validators take shifts',
+        ],
+        correctIndex: 1,
+        reward: { type: 'contract_obelisk', position: [3, 1, 4] },
+      },
     ],
   },
 ];
@@ -309,7 +422,7 @@ export const LESSON_BY_ID: Record<string, Lesson> = LESSONS.reduce(
   {} as Record<string, Lesson>
 );
 
-/** Sandbox unlocks after this many lessons are completed. */
+/** Sandbox unlocks after this many lessons completed. */
 export const SANDBOX_UNLOCK_COUNT = 3;
 
 export function lessonIndex(id: string): number {
@@ -326,4 +439,13 @@ export function isLessonUnlocked(id: string, completed: readonly string[]): bool
   const i = lessonIndex(id);
   if (i <= 0) return true;
   return completed.includes(LESSONS[i - 1].id);
+}
+
+export function totalBlocks(): number {
+  return LESSONS.reduce((s, l) => s + l.quiz.length, 0);
+}
+
+/** Stable id for tracking which questions a player has nailed. */
+export function questionId(lessonId: string, idx: number): string {
+  return `${lessonId}:${idx}`;
 }
