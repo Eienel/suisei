@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, ArrowLeft, BookOpen } from 'lucide-react';
 import type { Lesson } from '@/data/lessons';
+import { AskTutor } from './AskTutor';
 
 export function LessonRead({
   lesson,
@@ -34,6 +35,7 @@ export function LessonRead({
             {p.heading}
           </h2>
           <p className="text-fg-dim text-lg leading-relaxed whitespace-pre-line">{p.body}</p>
+          <AskTutor topic={lesson.title} page={p} />
         </div>
       </main>
 

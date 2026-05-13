@@ -1,8 +1,11 @@
 import { useApp, LESSONS, SANDBOX_UNLOCK_COUNT } from '@/state/app';
-import { isLessonUnlocked, totalBlocks } from '@/data/lessons';
+import { isLessonUnlocked, totalQuestions } from '@/data/lessons';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
 import { useWorld } from '@/state/world';
 import { Lock, Check, ArrowRight, Cuboid, Sparkles, RotateCcw } from 'lucide-react';
+import { AuthButton } from './AuthButton';
+import { SaveWorldButton } from './SaveWorldButton';
+import { ShareButton } from './ShareButton';
 
 export function LessonsList() {
   const completed = useApp((s) => s.completedLessons);
@@ -14,7 +17,7 @@ export function LessonsList() {
   const clearWorld = useWorld((s) => s.clearWorld);
 
   const placed = useWorld((s) => s.blocks.length);
-  const totalToPlace = totalBlocks();
+  const totalQs = totalQuestions();
 
   const onReset = () => {
     if (confirm('Reset all progress and clear the town? This cannot be undone.')) {
@@ -25,7 +28,12 @@ export function LessonsList() {
 
   return (
     <div className="fixed inset-0 overflow-y-auto bg-ink">
-      <header className="max-w-5xl mx-auto px-6 sm:px-10 pt-10 pb-6 flex items-start justify-between gap-6">
+      <header className="max-w-5xl mx-auto px-6 sm:px-10 pt-6 sm:pt-8 flex items-center justify-end gap-2 flex-wrap">
+        <ShareButton />
+        <SaveWorldButton />
+        <AuthButton />
+      </header>
+      <section className="max-w-5xl mx-auto px-6 sm:px-10 pt-4 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
           <p className="font-mono text-xs uppercase tracking-widest text-fg-mute mb-2">
             BlockBuilders
@@ -34,18 +42,21 @@ export function LessonsList() {
             Six lessons. One town.
           </h1>
           <p className="text-fg-mute max-w-xl leading-relaxed">
-            Read each lesson, then answer the questions. Every right answer drops
-            a block into your world. Finish all six and you'll have built a small crypto town.
+            Read each lesson, then answer the questions. Every right answer earns
+            you a Tetris-style piece. Drop it on the map wherever you like —
+            you decide how your town takes shape.
           </p>
         </div>
         <div className="text-right shrink-0">
           <div className="font-mono text-xs text-fg-mute">blocks placed</div>
           <div className="font-mono text-2xl font-semibold text-fg">
             {placed}
-            <span className="text-fg-mute">/{totalToPlace}</span>
+          </div>
+          <div className="font-mono text-[10px] text-fg-mute mt-0.5">
+            from {totalQs} possible questions
           </div>
         </div>
-      </header>
+      </section>
 
       <main className="max-w-5xl mx-auto px-6 sm:px-10 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

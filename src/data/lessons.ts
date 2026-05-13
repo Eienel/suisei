@@ -1,22 +1,14 @@
-import type { BlockType, Vec3 } from '@/types';
+import type { BlockType } from '@/types';
+import type { PieceKey } from '@/world/pieces';
 
 /**
- * BlockBuilders lessons — quiz-only flow.
+ * BlockBuilders lesson + quiz model.
  *
- * Each correct answer drops one block into the world at a pre-planned
- * coordinate. By the end of all 6 lessons the user has unknowingly
- * assembled a small crypto-themed town with 6 districts:
- *
- *                            ZK lab (north)
- *                                |
- *   Wallet homes  ---  TOWN  ---  Validator HQ
- *      (west)         CENTRE         (east)
- *                       |
- *                  Tokens & DeFi
- *                     (south)
- *
- * Lessons stage: READ -> CHECK (quiz drops blocks live) -> DONE.
- * No separate "build" stage — the quiz IS the build.
+ * Each lesson:
+ *   1. READ  — short kid-tone copy. AI tutor button can rephrase any page.
+ *   2. CHECK — multiple-choice quiz. Each correct answer hands the player
+ *              a Tetris-style piece to place anywhere on their map.
+ *   3. DONE  — celebration + auto-save bumps the World NFT on Sui.
  */
 
 export interface ReadPage {
@@ -24,12 +16,16 @@ export interface ReadPage {
   body: string;
 }
 
+export interface PieceReward {
+  type: BlockType;
+  pieceKey: PieceKey;
+}
+
 export interface QuizQuestion {
   prompt: string;
   options: string[];
   correctIndex: number;
-  /** Block placed in the world when this question is first answered correctly. */
-  reward: { type: BlockType; position: Vec3 };
+  reward: PieceReward;
 }
 
 export interface Lesson {
@@ -42,17 +38,17 @@ export interface Lesson {
 }
 
 export const LESSONS: readonly Lesson[] = [
-  // -------------- 1. WALLETS — west district -----------------------------
+  // -------------- 1. WALLETS — small homely pieces -------------------
   {
     id: 'wallets',
     title: 'Wallets',
     blurb: 'The keychain that proves you are you.',
-    district: 'The wallet homes',
+    district: 'Wallet homes',
     pages: [
       {
         heading: 'A wallet is a keychain',
         body:
-          'A wallet does NOT hold coins. It holds a tiny secret code called a private key. The key is what proves you control your address. Lose the key, lose the money. Keep it safe.',
+          'A wallet does NOT hold coins. It holds a tiny secret code called a private key. The key is what proves you control your address. Lose the key, lose the money.',
       },
       {
         heading: 'Public and private',
@@ -63,42 +59,42 @@ export const LESSONS: readonly Lesson[] = [
     quiz: [
       {
         prompt: 'What does a wallet actually hold?',
-        options: ['Cryptocurrency coins', 'Your keys', 'Your password', 'A list of contacts'],
+        options: ['Coins', 'Your keys', 'Your password', 'A contact list'],
         correctIndex: 1,
-        reward: { type: 'wallet_keystone', position: [-5, 0, -1] },
+        reward: { type: 'wallet_keystone', pieceKey: 'DOT' },
       },
       {
         prompt: 'Which key do you share with people who want to pay you?',
-        options: ['Your private key', 'Your public key', 'Both keys', 'Neither key'],
+        options: ['Private', 'Public (address)', 'Both', 'Neither'],
         correctIndex: 1,
-        reward: { type: 'wallet_keystone', position: [-5, 0, 0] },
+        reward: { type: 'wallet_keystone', pieceKey: 'DUO' },
       },
       {
         prompt: 'If you lose your private key…',
         options: [
-          'Customer support will email it back',
-          'A new key is auto-generated',
-          'You lose access — there is no recovery',
+          'Support emails it back',
+          'A new one is auto-generated',
+          'You lose access — no recovery',
           'The chain freezes for safety',
         ],
         correctIndex: 2,
-        reward: { type: 'wallet_keystone', position: [-5, 0, 1] },
+        reward: { type: 'wallet_keystone', pieceKey: 'TRI_L' },
       },
       {
-        prompt: 'A wallet "signs" a transaction. What does that do?',
+        prompt: 'What does "signing" a transaction do?',
         options: [
-          'Encrypts the transaction so nobody can read it',
-          'Proves the transaction came from this wallet, without revealing the key',
-          'Sends a fee to the network',
-          'Writes the transaction onto paper',
+          'Encrypts it so nobody can read it',
+          'Proves it came from this wallet, no key revealed',
+          'Sends a network fee',
+          'Writes it on paper',
         ],
         correctIndex: 1,
-        reward: { type: 'wallet_keystone', position: [-5, 1, 0] },
+        reward: { type: 'wallet_keystone', pieceKey: 'TRI_L' },
       },
     ],
   },
 
-  // -------------- 2. TOKENS — south district -----------------------------
+  // -------------- 2. TOKENS — small marketplace pieces ----------------
   {
     id: 'tokens',
     title: 'Tokens',
@@ -108,63 +104,63 @@ export const LESSONS: readonly Lesson[] = [
       {
         heading: 'Tokens are numbers',
         body:
-          'A token is a programmable unit of value living on a chain. It can be money, a game item, a ticket, or a share. The chain just keeps score of who owns how many.',
+          'A token is a programmable unit of value on a chain. It can be money, a game item, a ticket, or a share. The chain just keeps score of who owns how many.',
       },
       {
-        heading: "Sending without moving",
+        heading: 'Sending without moving',
         body:
-          "When you 'send' a token, no physical thing moves. The chain just updates a ledger: A goes down by 5, B goes up by 5. That ledger is public and locked in forever. No bank involved.",
+          'When you send tokens, no physical thing moves. The chain just updates a ledger: A goes down, B goes up. That ledger is public and locked in forever. No bank involved.',
       },
     ],
     quiz: [
       {
-        prompt: 'When you send 5 tokens to a friend, what really happens?',
+        prompt: 'When you send 5 tokens, what really happens?',
         options: [
-          'A physical coin travels on the network',
-          'Nothing — two ledger rows just update',
+          'A coin travels on the network',
+          'Two ledger rows update — nothing moves',
           'The token teleports',
           'A bank logs the transfer',
         ],
         correctIndex: 1,
-        reward: { type: 'token_prism', position: [-1, 0, 4] },
+        reward: { type: 'token_prism', pieceKey: 'DOT' },
       },
       {
         prompt: 'Who keeps the official record of token ownership?',
         options: ['A bank', 'The chain itself', 'A trusted person', 'Nobody'],
         correctIndex: 1,
-        reward: { type: 'token_prism', position: [0, 0, 4] },
+        reward: { type: 'token_prism', pieceKey: 'DUO' },
       },
       {
-        prompt: 'Two tokens with the same name from different chains are…',
+        prompt: 'Two tokens with the same name on different chains are…',
         options: [
           'Always the same token',
-          'Different — they live on separate ledgers',
+          'Different — separate ledgers',
           'Mergeable by a bank',
-          "Always exchangeable 1-for-1",
+          'Always 1-for-1 exchangeable',
         ],
         correctIndex: 1,
-        reward: { type: 'token_prism', position: [1, 0, 4] },
+        reward: { type: 'token_prism', pieceKey: 'LINE_3' },
       },
       {
-        prompt: 'Can a token represent something other than money?',
+        prompt: 'Can a token represent something besides money?',
         options: [
           'No, only money',
-          'Yes — game items, tickets, shares, anything countable',
+          'Yes — items, tickets, shares, anything countable',
           'Only with permission',
           'Only on Solana',
         ],
         correctIndex: 1,
-        reward: { type: 'token_prism', position: [0, 1, 4] },
+        reward: { type: 'token_prism', pieceKey: 'TRI_L' },
       },
     ],
   },
 
-  // -------------- 3. SMART CONTRACTS — north-west district ---------------
+  // -------------- 3. SMART CONTRACTS — tall code-tower pieces --------
   {
     id: 'smart-contracts',
     title: 'Smart Contracts',
     blurb: 'Code that runs on the chain.',
-    district: 'The code towers',
+    district: 'Code towers',
     pages: [
       {
         heading: "It's just code",
@@ -174,7 +170,7 @@ export const LESSONS: readonly Lesson[] = [
       {
         heading: 'Holding value',
         body:
-          'Smart contracts can hold tokens. They lend, swap, lock, return them when conditions are met. DeFi, NFTs, on-chain games — all of it is programs holding the bag and following code.',
+          'Smart contracts can hold tokens. They lend, swap, lock, return them when conditions are met. DeFi, NFTs, on-chain games — all programs holding the bag and following code.',
       },
     ],
     quiz: [
@@ -187,121 +183,121 @@ export const LESSONS: readonly Lesson[] = [
           'A type of wallet',
         ],
         correctIndex: 1,
-        reward: { type: 'contract_obelisk', position: [-3, 0, -4] },
+        reward: { type: 'contract_obelisk', pieceKey: 'DOT' },
       },
       {
-        prompt: "Can a deployed contract's rules be changed by the author later?",
+        prompt: "Can a deployed contract's rules be changed later?",
         options: [
-          'Yes, any time',
+          'Yes, anytime',
           'No — the code that runs is locked in (usually)',
           'Only on weekends',
-          "Only if the user pays a fee",
+          'Only with a fee',
         ],
         correctIndex: 1,
-        reward: { type: 'contract_obelisk', position: [-3, 1, -4] },
+        reward: { type: 'contract_obelisk', pieceKey: 'DUO' },
       },
       {
-        prompt: "Why do people say smart contracts are 'trustless'?",
+        prompt: "Why are smart contracts called 'trustless'?",
         options: [
-          "Because the author can't be trusted",
-          'Because anyone can read the code and the network runs it as written',
-          "Because they don't work",
-          'Because trust is illegal in DeFi',
+          "The author isn't trustworthy",
+          'Anyone can read the code; the network runs it as written',
+          "They don't work",
+          'Trust is illegal in DeFi',
         ],
         correctIndex: 1,
-        reward: { type: 'contract_obelisk', position: [-3, 2, -4] },
+        reward: { type: 'contract_obelisk', pieceKey: 'TRI_L' },
       },
       {
         prompt: 'What can a smart contract hold?',
         options: [
-          'Tokens, on-chain data, NFTs, basically anything the chain tracks',
-          'Only one specific token',
-          "Nothing — contracts can't hold value",
+          'Tokens, NFTs, any chain-tracked value',
+          'One specific token only',
+          'Nothing',
           "Only the chain's native coin",
         ],
         correctIndex: 0,
-        reward: { type: 'data_core', position: [-4, 0, -4] },
+        reward: { type: 'data_core', pieceKey: 'DUO' },
       },
     ],
   },
 
-  // -------------- 4. VALIDATORS — east district --------------------------
+  // -------------- 4. VALIDATORS — big fortress pieces ----------------
   {
     id: 'validators',
     title: 'Validators',
     blurb: 'Who keeps the chain honest.',
-    district: 'The validator HQ',
+    district: 'Validator HQ',
     pages: [
       {
         heading: 'Skin in the game',
         body:
-          'Validators are the network watchdogs. They lock up money as a deposit (called staking), then take turns proposing new blocks. Play fair and earn rewards. Cheat and lose your stake.',
+          'Validators lock up money as a deposit (staking), then take turns proposing new blocks. Play fair and earn rewards. Cheat and lose your stake.',
       },
       {
         heading: 'Governance lives here',
         body:
-          'Many networks let validators (and token holders) vote on upgrades. A vote weighted by stake decides where the chain goes. The same group that secures the network also steers it.',
+          'Many networks let validators (and stakers) vote on upgrades. A vote weighted by stake decides where the chain goes. The same group that secures the network also steers it.',
       },
     ],
     quiz: [
       {
-        prompt: 'What does a validator lock up as a deposit?',
-        options: ['A house', 'Tokens (called the stake)', 'Their identity', 'Nothing'],
+        prompt: 'What does a validator lock up as deposit?',
+        options: ['A house', 'Tokens (the stake)', 'Their identity', 'Nothing'],
         correctIndex: 1,
-        reward: { type: 'security_bunker', position: [4, 0, -1] },
+        reward: { type: 'security_bunker', pieceKey: 'DUO' },
       },
       {
         prompt: 'What happens to a validator that cheats?',
         options: [
-          'They get a warning',
-          'Part of their stake is destroyed (slashed)',
-          'Their account is frozen for a day',
-          'Nothing — there are no consequences',
+          'A warning',
+          'Part of stake is destroyed (slashed)',
+          'Frozen for a day',
+          'Nothing',
         ],
         correctIndex: 1,
-        reward: { type: 'security_bunker', position: [4, 0, 1] },
+        reward: { type: 'security_bunker', pieceKey: 'TRI_L' },
       },
       {
-        prompt: 'Who decides on big upgrades to a proof-of-stake chain?',
+        prompt: 'Who decides upgrades to a proof-of-stake chain?',
         options: [
           'A single CEO',
-          'Validators and stakers via on-chain votes',
+          'Validators + stakers via on-chain votes',
           'Random users',
-          'The chain decides automatically',
+          'The chain alone',
         ],
         correctIndex: 1,
-        reward: { type: 'governance_marble', position: [4, 0, 0] },
+        reward: { type: 'governance_marble', pieceKey: 'DOT' },
       },
       {
         prompt: 'Why does staking make the chain secure?',
         options: [
-          'Validators are paid extra to be careful',
-          'Cheating costs more than playing fair — incentives align with honesty',
-          "They're all watched by a referee",
-          'Cheaters get banned by social media',
+          'Validators are paid extra',
+          'Cheating costs more than playing fair — incentives align',
+          'A referee watches them',
+          'Social-media bans cheaters',
         ],
         correctIndex: 1,
-        reward: { type: 'governance_marble', position: [4, 1, 0] },
+        reward: { type: 'governance_marble', pieceKey: 'SQUARE' },
       },
     ],
   },
 
-  // -------------- 5. ZERO KNOWLEDGE — north district ---------------------
+  // -------------- 5. ZERO KNOWLEDGE — crystal grid -------------------
   {
     id: 'zk',
     title: 'Zero Knowledge',
     blurb: 'Prove a fact without revealing it.',
-    district: 'The proof lab',
+    district: 'Proof lab',
     pages: [
       {
         heading: 'Math that hides',
         body:
-          'A zero-knowledge proof lets you prove something is true WITHOUT showing the data behind it. Prove you know a password without typing it. Prove you are over 18 without showing your ID.',
+          'A zero-knowledge proof lets you prove something is true without showing the data behind it. Prove you know a password without typing it. Prove you are over 18 without showing your ID.',
       },
       {
         heading: 'Why crypto cares',
         body:
-          'ZK lets blockchains stay private AND verifiable. You can show your tax was paid without revealing your income. You can prove a transaction is valid without leaking who sent what. Huge unlock for privacy.',
+          'ZK lets blockchains stay private AND verifiable. Show your tax was paid without revealing your income. Prove a transaction is valid without leaking who sent what.',
       },
     ],
     quiz: [
@@ -314,45 +310,45 @@ export const LESSONS: readonly Lesson[] = [
           "Just the person's name",
         ],
         correctIndex: 1,
-        reward: { type: 'zk_crystal', position: [-1, 0, -4] },
+        reward: { type: 'zk_crystal', pieceKey: 'DOT' },
       },
       {
         prompt: 'A real-world use of ZK is…',
         options: [
           'Proving age without showing ID',
           'Posting your password to the chain',
-          'Sharing your full medical record publicly',
-          'Sending a normal email',
+          'Sharing your medical record publicly',
+          'Sending email',
         ],
         correctIndex: 0,
-        reward: { type: 'zk_crystal', position: [0, 0, -4] },
+        reward: { type: 'zk_crystal', pieceKey: 'DUO' },
       },
       {
-        prompt: 'Why is ZK useful for blockchains specifically?',
+        prompt: 'Why ZK + blockchains specifically?',
         options: [
-          'It lets you keep data private while still being verifiable on-chain',
-          'It makes blocks bigger',
-          'It removes the need for validators',
-          'It runs the chain itself',
+          'Keeps data private while still verifiable on-chain',
+          'Makes blocks bigger',
+          'Removes the need for validators',
+          'Runs the chain itself',
         ],
         correctIndex: 0,
-        reward: { type: 'zk_crystal', position: [1, 0, -4] },
+        reward: { type: 'zk_crystal', pieceKey: 'LINE_3' },
       },
       {
-        prompt: 'A ZK proof feeds on…',
+        prompt: 'A ZK proof needs…',
         options: [
           'Validator votes',
-          'Math + the secret data you want to keep hidden',
-          'Random network noise',
+          'Math + the secret data you hide',
+          'Network noise',
           'A trusted authority',
         ],
         correctIndex: 1,
-        reward: { type: 'data_core', position: [2, 0, -4] },
+        reward: { type: 'data_core', pieceKey: 'DUO' },
       },
     ],
   },
 
-  // -------------- 6. DEFI — south-east district --------------------------
+  // -------------- 6. DEFI — big vault pieces -------------------------
   {
     id: 'defi',
     title: 'DeFi',
@@ -362,53 +358,53 @@ export const LESSONS: readonly Lesson[] = [
       {
         heading: 'A bank made of code',
         body:
-          'DeFi (Decentralized Finance) is when banks are replaced by smart contracts. Lending, borrowing, swapping, saving — all done by code that anyone can use, no signup required.',
+          'DeFi (Decentralized Finance) replaces banks with smart contracts. Lending, borrowing, swapping, saving — all done by code anyone can use, no signup.',
       },
       {
         heading: 'Vaults and pools',
         body:
-          'A DeFi vault holds tokens from many users. The contract decides how to use them — earn interest, swap for other tokens, lend to borrowers. You can withdraw your share. The contract is the bank.',
+          'A DeFi vault holds tokens from many users. The contract decides how to use them — earn interest, swap, lend. You can withdraw your share. The contract IS the bank.',
       },
     ],
     quiz: [
       {
         prompt: 'What replaces the bank in DeFi?',
-        options: ['A government', 'A smart contract', 'A celebrity', 'A telephone hotline'],
+        options: ['A government', 'A smart contract', 'A celebrity', 'A phone hotline'],
         correctIndex: 1,
-        reward: { type: 'defi_vault', position: [3, 0, 4] },
+        reward: { type: 'defi_vault', pieceKey: 'SQUARE' },
       },
       {
         prompt: "What's typically inside a DeFi vault?",
         options: [
           'Physical gold',
           'A pile of tokens managed by code',
-          'A list of bank customers',
-          "Just contracts, no tokens",
+          'A bank customer list',
+          'Just contracts, no tokens',
         ],
         correctIndex: 1,
-        reward: { type: 'token_prism', position: [4, 0, 4] },
+        reward: { type: 'token_prism', pieceKey: 'TRI_L' },
       },
       {
         prompt: 'A "yield" in DeFi is…',
         options: [
           'A traffic sign',
-          'The return your deposited tokens earn from being lent or used',
-          'A penalty for withdrawing',
+          'The return your deposited tokens earn',
+          'A withdrawal penalty',
           'A bank fee',
         ],
         correctIndex: 1,
-        reward: { type: 'token_prism', position: [3, 0, 5] },
+        reward: { type: 'token_prism', pieceKey: 'DUO' },
       },
       {
-        prompt: 'Why is DeFi available to everyone, 24/7?',
+        prompt: 'Why is DeFi available 24/7 globally?',
         options: [
           'A bank app is always running',
-          "The contracts live on-chain — there's no office, no closing hours",
+          "The contracts live on-chain — no office, no closing hours",
           'Governments require it',
           'Validators take shifts',
         ],
         correctIndex: 1,
-        reward: { type: 'contract_obelisk', position: [3, 1, 4] },
+        reward: { type: 'contract_obelisk', pieceKey: 'DOT' },
       },
     ],
   },
@@ -441,11 +437,10 @@ export function isLessonUnlocked(id: string, completed: readonly string[]): bool
   return completed.includes(LESSONS[i - 1].id);
 }
 
-export function totalBlocks(): number {
+export function totalQuestions(): number {
   return LESSONS.reduce((s, l) => s + l.quiz.length, 0);
 }
 
-/** Stable id for tracking which questions a player has nailed. */
 export function questionId(lessonId: string, idx: number): string {
   return `${lessonId}:${idx}`;
 }

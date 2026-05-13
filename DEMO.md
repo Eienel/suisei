@@ -1,48 +1,47 @@
 # Demo storyboard — Sui Overflow (AI track)
 
-~90 seconds. Goal: a judge understands in 30 seconds that this is an AI
-co-creative 3D world builder where users own evolving knowledge worlds
-onchain via Sui.
+~90 seconds. Goal: a judge understands in 30 seconds that this is a
+**learn-by-playing town builder where every right answer drops a Lego/Tetris
+piece on your map, the world is yours to shape, and the finished town
+lives onchain on Sui where anyone can visit it.**
 
 ## Pre-record checklist
-- [ ] Clear `localStorage` so the world is empty + the "How to play" modal
-      opens fresh
-- [ ] Browser zoom 100%, no extension toolbars visible
-- [ ] Sound on — placement thuds, build chimes, save sparkles all carry the moment
-- [ ] Wallet ready: either a Sui wallet (Sui Wallet / Suiet) on testnet
-      OR an Enoki Google flow if VITE_ENOKI_* are configured
-- [ ] Some testnet SUI in the wallet (~0.05 SUI is enough for save tx)
-- [ ] Optional: pre-create a World NFT so the demo skips name-prompt
-      (otherwise show the mint flow)
+- [ ] Clear localStorage so progress is fresh and Landing shows
+- [ ] Connected Sui wallet (testnet) with a tiny SUI balance (faucet ok)
+- [ ] Sound on — placement thuds, sparkles on correct, chimes on lesson done
+- [ ] Browser 1080p, no devtools, no extension toolbars visible
+- [ ] Optional second tab open at `/town/<your-address>` for the closing shot
 
 ## Cuts
 
 | Time | Beat | What's on screen | What you say / do |
 |------|------|------------------|-------------------|
-| 0:00–0:05 | **Hook** | Empty 3D world, dark cinematic UI, HowTo overlay dismissed | "BlockBuilders. AI + human co-creative 3D world builder, owned onchain via Sui." |
-| 0:05–0:20 | **Prompt the AI** | Bottom prompt bar focused with ⌘K. Type: *"build a zk learning city"* | "I prompt an AI Builder Agent — not a chatbot. It returns structured 3D actions." |
-| 0:20–0:45 | **World builds itself** | 60+ blocks animate into place over ~6s, narration toast at top: *"I'm constructing a small zk learning city with distinct functional zones."* | Let it breathe. The staggered placement + chime is the magic moment. |
-| 0:45–1:00 | **Edit manually** | Switch to **Place** tool (B). Drop a few governance marbles. Press R to rotate. Select a token prism and delete with ⌫. | "AI gives you a starting point. You stay in control — every block is yours to move, rotate, delete." |
-| 1:00–1:12 | **Iterate with the AI** | Prompt: *"add a token marketplace on the north edge"*. Watch the new district appear next to the city. | "The AI sees the current world. It adds to what's there." |
-| 1:12–1:25 | **Sign in + Save onchain** | Top-right: "Sign in with Google" (Enoki) OR "Connect Wallet". Then "Save World" → name prompt → mint. Suiscan link appears. | "One click signs me in via Sui zkLogin. Save uploads my world to Walrus and mints a dynamic World NFT on Sui." |
-| 1:25–1:30 | **Outro** | Reveal the Suiscan tx page in another tab briefly, cut back to the world | "Worlds you own. Worlds that evolve. BlockBuilders." |
+| 0:00–0:06 | **Hook** | Landing — isometric block diorama, headline "Read a lesson. Answer the questions. Watch a town appear." | "BlockBuilders. Learn crypto by playing — and own what you build, on Sui." |
+| 0:06–0:14 | **Curriculum** | Pan down to the curriculum table — 6 lessons listed | "Six districts. Wallets, tokens, smart contracts, validators, ZK, DeFi." |
+| 0:14–0:18 | **Begin** | Click "Begin lesson 1" → lessons list → Lesson 1 → Read pane | — |
+| 0:18–0:28 | **AI tutor moment** | Click *Explain it differently* on the read page → Gemini rephrases | "If a kid gets stuck, an AI tutor rephrases the concept in plain language." |
+| 0:28–0:36 | **First question** | Click an answer → ✓ Correct → a single-block piece appears on the map | "Every right answer earns a Tetris piece." |
+| 0:36–0:46 | **Place + rotate** | Hover over map, press `R` to rotate, click to drop | "You choose where it goes. The town is yours." |
+| 0:46–0:60 | **Watch town grow** | Speed-answer 3–4 more questions across two lessons; blocks pile in | (Let the placement chimes carry it) |
+| 0:60–1:10 | **Save to Sui** | Connect wallet → click "Save World" → wallet prompt → ✓ Saved to Sui | "Save your town and the metadata goes to Walrus + a dynamic NFT on Sui." |
+| 1:10–1:22 | **Visit publicly** | Click Share → paste `/town/<address>` into a clean tab → camera auto-orbits around the saved town | "Anyone with the URL can walk through your town. Open worlds, onchain." |
+| 1:22–1:30 | **Outro** | Cut back to the auto-orbiting world, badge "Sui testnet · v3" visible | "BlockBuilders. AI tutor, blockchain learning, an onchain artifact you can show." |
 
 ## Submission copy
 
-**Title.** BlockBuilders — AI co-creative 3D world builder on Sui
+**Title.** BlockBuilders — learn crypto by building a town. Onchain on Sui.
 
-**One-liner.** Co-create evolving 3D knowledge worlds with an AI Builder
-Agent. Own them onchain via dynamic NFTs on Sui.
+**One-liner.** Read a lesson, answer questions, drop Tetris-style pieces on a 3D map. Your finished town lives onchain so anyone can visit it.
 
 **What's novel.**
-1. The AI emits structured JSON actions, not chat — the frontend executes
-   them directly into a real-time 3D world.
-2. Save → Walrus blob → on-chain `update_world` tx → dynamic NFT metadata.
-   The NFT *is* the snapshot pointer.
-3. Sui-native auth via Enoki zkLogin (Google sign-in → derived Sui
-   address, no wallet install).
+1. **Quiz-driven Tetris-Lego building** — answers earn pieces, players choose layout. Learning + agency in one mechanic.
+2. **AI tutor inline** — Gemini rephrases any lesson page on demand with a fresh metaphor.
+3. **Open visitable worlds** — `/town/<address>` reads from Sui + Walrus, no auth required. Friction-free social loop.
+4. **Sui-native end-to-end** — Move package, dynamic World NFT, Walrus storage, Enoki zkLogin (Google sign-in).
 
 ## Tweet
-> just shipped BlockBuilders for @SuiOverflow — prompt an AI agent to
-> build a 3D crypto-knowledge world, then own it onchain as an evolving
-> Sui NFT. 90-second clip ↓
+
+> just shipped BlockBuilders for @SuiNetwork's overflow hackathon — read a
+> lesson, answer questions, every correct one drops a Tetris piece you
+> place on a 3D map. finish all 6 and you've built a crypto town that
+> lives onchain. anyone can visit it.

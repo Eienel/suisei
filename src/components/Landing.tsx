@@ -1,5 +1,5 @@
 import { useApp } from '@/state/app';
-import { LESSONS, totalBlocks } from '@/data/lessons';
+import { LESSONS, totalQuestions } from '@/data/lessons';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
 
 /**
@@ -12,7 +12,7 @@ export function Landing() {
   const setScreen = useApp((s) => s.setScreen);
   const completed = useApp((s) => s.completedLessons);
   const hasProgress = completed.length > 0;
-  const total = totalBlocks();
+  const total = totalQuestions();
 
   return (
     <div className="fixed inset-0 overflow-y-auto bg-ink text-fg">
