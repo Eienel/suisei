@@ -1,11 +1,15 @@
 import { Canvas } from '@react-three/fiber';
-import { Environment, OrbitControls, SoftShadows } from '@react-three/drei';
+import { OrbitControls, SoftShadows } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing';
 import { Suspense } from 'react';
 import * as THREE from 'three';
 import { useWorld } from '@/state/world';
 import { Block } from './Block';
 import { PlacementGrid } from './PlacementGrid';
+
+/** Mobile heuristic — disable expensive features on phones to keep boot snappy. */
+const isMobile =
+  typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
 export function World() {
   const blocks = useWorld((s) => s.blocks);
@@ -14,28 +18,31 @@ export function World() {
 
   return (
     <Canvas
-      shadows
+      shadows={!isMobile}
       gl={{
-        antialias: true,
+        antialias: !isMobile,
         toneMapping: THREE.ACESFilmicToneMapping,
         outputColorSpace: THREE.SRGBColorSpace,
+        powerPreference: 'default',
+        failIfMajorPerformanceCaveat: false,
       }}
       camera={{ position: [10, 8, 10], fov: 45, near: 0.1, far: 200 }}
-      dpr={[1, 2]}
+      dpr={isMobile ? [1, 1.5] : [1, 2]}
     >
       <color attach="background" args={['#070A14']} />
       <fog attach="fog" args={['#070A14', 28, 80]} />
 
       <Suspense fallback={null}>
-        <SoftShadows size={28} samples={12} focus={0.7} />
-        <Environment preset="night" />
+        {!isMobile && <SoftShadows size={28} samples={10} focus={0.7} />}
 
-        {/* Lighting — key light + rim + soft ambient. */}
-        <ambientLight intensity={0.18} />
+        {/* Lighting rig — key + rim + soft ambient. No external HDR (CDN) so
+            cold start works on flaky cellular. */}
+        <ambientLight intensity={0.35} />
+        <hemisphereLight args={['#5B83FF', '#0A0E1A', 0.5]} />
         <directionalLight
           position={[12, 18, 8]}
           intensity={1.2}
-          castShadow
+          castShadow={!isMobile}
           shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-30}
           shadow-camera-right={30}
@@ -69,9 +76,9 @@ export function World() {
           }}
         />
 
-        <EffectComposer multisampling={0}>
+        <EffectComposer multisampling={0} enabled={!isMobile}>
           <SMAA />
-          <Bloom mipmapBlur intensity={0.75} luminanceThreshold={0.6} luminanceSmoothing={0.4} />
+          <Bloom mipmapBlur intensity={0.6} luminanceThreshold={0.6} luminanceSmoothing={0.4} />
           <Vignette eskil={false} offset={0.15} darkness={0.55} />
         </EffectComposer>
       </Suspense>
