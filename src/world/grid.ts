@@ -1,4 +1,4 @@
-import type { Vec3 } from '@/types';
+import type { Vec3 } from '../types';
 
 /** World units per grid cell. One block = 1 cell. */
 export const CELL = 1;

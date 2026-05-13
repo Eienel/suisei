@@ -1,4 +1,4 @@
-import type { BlockType } from '@/types';
+import type { BlockType } from '../types';
 
 /**
  * Visual identity per block type. Phase 1 ships the taxonomy + a
