@@ -51,7 +51,7 @@ export function World() {
             key={b.id}
             block={b}
             selected={b.id === selectedBlockId}
-            onPointerDown={() => setSelected(b.id)}
+            onSelect={() => setSelected(b.id)}
           />
         ))}
 
