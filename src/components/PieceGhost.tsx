@@ -26,11 +26,12 @@ export function PieceGhost() {
   const cells = resolveCells(piece, pending.rotation);
   const anchor = pending.hoverCell;
 
-  // Validate every cell
+  // Validate every cell. The whole piece sits on the anchor's y level,
+  // so hovering a block's top face previews the piece stacked on top.
   let valid = true;
   const cellPositions: [number, number, number][] = [];
   for (const [dx, dz] of cells) {
-    const pos: [number, number, number] = [anchor[0] + dx, 0, anchor[2] + dz];
+    const pos: [number, number, number] = [anchor[0] + dx, anchor[1], anchor[2] + dz];
     cellPositions.push(pos);
     if (!inBounds(pos) || occupied.has(positionKey(pos))) {
       valid = false;

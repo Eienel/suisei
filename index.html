@@ -6,10 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0A0E1A" />
     <title>BlockBuilders — learn crypto by building a town</title>
-    <meta
-      name="description"
-      content="Read a lesson, answer questions, drop Tetris pieces on a 3D map. Your finished town lives onchain via Sui."
-    />
+    <meta name="description" content="Read a lesson, answer questions, drop Tetris pieces on a 3D map. Your finished town lives onchain via Sui." />
     <meta property="og:title" content="BlockBuilders" />
     <meta property="og:description" content="Learn crypto by building a town. Onchain on Sui." />
     <meta property="og:type" content="website" />
@@ -17,78 +14,126 @@
     <meta name="twitter:title" content="BlockBuilders" />
     <meta name="twitter:description" content="Learn crypto by building a town. Onchain on Sui." />
     <style>
-      html, body { background: #0A0E1A; color: #F5F7FF; margin: 0; }
-      /* Bare splash so users on slow / failing loads see SOMETHING */
-      #bb-splash {
-        position: fixed; inset: 0; display: flex; align-items: center;
-        justify-content: center; pointer-events: none;
+      html, body {
+        background: #0A0E1A;
+        color: #F5F7FF;
+        margin: 0;
         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        color: #7B8298; font-size: 13px;
-        transition: opacity 240ms ease;
+        -webkit-font-smoothing: antialiased;
       }
-      .bb-dot {
-        width: 6px; height: 6px; border-radius: 999px; background: #00E5FF;
-        margin-right: 8px; animation: bb-pulse 1.4s ease-in-out infinite;
+      /* Bare static fallback rendered inside #root. React replaces it on mount. */
+      #bb-fallback {
+        position: fixed; inset: 0;
+        display: flex; align-items: center; justify-content: center;
+        padding: 24px; box-sizing: border-box;
+        background: #0A0E1A;
+        z-index: 0;
+      }
+      #bb-fallback .card {
+        max-width: 380px; width: 100%;
+        text-align: left;
+      }
+      #bb-fallback .brand {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 14px;
+      }
+      #bb-fallback .swatch {
+        width: 14px; height: 14px;
+        background: linear-gradient(135deg, #00E5FF, #8B5CF6);
+        border-radius: 3px;
+        box-shadow: 0 0 18px rgba(0,229,255,0.55);
+      }
+      #bb-fallback h1 {
+        font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.01em;
+        color: #F5F7FF;
+      }
+      #bb-fallback .status {
+        display: flex; align-items: center; gap: 10px;
+        color: #B7BFD5; font-size: 14px;
+        margin-bottom: 18px;
+      }
+      #bb-fallback .dot {
+        width: 8px; height: 8px; border-radius: 999px;
+        background: #00E5FF;
+        animation: bb-pulse 1.3s ease-in-out infinite;
       }
       @keyframes bb-pulse {
-        0%, 100% { opacity: 0.35; transform: scale(1); }
-        50%      { opacity: 1;    transform: scale(1.4); }
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50%      { opacity: 1; transform: scale(1.6); }
+      }
+      #bb-troubleshoot {
+        display: none;
+        border-top: 1px solid #1F2638;
+        padding-top: 16px;
+        animation: bb-fade 320ms ease both;
+      }
+      @keyframes bb-fade {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      #bb-troubleshoot p {
+        font-size: 13px; color: #B7BFD5; line-height: 1.55;
+        margin: 0 0 8px;
+      }
+      #bb-troubleshoot ol {
+        font-size: 13px; color: #B7BFD5; line-height: 1.6;
+        padding-left: 18px; margin: 0 0 14px;
+      }
+      #bb-troubleshoot button, #bb-troubleshoot a {
+        display: inline-block;
+        background: #F5F7FF; color: #0A0E1A;
+        border: 0; border-radius: 8px; padding: 9px 14px;
+        font-weight: 600; font-size: 13px; cursor: pointer;
+        text-decoration: none; margin-right: 8px;
+        font-family: inherit;
       }
     </style>
   </head>
   <body>
-    <div id="root"></div>
-    <div id="bb-splash"><span class="bb-dot"></span>loading…</div>
+    <div id="root">
+      <!-- This fallback paints immediately so even if JS fails, the user
+           sees BlockBuilders branding and (after a bit) troubleshooting
+           tips. React.createRoot replaces this whole tree on mount. -->
+      <div id="bb-fallback">
+        <div class="card">
+          <div class="brand">
+            <span class="swatch"></span>
+            <h1>BlockBuilders</h1>
+          </div>
+          <div class="status">
+            <span class="dot"></span>
+            <span id="bb-status-text">loading…</span>
+          </div>
+          <div id="bb-troubleshoot">
+            <p>Looks like the app didn't load on this browser. Try one of these:</p>
+            <ol>
+              <li>Long-press refresh → <em>Reload Without Content Blockers</em></li>
+              <li>Open in a private tab (or another browser)</li>
+              <li>Try Chrome / Firefox / a desktop browser</li>
+            </ol>
+            <button onclick="location.href=location.pathname">Retry</button>
+            <a href="https://www.google.com/intl/en/chrome/" target="_blank" rel="noreferrer">Get Chrome</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <noscript>
+      <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0A0E1A;color:#F5F7FF;font-family:sans-serif;text-align:center;">
+        BlockBuilders needs JavaScript turned on.
+      </div>
+    </noscript>
     <script>
-      // Auto-recovery: if React fails to mount within 8s, try a cache-bust reload once.
-      // If that doesn't help either, show a manual instructions card.
+      // After 7 seconds, if the fallback is still in the DOM (React hasn't
+      // replaced it yet), upgrade it to the troubleshoot card.
       (function () {
-        var FALLBACK_MS = 8000;
-        function isMounted() {
-          var r = document.getElementById('root');
-          return !!(r && r.firstChild);
-        }
-        function hideSplash() {
-          var s = document.getElementById('bb-splash');
-          if (s) s.style.opacity = '0';
-          setTimeout(function () { if (s && s.parentNode) s.parentNode.removeChild(s); }, 300);
-        }
-        // Poll occasionally so splash goes away as soon as React mounts.
-        var poll = setInterval(function () {
-          if (isMounted()) {
-            clearInterval(poll);
-            hideSplash();
-          }
-        }, 200);
         setTimeout(function () {
-          if (isMounted()) return;
-          clearInterval(poll);
-          if (location.search.indexOf('cachebust') === -1) {
-            // First strike — bypass cache once.
-            try { sessionStorage.setItem('bb-cachebusted', '1'); } catch (e) {}
-            location.href = location.pathname + '?cachebust=' + Date.now();
-            return;
-          }
-          // Already tried cachebust and still blank. Show actionable card.
-          var root = document.getElementById('root');
-          if (root) {
-            root.innerHTML =
-              '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#0A0E1A;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;">' +
-              '  <div style="max-width:360px;text-align:left;border:1px solid #1F2638;background:#131826;border-radius:16px;padding:20px;">' +
-              '    <p style="font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#FF2D92;margin:0 0 6px;">App did not load</p>' +
-              '    <h2 style="font-size:18px;color:#F5F7FF;font-weight:600;margin:0 0 8px;">Trouble starting BlockBuilders</h2>' +
-              '    <p style="font-size:14px;color:#B7BFD5;line-height:1.55;margin:0 0 14px;">Try one of these:</p>' +
-              '    <ol style="font-size:13px;color:#B7BFD5;line-height:1.6;padding-left:18px;margin:0 0 14px;">' +
-              '      <li>Long-press the refresh button and choose <em>Reload Without Content Blockers</em>.</li>' +
-              '      <li>Or open this URL in a private tab.</li>' +
-              '      <li>Or try Chrome / Firefox / desktop browser.</li>' +
-              '    </ol>' +
-              '    <button style="background:#F5F7FF;color:#0A0E1A;border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;" onclick="location.href=location.pathname">Retry</button>' +
-              '  </div>' +
-              '</div>';
-          }
-          hideSplash();
-        }, FALLBACK_MS);
+          var fallback = document.getElementById('bb-fallback');
+          if (!fallback) return; // React mounted, fallback is gone
+          var statusText = document.getElementById('bb-status-text');
+          if (statusText) statusText.textContent = "couldn't load";
+          var ts = document.getElementById('bb-troubleshoot');
+          if (ts) ts.style.display = 'block';
+        }, 7000);
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>

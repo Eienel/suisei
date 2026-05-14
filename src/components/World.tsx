@@ -1,15 +1,16 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, SoftShadows } from '@react-three/drei';
-import { Suspense } from 'react';
+import { Suspense, useCallback } from 'react';
 import * as THREE from 'three';
 import { useWorld } from '@/state/world';
+import type { Vec3 } from '@/types';
+import { sfx } from '@/audio/sfx';
 import { Block } from './Block';
 import { PlacementGrid } from './PlacementGrid';
 
 /* Postprocessing (Bloom/Vignette/SMAA) is intentionally disabled — the
    library hit a temporal-dead-zone error in production minification
-   that crashed the entire app at module load. Look + perf are fine
-   without it; reintroduce once the upstream issue is sorted. */
+   that crashed the entire app at module load. */
 
 /** Mobile heuristic — disable expensive features on phones to keep boot snappy. */
 const isMobile =
@@ -18,7 +19,48 @@ const isMobile =
 export function World() {
   const blocks = useWorld((s) => s.blocks);
   const selectedBlockId = useWorld((s) => s.selectedBlockId);
+  const tool = useWorld((s) => s.tool);
+  const activeBlockType = useWorld((s) => s.activeBlockType);
+  const pendingPiece = useWorld((s) => s.pendingPiece);
   const setSelected = useWorld((s) => s.setSelected);
+  const setHoveredCell = useWorld((s) => s.setHoveredCell);
+  const setPieceHover = useWorld((s) => s.setPieceHover);
+  const placeBlock = useWorld((s) => s.placeBlock);
+  const commitPiece = useWorld((s) => s.commitPiece);
+
+  // Pointer hovering a block's face → preview placement in the adjacent cell.
+  const handleFaceHover = useCallback(
+    (cell: Vec3) => {
+      if (pendingPiece) setPieceHover(cell);
+      else if (tool === 'place') setHoveredCell(cell);
+    },
+    [pendingPiece, tool, setPieceHover, setHoveredCell]
+  );
+
+  // Pointer clicking a block's face → place there (stacking), or select it.
+  const handleFaceClick = useCallback(
+    (cell: Vec3, blockId: string) => {
+      if (pendingPiece) {
+        const placed = commitPiece(cell);
+        if (placed && placed.length) {
+          // Crisp snap that pitches up with stack height.
+          sfx.snap(cell[1]);
+          sfx.sparkle();
+        } else {
+          sfx.error();
+        }
+        return;
+      }
+      if (tool === 'place') {
+        const placed = placeBlock(activeBlockType, cell);
+        if (placed) sfx.snap(cell[1]);
+        return;
+      }
+      // select tool — pick the block that was clicked
+      setSelected(blockId);
+    },
+    [pendingPiece, tool, activeBlockType, commitPiece, placeBlock, setSelected]
+  );
 
   return (
     <Canvas
@@ -39,15 +81,13 @@ export function World() {
       <Suspense fallback={null}>
         {!isMobile && <SoftShadows size={28} samples={10} focus={0.7} />}
 
-        {/* Lighting rig — key + rim + soft ambient. No external HDR (CDN) so
-            cold start works on flaky cellular. */}
         <ambientLight intensity={0.35} />
         <hemisphereLight args={['#5B83FF', '#0A0E1A', 0.5]} />
         <directionalLight
           position={[12, 18, 8]}
           intensity={1.2}
           castShadow={!isMobile}
-          shadow-mapSize={[2048, 2048]}
+          shadow-mapSize={isMobile ? [1024, 1024] : [2048, 2048]}
           shadow-camera-left={-30}
           shadow-camera-right={30}
           shadow-camera-top={30}
@@ -63,6 +103,8 @@ export function World() {
             block={b}
             selected={b.id === selectedBlockId}
             onSelect={() => setSelected(b.id)}
+            onFaceHover={handleFaceHover}
+            onFaceClick={handleFaceClick}
           />
         ))}
 

@@ -34,4 +34,4 @@ export interface WorldSnapshot {
   version: number;
 }
 
-export type Tool = 'place' | 'select' | 'pan';
+export type Tool = 'place' | 'select';
