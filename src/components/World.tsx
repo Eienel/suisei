@@ -43,7 +43,8 @@ export function World() {
       if (pendingPiece) {
         const placed = commitPiece(cell);
         if (placed && placed.length) {
-          sfx.thud();
+          // Crisp snap that pitches up with stack height.
+          sfx.snap(cell[1]);
           sfx.sparkle();
         } else {
           sfx.error();
@@ -52,7 +53,7 @@ export function World() {
       }
       if (tool === 'place') {
         const placed = placeBlock(activeBlockType, cell);
-        if (placed) sfx.thud();
+        if (placed) sfx.snap(cell[1]);
         return;
       }
       // select tool — pick the block that was clicked
