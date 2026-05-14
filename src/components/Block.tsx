@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import type { Block as BlockData } from '@/types';
+import type { Block as BlockData, Vec3 } from '@/types';
 import { BlockMaterial, hasAccent, isAnimatedIdle } from './BlockMaterial';
 import { BlockAccent } from './BlockAccent';
 
@@ -9,6 +9,13 @@ interface Props {
   block: BlockData;
   selected: boolean;
   onSelect: () => void;
+  /**
+   * Placement raycasting (optional — omitted by the read-only VisitPage).
+   * onFaceHover/onFaceClick report the cell ADJACENT to the face the
+   * pointer is over, enabling Minecraft-style stacking.
+   */
+  onFaceHover?: (cell: Vec3) => void;
+  onFaceClick?: (cell: Vec3, blockId: string) => void;
 }
 
 /**
@@ -18,20 +25,13 @@ interface Props {
  * - A placement spring (scale 0 → 1) on first mount
  * - A gentle idle pulse on emissive-heavy types
  * - A hover float + cyan wireframe outline when selected
+ * - Face-aware placement raycasting so blocks can be stacked
  */
-export function Block({ block, selected, onSelect }: Props) {
+export function Block({ block, selected, onSelect, onFaceHover, onFaceClick }: Props) {
   const groupRef = useRef<THREE.Group>(null);
   const bodyRef = useRef<THREE.Mesh>(null);
   const mountedAt = useMemo(() => performance.now(), []);
   const idleAnimated = isAnimatedIdle(block.type);
-
-  // Smooth interpolated targets for selection state.
-  const targetScale = useRef(1);
-  const targetLift = useRef(0);
-
-  useEffect(() => {
-    targetScale.current = 1;
-  }, []);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -46,11 +46,10 @@ export function Block({ block, selected, onSelect }: Props) {
     const t = state.clock.elapsedTime;
     const bob = selected ? Math.sin(t * 2.4) * 0.04 : 0;
     const lift = selected ? 0.05 : 0;
-    targetLift.current = lift;
 
     groupRef.current.position.set(
       block.position[0],
-      block.position[1] + targetLift.current + bob,
+      block.position[1] + lift + bob,
       block.position[2]
     );
     groupRef.current.scale.setScalar(placementScale);
@@ -60,17 +59,38 @@ export function Block({ block, selected, onSelect }: Props) {
       const mat = bodyRef.current.material as THREE.MeshPhysicalMaterial;
       const base = selected ? 1.5 : 1;
       const pulse = 0.85 + Math.sin(t * 1.6 + block.position[0] * 1.7) * 0.15;
-      // We can't read the original easily; instead, keep a per-frame factor.
-      // Default emissiveIntensity from material is set on mount; we apply
-      // a multiplicative factor here that hovers around the chosen base.
       mat.emissiveIntensity = (mat.userData.baseEmissive ?? 0.5) * pulse * base;
     }
   });
 
+  /** Which cell does the pointer's hit-face point into? (block cell + face normal) */
+  const cellFromHit = (e: ThreeEvent<PointerEvent>): Vec3 => {
+    const [bx, by, bz] = block.position;
+    const lx = e.point.x - bx;
+    const ly = e.point.y - by;
+    const lz = e.point.z - bz;
+    const ax = Math.abs(lx);
+    const ay = Math.abs(ly);
+    const az = Math.abs(lz);
+    if (ax >= ay && ax >= az) return [bx + (Math.sign(lx) || 1), by, bz];
+    if (ay >= ax && ay >= az) return [bx, by + (Math.sign(ly) || 1), bz];
+    return [bx, by, bz + (Math.sign(lz) || 1)];
+  };
+
+  const handleMove = (e: ThreeEvent<PointerEvent>) => {
+    if (!onFaceHover) return;
+    e.stopPropagation();
+    onFaceHover(cellFromHit(e));
+  };
+
   const handleDown = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation();
     if (e.button !== 0) return;
-    onSelect();
+    if (onFaceClick) {
+      onFaceClick(cellFromHit(e), block.id);
+    } else {
+      onSelect();
+    }
   };
 
   return (
@@ -79,9 +99,9 @@ export function Block({ block, selected, onSelect }: Props) {
         ref={bodyRef}
         castShadow
         receiveShadow
+        onPointerMove={handleMove}
         onPointerDown={handleDown}
         onUpdate={(self) => {
-          // Stash the initial emissiveIntensity so the idle pulse can ref it.
           const m = self.material as THREE.MeshPhysicalMaterial;
           if (m.userData.baseEmissive === undefined) {
             m.userData.baseEmissive = m.emissiveIntensity;
@@ -94,7 +114,6 @@ export function Block({ block, selected, onSelect }: Props) {
 
       {hasAccent(block.type) && <BlockAccent type={block.type} />}
 
-      {/* Selection outline */}
       {selected && (
         <mesh>
           <boxGeometry args={[1.04, 1.04, 1.04]} />

@@ -166,11 +166,16 @@ export const useWorld = create<WorldState>()(
         const cells = resolveCells(piece, pendingPiece.rotation);
         const anchorSnapped = snapToGrid(anchor);
 
-        // Validate every cell: in-bounds + not already occupied + no duplicates inside the piece
+        // Validate every cell: in-bounds + not already occupied + no duplicates inside the piece.
+        // The whole piece sits on the anchor's y level (supports stacking).
         const occupied = new Set(blocks.map((b) => positionKey(b.position)));
         const newPositions: Vec3[] = [];
         for (const [dx, dz] of cells) {
-          const pos: Vec3 = [anchorSnapped[0] + dx, 0, anchorSnapped[2] + dz];
+          const pos: Vec3 = [
+            anchorSnapped[0] + dx,
+            anchorSnapped[1],
+            anchorSnapped[2] + dz,
+          ];
           if (!inBounds(pos)) return null;
           const key = positionKey(pos);
           if (occupied.has(key)) return null;
@@ -207,5 +212,3 @@ declare global {
 if (typeof window !== 'undefined') {
   window.__world = () => useWorld.getState().snapshot();
 }
-
-export { positionKey };

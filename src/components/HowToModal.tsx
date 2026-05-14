@@ -47,10 +47,11 @@ export function HowToModal() {
           </Step>
           <Step
             icon={<Cuboid size={16} className="text-accent-violet" />}
-            title="Edit the world manually"
+            title="Build like Minecraft"
           >
-            Pick a block from the floating tray, click anywhere on the grid to
-            place it. Right-click pans, scroll wheel zooms.
+            Pick a block from the floating tray, click the ground to place it —
+            or click the face of an existing block to stack on top. Right-click
+            pans, scroll wheel zooms.
           </Step>
           <Step
             icon={<MousePointer size={16} className="text-accent-amber" />}
