@@ -15,7 +15,16 @@ export type BlockType =
   | 'wallet_keystone'
   | 'oracle_lens'
   | 'token_prism'
-  | 'contract_obelisk';
+  | 'contract_obelisk'
+  // --- content pack (Phase 3) ---
+  | 'road'
+  | 'water'
+  | 'foliage'
+  | 'streetlight'
+  | 'timber';
+
+/** Geometry variants — turns voxels into architecture. */
+export type BlockShape = 'cube' | 'slab' | 'pole' | 'panel' | 'ramp';
 
 export type Vec3 = [number, number, number];
 
@@ -24,8 +33,12 @@ export interface Block {
   type: BlockType;
   /** Integer grid coordinates: x (right), y (up), z (forward). */
   position: Vec3;
-  /** Euler rotation in radians. V1 snaps to 90° steps around Y. */
+  /** Euler rotation in radians. Snaps to 90° steps around Y. */
   rotation: Vec3;
+  /** Geometry variant. Absent = 'cube' (back-compat with old saves). */
+  shape?: BlockShape;
+  /** Hex tint override. Absent = the block type's default colour. */
+  color?: string;
 }
 
 export interface WorldSnapshot {

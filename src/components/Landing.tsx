@@ -56,13 +56,20 @@ export function Landing() {
               world. Finish all of them and you've built a {total}-block crypto town.
             </p>
 
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={() => setScreen('lessons')}
                 className="bg-fg text-ink px-6 py-3 rounded-md font-semibold hover:bg-white transition-colors text-base"
               >
                 {hasProgress ? 'Keep going' : 'Begin lesson 1'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setScreen('gallery')}
+                className="text-fg-dim hover:text-fg px-3 py-3 font-medium transition-colors text-base"
+              >
+                Visit other towns →
               </button>
               {hasProgress && (
                 <span className="font-mono text-xs text-fg-mute">

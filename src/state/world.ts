@@ -1,25 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Block, BlockType, Tool, Vec3, WorldSnapshot } from '@/types';
+import type { Block, BlockShape, BlockType, Tool, Vec3, WorldSnapshot } from '@/types';
 import { inBounds, sameCell, snapToGrid, positionKey } from '@/world/grid';
 import { PIECES, resolveCells, type PieceKey } from '@/world/pieces';
 
-export const WORLD_SCHEMA_VERSION = 1;
+export const WORLD_SCHEMA_VERSION = 2;
 
 /**
  * A piece queued for placement after a correct quiz answer.
  * The player drags it around the grid; clicking commits it.
  */
 export interface PendingPiece {
-  /** Piece identifier from the PIECES library. */
   pieceKey: PieceKey;
-  /** Visual style for every cell in the piece. */
   type: BlockType;
-  /** 0..3 — 90° rotation steps around Y. */
   rotation: number;
-  /** Grid cell the anchor follows. null = no preview yet. */
   hoverCell: Vec3 | null;
-  /** Used to group the placed cells in transactions / history. */
   groupId: string;
 }
 
@@ -29,29 +24,38 @@ interface WorldState {
   hoveredCell: Vec3 | null;
 
   activeBlockType: BlockType;
+  activeShape: BlockShape;
+  /** Optional per-placement tint. null = use the block type's default. */
+  activeColor: string | null;
   tool: Tool;
 
   pendingPiece: PendingPiece | null;
 
   setActiveBlockType: (t: BlockType) => void;
+  setActiveShape: (s: BlockShape) => void;
+  setActiveColor: (c: string | null) => void;
   setTool: (t: Tool) => void;
   setHoveredCell: (c: Vec3 | null) => void;
   setSelected: (id: string | null) => void;
 
-  placeBlock: (type: BlockType, position: Vec3, rotation?: Vec3) => Block | null;
+  placeBlock: (
+    type: BlockType,
+    position: Vec3,
+    opts?: { rotation?: Vec3; shape?: BlockShape; color?: string | null },
+  ) => Block | null;
   moveBlock: (id: string, position: Vec3) => void;
   rotateBlock: (id: string, rotation: Vec3) => void;
+  recolorBlock: (id: string, color: string | null) => void;
+  reshapeBlock: (id: string, shape: BlockShape) => void;
   removeBlock: (id: string) => void;
   clearWorld: () => void;
   loadSnapshot: (snap: WorldSnapshot) => void;
   snapshot: () => WorldSnapshot;
 
-  /** Queue a Tetris-style piece for placement. */
   startPiece: (pieceKey: PieceKey, type: BlockType) => void;
   cancelPiece: () => void;
   setPieceHover: (cell: Vec3 | null) => void;
   rotatePiece: () => void;
-  /** Attempt to drop the pending piece at anchor (snapped). Returns placed Block[] or null. */
   commitPiece: (anchor: Vec3) => Block[] | null;
 }
 
@@ -70,21 +74,32 @@ export const useWorld = create<WorldState>()(
       blocks: [],
       selectedBlockId: null,
       hoveredCell: null,
-      activeBlockType: 'zk_crystal',
+      activeBlockType: 'timber',
+      activeShape: 'cube',
+      activeColor: null,
       tool: 'place',
       pendingPiece: null,
 
       setActiveBlockType: (t) => set({ activeBlockType: t }),
+      setActiveShape: (s) => set({ activeShape: s }),
+      setActiveColor: (c) => set({ activeColor: c }),
       setTool: (t) => set({ tool: t }),
       setHoveredCell: (c) => set({ hoveredCell: c }),
       setSelected: (id) => set({ selectedBlockId: id }),
 
-      placeBlock: (type, rawPos, rotation = [0, 0, 0]) => {
+      placeBlock: (type, rawPos, opts = {}) => {
         const position = snapToGrid(rawPos);
         if (!inBounds(position)) return null;
-        const { blocks } = get();
+        const { blocks, activeShape, activeColor } = get();
         if (blockIdAt(blocks, position)) return null;
-        const block: Block = { id: newId(), type, position, rotation };
+        const block: Block = {
+          id: newId(),
+          type,
+          position,
+          rotation: opts.rotation ?? [0, 0, 0],
+          shape: opts.shape ?? activeShape,
+          color: opts.color ?? activeColor ?? undefined,
+        };
         set({ blocks: [...blocks, block] });
         return block;
       },
@@ -103,6 +118,18 @@ export const useWorld = create<WorldState>()(
       rotateBlock: (id, rotation) =>
         set((s) => ({
           blocks: s.blocks.map((b) => (b.id === id ? { ...b, rotation } : b)),
+        })),
+
+      recolorBlock: (id, color) =>
+        set((s) => ({
+          blocks: s.blocks.map((b) =>
+            b.id === id ? { ...b, color: color ?? undefined } : b,
+          ),
+        })),
+
+      reshapeBlock: (id, shape) =>
+        set((s) => ({
+          blocks: s.blocks.map((b) => (b.id === id ? { ...b, shape } : b)),
         })),
 
       removeBlock: (id) =>
@@ -166,8 +193,6 @@ export const useWorld = create<WorldState>()(
         const cells = resolveCells(piece, pendingPiece.rotation);
         const anchorSnapped = snapToGrid(anchor);
 
-        // Validate every cell: in-bounds + not already occupied + no duplicates inside the piece.
-        // The whole piece sits on the anchor's y level (supports stacking).
         const occupied = new Set(blocks.map((b) => positionKey(b.position)));
         const newPositions: Vec3[] = [];
         for (const [dx, dz] of cells) {
@@ -188,6 +213,8 @@ export const useWorld = create<WorldState>()(
           type: pendingPiece.type,
           position: pos,
           rotation: [0, 0, 0],
+          // Pieces always lay as cubes, no tint — keeps lessons crisp
+          shape: 'cube',
         }));
         set({
           blocks: [...blocks, ...newBlocks],

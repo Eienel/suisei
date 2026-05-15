@@ -25,7 +25,12 @@ function applyOne(action: Action) {
   const state = useWorld.getState();
   if (action.type === 'place_block') {
     if (!action.block) return;
-    state.placeBlock(action.block as never, action.position, action.rotation ?? [0, 0, 0]);
+    // AI builds with default cubes; the user can pick shapes / colours manually.
+    state.placeBlock(action.block as never, action.position, {
+      rotation: action.rotation ?? [0, 0, 0],
+      shape: 'cube',
+      color: null,
+    });
   } else if (action.type === 'remove_block') {
     const hit = state.blocks.find((b) => sameCell(b.position, action.position));
     if (hit) state.removeBlock(hit.id);

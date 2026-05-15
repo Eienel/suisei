@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useWorld } from '@/state/world';
 import { snapToGrid, WORLD_HALF_EXTENT } from '@/world/grid';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
+import { getShapeGeometry } from '@/world/shapes';
 import { sfx } from '@/audio/sfx';
 import { PieceGhost } from './PieceGhost';
 
@@ -14,6 +15,9 @@ const GRID_SIZE = WORLD_HALF_EXTENT * 2;
  *   - pendingPiece set → click commits the piece at the hovered cell
  *   - tool === 'place' → click drops a single block at the hovered cell
  *   - tool === 'select' → click empty space deselects
+ *
+ * The single-block ghost reflects the active block type, shape, and
+ * colour tint — so the user previews exactly what they'll drop.
  */
 export function PlacementGrid() {
   const planeRef = useRef<THREE.Mesh>(null);
@@ -21,6 +25,8 @@ export function PlacementGrid() {
 
   const tool = useWorld((s) => s.tool);
   const activeBlockType = useWorld((s) => s.activeBlockType);
+  const activeShape = useWorld((s) => s.activeShape);
+  const activeColor = useWorld((s) => s.activeColor);
   const hoveredCell = useWorld((s) => s.hoveredCell);
   const setHoveredCell = useWorld((s) => s.setHoveredCell);
   const placeBlock = useWorld((s) => s.placeBlock);
@@ -35,9 +41,12 @@ export function PlacementGrid() {
   const { gl } = useThree();
 
   const def = BLOCK_BY_ID[activeBlockType];
-  const ghostColor = new THREE.Color(def.color);
+  const ghostColor = useMemo(
+    () => new THREE.Color(activeColor ?? def.color),
+    [activeColor, def.color]
+  );
+  const ghostGeometry = useMemo(() => getShapeGeometry(activeShape), [activeShape]);
 
-  // Hotkeys for piece placement: R rotate, Esc cancel
   useEffect(() => {
     if (!pendingPiece) return;
     const onKey = (e: KeyboardEvent) => {
@@ -55,8 +64,7 @@ export function PlacementGrid() {
 
   useFrame(() => {
     if (!ghostRef.current) return;
-    const showSingle =
-      !!hoveredCell && tool === 'place' && !pendingPiece;
+    const showSingle = !!hoveredCell && tool === 'place' && !pendingPiece;
     ghostRef.current.visible = showSingle;
     if (hoveredCell) {
       ghostRef.current.position.set(hoveredCell[0], hoveredCell[1], hoveredCell[2]);
@@ -93,8 +101,7 @@ export function PlacementGrid() {
     if (pendingPiece) {
       const placed = commitPiece(cell);
       if (placed && placed.length > 0) {
-        sfx.thud();
-        // Brief sparkle on commit
+        sfx.snap(cell[1]);
         sfx.sparkle();
       } else {
         sfx.error();
@@ -123,23 +130,22 @@ export function PlacementGrid() {
         onPointerDown={handleDown}
       >
         <planeGeometry args={[GRID_SIZE, GRID_SIZE]} />
-        <meshStandardMaterial color="#0F1422" roughness={0.95} metalness={0.05} />
+        <meshStandardMaterial color="#1A2336" roughness={0.95} metalness={0.05} />
       </mesh>
 
       <gridHelper
-        args={[GRID_SIZE, GRID_SIZE, '#1F2638', '#161B2A']}
+        args={[GRID_SIZE, GRID_SIZE, '#2B3654', '#1F2840']}
         position={[0, -0.499, 0]}
       />
 
-      {/* Single-block ghost (free-build mode) */}
-      <mesh ref={ghostRef} visible={false}>
-        <boxGeometry args={[0.92, 0.92, 0.92]} />
+      {/* Single-block ghost reflects active type + shape + colour tint */}
+      <mesh ref={ghostRef} visible={false} geometry={ghostGeometry}>
         <meshStandardMaterial
           color={ghostColor}
           emissive={ghostColor}
           emissiveIntensity={0.5}
           transparent
-          opacity={0.35}
+          opacity={0.4}
         />
       </mesh>
 
