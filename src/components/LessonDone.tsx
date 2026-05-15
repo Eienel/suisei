@@ -40,14 +40,18 @@ export function LessonDone({
         </p>
 
         {isFinal && (
-          <div className="mt-4 mb-2 rounded-xl border border-accent-cyan/40 bg-accent-cyan/10 p-3 text-left">
-            <p className="text-accent-cyan text-xs font-mono uppercase tracking-widest mb-1">
+          <div className="mt-4 mb-2 rounded-xl border border-accent-amber/40 bg-accent-amber/10 p-3 text-left">
+            <p className="text-accent-amber text-xs font-mono uppercase tracking-widest mb-1">
               All six districts built
             </p>
-            <p className="text-fg-dim text-sm leading-relaxed">
-              Your full crypto town is on the map. Save it onchain so others can visit, or
-              head to Sandbox to keep building with the AI.
+            <p className="text-fg-dim text-sm leading-relaxed mb-3">
+              You can mint this exact town as a <strong>Crypto 101 NFT</strong> —
+              a one-time commemorative record of finishing every lesson.
+              Then head to Sandbox to build your own land separately.
             </p>
+            <div className="flex flex-wrap gap-2 items-center">
+              <SaveWorldButton kind="lessons" />
+            </div>
           </div>
         )}
 
@@ -62,9 +66,9 @@ export function LessonDone({
           </div>
         )}
 
-        {/* Onchain row — surface save + auth + share inline */}
+        {/* Onchain row — auth + share (Save lives in the amber callout for isFinal). */}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2 border-t border-ink-line/60 pt-5">
-          <SaveWorldButton />
+          {!isFinal && <SaveWorldButton kind="lessons" />}
           <ShareButton />
           <AuthButton />
         </div>

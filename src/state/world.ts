@@ -4,12 +4,22 @@ import type { Block, BlockShape, BlockType, Tool, Vec3, WorldSnapshot } from '@/
 import { inBounds, sameCell, snapToGrid, positionKey } from '@/world/grid';
 import { PIECES, resolveCells, type PieceKey } from '@/world/pieces';
 
-export const WORLD_SCHEMA_VERSION = 2;
+export const WORLD_SCHEMA_VERSION = 3;
 
 /**
- * A piece queued for placement after a correct quiz answer.
- * The player drags it around the grid; clicking commits it.
+ * Two separate worlds per player:
+ *   - lessons  → built passively from correct quiz answers; minted ONCE
+ *                as a commemorative "Crypto 101" NFT after all lessons
+ *                are completed. The town a learner walks away with.
+ *   - sandbox  → the player's creative land. Anyone can visit it via
+ *                /town/<address>. Updates on every Save World.
+ *
+ * The `mode` flag chooses which set the reducers act on. Components
+ * read `blocks` which proxies to the active set; we keep both arrays
+ * persisted so switching screens doesn't blow anything away.
  */
+export type WorldMode = 'lessons' | 'sandbox';
+
 export interface PendingPiece {
   pieceKey: PieceKey;
   type: BlockType;
@@ -19,18 +29,24 @@ export interface PendingPiece {
 }
 
 interface WorldState {
+  mode: WorldMode;
+  lessonBlocks: Block[];
+  sandboxBlocks: Block[];
+
+  /** Active blocks (derived from `mode`). Components should read this. */
   blocks: Block[];
+
   selectedBlockId: string | null;
   hoveredCell: Vec3 | null;
 
   activeBlockType: BlockType;
   activeShape: BlockShape;
-  /** Optional per-placement tint. null = use the block type's default. */
   activeColor: string | null;
   tool: Tool;
 
   pendingPiece: PendingPiece | null;
 
+  setMode: (m: WorldMode) => void;
   setActiveBlockType: (t: BlockType) => void;
   setActiveShape: (s: BlockShape) => void;
   setActiveColor: (c: string | null) => void;
@@ -50,6 +66,7 @@ interface WorldState {
   removeBlock: (id: string) => void;
   clearWorld: () => void;
   loadSnapshot: (snap: WorldSnapshot) => void;
+  /** Snapshot of whatever mode is active (used by Save flows). */
   snapshot: () => WorldSnapshot;
 
   startPiece: (pieceKey: PieceKey, type: BlockType) => void;
@@ -68,10 +85,24 @@ function newId(prefix = 'b'): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
+/** Helper — mutate only the slice owned by `mode`. */
+function withMode<S extends { mode: WorldMode; lessonBlocks: Block[]; sandboxBlocks: Block[] }>(
+  s: S,
+  next: Block[],
+): Partial<S> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (s.mode === 'lessons' ? { lessonBlocks: next } : { sandboxBlocks: next }) as any;
+}
+
 export const useWorld = create<WorldState>()(
   persist(
     (set, get) => ({
+      mode: 'sandbox',
+      lessonBlocks: [],
+      sandboxBlocks: [],
+      // Mirror of whichever array `mode` points at. Kept in sync by reducers.
       blocks: [],
+
       selectedBlockId: null,
       hoveredCell: null,
       activeBlockType: 'timber',
@@ -79,6 +110,14 @@ export const useWorld = create<WorldState>()(
       activeColor: null,
       tool: 'place',
       pendingPiece: null,
+
+      setMode: (m) =>
+        set((s) => ({
+          mode: m,
+          selectedBlockId: null,
+          pendingPiece: null,
+          blocks: m === 'lessons' ? s.lessonBlocks : s.sandboxBlocks,
+        })),
 
       setActiveBlockType: (t) => set({ activeBlockType: t }),
       setActiveShape: (s) => set({ activeShape: s }),
@@ -90,17 +129,19 @@ export const useWorld = create<WorldState>()(
       placeBlock: (type, rawPos, opts = {}) => {
         const position = snapToGrid(rawPos);
         if (!inBounds(position)) return null;
-        const { blocks, activeShape, activeColor } = get();
+        const s = get();
+        const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
         if (blockIdAt(blocks, position)) return null;
         const block: Block = {
           id: newId(),
           type,
           position,
           rotation: opts.rotation ?? [0, 0, 0],
-          shape: opts.shape ?? activeShape,
-          color: opts.color ?? activeColor ?? undefined,
+          shape: opts.shape ?? s.activeShape,
+          color: opts.color ?? s.activeColor ?? undefined,
         };
-        set({ blocks: [...blocks, block] });
+        const next = [...blocks, block];
+        set({ ...withMode(s, next), blocks: next });
         return block;
       },
 
@@ -108,50 +149,73 @@ export const useWorld = create<WorldState>()(
         const position = snapToGrid(rawPos);
         if (!inBounds(position)) return;
         set((s) => {
-          if (blockIdAt(s.blocks, position) && blockIdAt(s.blocks, position) !== id) return s;
-          return {
-            blocks: s.blocks.map((b) => (b.id === id ? { ...b, position } : b)),
-          };
+          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+          if (blockIdAt(blocks, position) && blockIdAt(blocks, position) !== id) return s;
+          const next = blocks.map((b) => (b.id === id ? { ...b, position } : b));
+          return { ...withMode(s, next), blocks: next };
         });
       },
 
       rotateBlock: (id, rotation) =>
-        set((s) => ({
-          blocks: s.blocks.map((b) => (b.id === id ? { ...b, rotation } : b)),
-        })),
+        set((s) => {
+          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+          const next = blocks.map((b) => (b.id === id ? { ...b, rotation } : b));
+          return { ...withMode(s, next), blocks: next };
+        }),
 
       recolorBlock: (id, color) =>
-        set((s) => ({
-          blocks: s.blocks.map((b) =>
-            b.id === id ? { ...b, color: color ?? undefined } : b,
-          ),
-        })),
+        set((s) => {
+          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+          const next = blocks.map((b) => (b.id === id ? { ...b, color: color ?? undefined } : b));
+          return { ...withMode(s, next), blocks: next };
+        }),
 
       reshapeBlock: (id, shape) =>
-        set((s) => ({
-          blocks: s.blocks.map((b) => (b.id === id ? { ...b, shape } : b)),
-        })),
+        set((s) => {
+          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+          const next = blocks.map((b) => (b.id === id ? { ...b, shape } : b));
+          return { ...withMode(s, next), blocks: next };
+        }),
 
       removeBlock: (id) =>
-        set((s) => ({
-          blocks: s.blocks.filter((b) => b.id !== id),
-          selectedBlockId: s.selectedBlockId === id ? null : s.selectedBlockId,
-        })),
+        set((s) => {
+          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+          const next = blocks.filter((b) => b.id !== id);
+          return {
+            ...withMode(s, next),
+            blocks: next,
+            selectedBlockId: s.selectedBlockId === id ? null : s.selectedBlockId,
+          };
+        }),
 
-      clearWorld: () => set({ blocks: [], selectedBlockId: null, pendingPiece: null }),
+      clearWorld: () =>
+        set((s) => {
+          const next: Block[] = [];
+          return {
+            ...withMode(s, next),
+            blocks: next,
+            selectedBlockId: null,
+            pendingPiece: null,
+          };
+        }),
 
       loadSnapshot: (snap) =>
-        set({
-          blocks: snap.blocks.slice(),
-          selectedBlockId: null,
+        set((s) => {
+          const next = snap.blocks.slice();
+          return {
+            ...withMode(s, next),
+            blocks: next,
+            selectedBlockId: null,
+          };
         }),
 
       snapshot: () => ({
-        blocks: get().blocks,
+        blocks: get().mode === 'lessons' ? get().lessonBlocks : get().sandboxBlocks,
         version: WORLD_SCHEMA_VERSION,
+        kind: get().mode,
       }),
 
-      // --- Pending piece flow ---
+      // --- Pending piece flow (works in either mode) ---
 
       startPiece: (pieceKey, type) =>
         set({
@@ -186,14 +250,16 @@ export const useWorld = create<WorldState>()(
         ),
 
       commitPiece: (anchor) => {
-        const { pendingPiece, blocks } = get();
+        const s = get();
+        const { pendingPiece } = s;
         if (!pendingPiece) return null;
         const piece = PIECES[pendingPiece.pieceKey];
         if (!piece) return null;
         const cells = resolveCells(piece, pendingPiece.rotation);
         const anchorSnapped = snapToGrid(anchor);
 
-        const occupied = new Set(blocks.map((b) => positionKey(b.position)));
+        const current = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+        const occupied = new Set(current.map((b) => positionKey(b.position)));
         const newPositions: Vec3[] = [];
         for (const [dx, dz] of cells) {
           const pos: Vec3 = [
@@ -213,20 +279,41 @@ export const useWorld = create<WorldState>()(
           type: pendingPiece.type,
           position: pos,
           rotation: [0, 0, 0],
-          // Pieces always lay as cubes, no tint — keeps lessons crisp
           shape: 'cube',
         }));
-        set({
-          blocks: [...blocks, ...newBlocks],
-          pendingPiece: null,
-        });
+        const next = [...current, ...newBlocks];
+        set({ ...withMode(s, next), blocks: next, pendingPiece: null });
         return newBlocks;
       },
     }),
     {
       name: 'blockbuilders-world',
       version: WORLD_SCHEMA_VERSION,
-      partialize: (s) => ({ blocks: s.blocks }),
+      // Persist both worlds + mode.
+      partialize: (s) => ({
+        mode: s.mode,
+        lessonBlocks: s.lessonBlocks,
+        sandboxBlocks: s.sandboxBlocks,
+      }),
+      // Migrate v2 → v3: old `blocks` field becomes sandbox.
+      migrate: (state: unknown, version: number) => {
+        if (version < 3 && state && typeof state === 'object') {
+          const old = state as { blocks?: Block[]; lessonBlocks?: Block[]; sandboxBlocks?: Block[] };
+          return {
+            mode: 'sandbox',
+            lessonBlocks: old.lessonBlocks ?? [],
+            sandboxBlocks: old.sandboxBlocks ?? old.blocks ?? [],
+          };
+        }
+        return state as never;
+      },
+      // After hydration, sync the derived `blocks` getter.
+      onRehydrateStorage: () => (s) => {
+        if (s) {
+          // Force blocks to reflect mode after persisted load.
+          s.blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
+        }
+      },
     }
   )
 );

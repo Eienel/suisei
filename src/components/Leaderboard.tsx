@@ -1,7 +1,8 @@
-import { ArrowLeft, Loader2, AlertCircle, Trophy, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Trophy, ExternalLink, GraduationCap, Sparkles } from 'lucide-react';
 import { useLeaderboard } from '@/sui/useLeaderboard';
 import { useApp } from '@/state/app';
 import { useCurrentAccount } from '@mysten/dapp-kit';
+import { classifyByName, stripKindPrefix } from '@/sui/useUserWorld';
 
 /**
  * Top builders, sorted by on-chain block count. Reads WorldUpdated
@@ -78,29 +79,45 @@ export function Leaderboard() {
                     : i === 2
                       ? 'text-accent-violet'
                       : 'text-fg-mute';
+              const kind = classifyByName(r.name ?? '');
+              const displayName = stripKindPrefix(r.name ?? '');
               return (
                 <li key={r.worldId}>
                   <button
                     type="button"
                     onClick={() => goVisit(r.owner)}
-                    className={`group w-full flex items-center gap-4 px-4 sm:px-5 py-3 sm:py-4 text-left transition-colors ${
+                    className={`group w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4 text-left transition-colors ${
                       isMe ? 'bg-accent-cyan/10' : 'hover:bg-ink-line/40'
                     }`}
                   >
                     <span className={`font-mono text-lg sm:text-2xl font-bold w-8 sm:w-10 shrink-0 ${rankClass}`}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
+                    <span
+                      className={`shrink-0 w-7 h-7 rounded-md flex items-center justify-center ${
+                        kind === 'lessons' ? 'bg-accent-amber/15 text-accent-amber' : 'bg-accent-cyan/15 text-accent-cyan'
+                      }`}
+                      title={kind === 'lessons' ? 'Crypto 101 (lessons NFT)' : 'Sandbox land'}
+                    >
+                      {kind === 'lessons' ? <GraduationCap size={14} /> : <Sparkles size={14} />}
+                    </span>
                     <div className="flex-1 min-w-0">
-                      <div className="font-mono text-sm text-fg truncate">
+                      {displayName && (
+                        <div className="font-semibold text-fg truncate text-sm sm:text-base">
+                          {displayName}
+                        </div>
+                      )}
+                      <div className="font-mono text-[11px] sm:text-xs text-fg-mute truncate">
                         {r.owner.slice(0, 8)}…{r.owner.slice(-4)}
                         {isMe && (
                           <span className="ml-2 text-[10px] uppercase tracking-widest text-accent-cyan font-semibold">
                             you
                           </span>
                         )}
-                      </div>
-                      <div className="text-[11px] text-fg-mute font-mono">
-                        v{r.version} {r.updatedAt && `· ${timeAgo(r.updatedAt)}`}
+                        <span className="ml-2">
+                          v{r.version}
+                          {r.updatedAt && ` · ${timeAgo(r.updatedAt)}`}
+                        </span>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
@@ -113,7 +130,7 @@ export function Leaderboard() {
                     </div>
                     <ExternalLink
                       size={14}
-                      className="text-fg-mute group-hover:text-accent-cyan transition-colors shrink-0"
+                      className="text-fg-mute group-hover:text-accent-cyan transition-colors shrink-0 hidden sm:block"
                     />
                   </button>
                 </li>

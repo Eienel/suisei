@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useApp } from '@/state/app';
+import { useWorld } from '@/state/world';
 import { LESSON_BY_ID, nextLessonId } from '@/data/lessons';
 import { LessonRead } from './LessonRead';
 import { LessonCheck } from './LessonCheck';
@@ -11,6 +13,13 @@ export function LessonScreen() {
   const closeLesson = useApp((s) => s.closeLesson);
   const completeLesson = useApp((s) => s.completeLesson);
   const openLesson = useApp((s) => s.openLesson);
+  const setMode = useWorld((s) => s.setMode);
+
+  // Lessons operate on the lesson-only world so they don't disturb the
+  // user's sandbox creation.
+  useEffect(() => {
+    setMode('lessons');
+  }, [setMode]);
 
   if (!currentLessonId) return null;
   const lesson = LESSON_BY_ID[currentLessonId];
@@ -33,7 +42,6 @@ export function LessonScreen() {
     );
   }
 
-  // done
   const next = nextLessonId(lesson.id);
   return (
     <LessonDone

@@ -45,6 +45,13 @@ export interface WorldSnapshot {
   blocks: Block[];
   /** Schema version, incremented on breaking changes. */
   version: number;
+  /**
+   * Which kind of world this snapshot represents.
+   *  - 'sandbox': the user's creative land — anyone can visit.
+   *  - 'lessons': the commemorative town built through quiz answers,
+   *               minted once after all lessons are complete.
+   */
+  kind?: 'sandbox' | 'lessons';
 }
 
 export type Tool = 'place' | 'select';

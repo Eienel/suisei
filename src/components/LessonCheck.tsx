@@ -46,13 +46,15 @@ export function LessonCheck({
     }
   }, [pendingPiece, phase]);
 
-  // Auto-advance when current lesson's quiz is fully answered.
+  // Auto-advance only AFTER the last piece has been placed.
+  // (Previously this fired the instant correctSoFar === total, which
+  // unmounted the canvas before the player could drop their final piece.)
   useEffect(() => {
-    if (correctSoFar === total) {
+    if (correctSoFar === total && phase === 'placed') {
       const t = setTimeout(() => onPass(), 700);
       return () => clearTimeout(t);
     }
-  }, [correctSoFar, total, onPass]);
+  }, [correctSoFar, total, onPass, phase]);
 
   // Cancel any pending piece if user navigates away.
   useEffect(() => {

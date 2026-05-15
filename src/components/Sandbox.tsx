@@ -9,18 +9,16 @@ import { HowToModal } from './HowToModal';
 import { useWorld } from '@/state/world';
 
 /**
- * Free-play mode — the full V1 builder. Clears any leftover blocks from
- * a previous lesson build on entry so the user starts fresh.
- *
- * The Back-to-lessons + branding lives in <HUD>, so this just stitches
- * the canvas + overlays.
+ * Free-play mode. The Sandbox works on its OWN persistent world —
+ * separate from the lesson-built town, anyone-visitable, the "land"
+ * a player actually keeps.
  */
 export function Sandbox() {
-  const clearWorld = useWorld((s) => s.clearWorld);
+  const setMode = useWorld((s) => s.setMode);
 
   useEffect(() => {
-    clearWorld();
-  }, [clearWorld]);
+    setMode('sandbox');
+  }, [setMode]);
 
   return (
     <div className="fixed inset-0 bg-ink overflow-hidden">

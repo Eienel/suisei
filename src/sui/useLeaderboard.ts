@@ -10,6 +10,8 @@ export interface LeaderboardRow {
   metadataUri: string;
   /** Last update timestamp ms (so we can show recency). */
   updatedAt?: number;
+  /** "L:..." or "S:..." or whatever the owner picked. */
+  name?: string;
 }
 
 export interface LeaderboardState {
@@ -18,18 +20,20 @@ export interface LeaderboardState {
   rows: LeaderboardRow[];
 }
 
-/**
- * Builds a leaderboard from on-chain events. Every Save World emits a
- * WorldUpdated event with the new block_count + version. We dedupe by
- * world_id (keeping the highest-version row) and sort by block_count.
- *
- * For first-time mints we also read WorldMinted events — block_count
- * is carried there too.
- *
- * No wallet required.
- */
 const PAGE = 100;
 
+/**
+ * Builds a leaderboard from on-chain events + object reads.
+ *
+ *  1. Pull recent WorldMinted + WorldUpdated events.
+ *  2. Latest version per world_id wins (via WorldUpdated).
+ *  3. For worlds that were minted but never updated, multiGetObjects
+ *     fills in the current block_count + name (mint events don't
+ *     carry block_count).
+ *  4. Sort by block_count desc.
+ *
+ * No wallet required — public RPC reads.
+ */
 export function useLeaderboard(): LeaderboardState {
   const [state, setState] = useState<LeaderboardState>({
     loading: true,
@@ -47,7 +51,6 @@ export function useLeaderboard(): LeaderboardState {
       try {
         const client = new SuiClient({ url: SUI_RPC_URL });
 
-        // Pull recent mints + updates in parallel
         const [mints, updates] = await Promise.all([
           client.queryEvents({
             query: { MoveEventType: `${WORLD_PACKAGE_ID}::world::WorldMinted` },
@@ -64,23 +67,17 @@ export function useLeaderboard(): LeaderboardState {
 
         // owner per world_id (from mints)
         const ownerOf = new Map<string, string>();
-        // also seed block_count=1's metadata from mints in case there are no updates
-        const seedFromMint = new Map<string, { metadata: string; ts?: number }>();
+        const mintTimestamps = new Map<string, number>();
         for (const e of mints.data) {
-          const json = e.parsedJson as {
-            world_id?: string; owner?: string; metadata_uri?: string;
-          } | undefined;
+          const json = e.parsedJson as { world_id?: string; owner?: string } | undefined;
           if (!json?.world_id || !json.owner) continue;
           if (!ownerOf.has(json.world_id)) ownerOf.set(json.world_id, json.owner);
-          if (!seedFromMint.has(json.world_id)) {
-            seedFromMint.set(json.world_id, {
-              metadata: json.metadata_uri ?? '',
-              ts: e.timestampMs ? Number(e.timestampMs) : undefined,
-            });
+          if (e.timestampMs && !mintTimestamps.has(json.world_id)) {
+            mintTimestamps.set(json.world_id, Number(e.timestampMs));
           }
         }
 
-        // Latest-version row per world_id (from updates)
+        // Latest version per world_id from WorldUpdated
         const latest = new Map<string, LeaderboardRow>();
         for (const e of updates.data) {
           const json = e.parsedJson as {
@@ -103,23 +100,37 @@ export function useLeaderboard(): LeaderboardState {
           });
         }
 
-        // Mints with no updates: seed a row with block_count not known on-chain,
-        // but available from the mint payload if the contract emitted it.
-        for (const [worldId, mintData] of seedFromMint.entries()) {
-          if (latest.has(worldId)) continue;
-          latest.set(worldId, {
-            worldId,
-            owner: ownerOf.get(worldId) ?? '',
-            blockCount: 0,
-            version: 1,
-            metadataUri: mintData.metadata,
-            updatedAt: mintData.ts,
+        // For worlds that have a mint but no update events, fetch the
+        // object directly to read its block_count + name. Batched
+        // via multiGetObjects for efficiency.
+        const needsFetch = Array.from(mintTimestamps.keys()).filter(
+          (worldId) => !latest.has(worldId),
+        );
+        if (needsFetch.length > 0) {
+          const fetched = await client.multiGetObjects({
+            ids: needsFetch,
+            options: { showContent: true },
           });
+          for (const obj of fetched) {
+            const id = obj.data?.objectId;
+            if (!id) continue;
+            if (obj.data?.content?.dataType !== 'moveObject') continue;
+            const fields = (obj.data.content as { fields: Record<string, unknown> }).fields;
+            latest.set(id, {
+              worldId: id,
+              owner: ownerOf.get(id) ?? '',
+              blockCount: Number(fields.block_count ?? 0),
+              version: Number(fields.version ?? 1),
+              metadataUri: String(fields.metadata_uri ?? ''),
+              name: String(fields.name ?? ''),
+              updatedAt: mintTimestamps.get(id),
+            });
+          }
         }
 
-        // Sort by blockCount desc, tiebreak by version
+        // Pull name onto rows from updates+fetched, where available
         const rows = Array.from(latest.values())
-          .filter((r) => r.owner) // need an owner to link to
+          .filter((r) => r.owner)
           .sort((a, b) =>
             b.blockCount === a.blockCount ? b.version - a.version : b.blockCount - a.blockCount,
           );
