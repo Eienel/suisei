@@ -1,13 +1,15 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, SoftShadows } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { SuiClient } from '@mysten/sui/client';
 import { SUI_RPC_URL, WORLD_TYPE, WALRUS_AGGREGATOR } from '@/sui/config';
 import type { Block as BlockData } from '@/types';
-import { Block } from './Block';
+import { BlockInstances } from './BlockInstances';
+import { DayNightCycle } from './DayNightCycle';
 import { ErrorBoundary } from './ErrorBoundary';
-import { ArrowLeft, Copy, Check, Loader2, AlertCircle } from 'lucide-react';
+import { useWorld } from '@/state/world';
+import { ArrowLeft, Copy, Check, Loader2, AlertCircle, Wand2 } from 'lucide-react';
 
 interface Props {
   address: string;
@@ -142,6 +144,17 @@ export function VisitPage({ address }: Props) {
     }
   };
 
+  const remix = () => {
+    if (state.phase !== 'ready') return;
+    const ok = confirm(
+      "Remix this town?\nThis replaces your current world with this one. You can edit, save it as your own, and share a new URL.",
+    );
+    if (!ok) return;
+    useWorld.getState().loadSnapshot({ blocks: state.blocks, version: 1 });
+    window.history.pushState({}, '', '/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
   return (
     <div className="fixed inset-0 bg-ink">
       {/* HUD top */}
@@ -166,6 +179,16 @@ export function VisitPage({ address }: Props) {
           {copied ? <Check size={12} className="text-accent-cyan" /> : <Copy size={12} />}
           {copied ? 'copied' : 'share'}
         </button>
+        {state.phase === 'ready' && (
+          <button
+            type="button"
+            onClick={remix}
+            className="pointer-events-auto rounded-xl bg-accent-cyan text-ink px-3 py-1.5 text-xs font-mono font-semibold hover:bg-accent-cyan/90 flex items-center gap-1.5"
+          >
+            <Wand2 size={12} />
+            remix
+          </button>
+        )}
       </header>
 
       {/* 3D viewer */}
@@ -182,24 +205,10 @@ export function VisitPage({ address }: Props) {
           camera={{ position: [14, 11, 14], fov: 42, near: 0.1, far: 200 }}
           dpr={isMobile ? [1, 1.5] : [1, 2]}
         >
-          <color attach="background" args={['#070A14']} />
-          <fog attach="fog" args={['#070A14', 30, 90]} />
+          <color attach="background" args={['#9DBBE5']} />
+          <fog attach="fog" args={['#A8C2DD', 32, 95]} />
 
-          {!isMobile && <SoftShadows size={28} samples={10} focus={0.7} />}
-
-          <ambientLight intensity={0.35} />
-          <hemisphereLight args={['#5B83FF', '#0A0E1A', 0.55]} />
-          <directionalLight
-            position={[12, 18, 8]}
-            intensity={1.2}
-            castShadow={!isMobile}
-            shadow-mapSize={[2048, 2048]}
-            shadow-camera-left={-30}
-            shadow-camera-right={30}
-            shadow-camera-top={30}
-            shadow-camera-bottom={-30}
-          />
-          <directionalLight position={[-10, 6, -8]} intensity={0.45} color="#5B83FF" />
+          <DayNightCycle />
 
           {/* Floor */}
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
@@ -208,10 +217,9 @@ export function VisitPage({ address }: Props) {
           </mesh>
           <gridHelper args={[64, 64, '#1F2638', '#161B2A']} position={[0, -0.499, 0]} />
 
-          {state.phase === 'ready' &&
-            state.blocks.map((b) => (
-              <Block key={b.id} block={b} selected={false} onSelect={() => {}} />
-            ))}
+          {state.phase === 'ready' && (
+            <BlockInstances blocks={state.blocks} />
+          )}
 
           <OrbitControls
             enableDamping

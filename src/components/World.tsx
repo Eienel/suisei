@@ -1,18 +1,14 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, SoftShadows } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import { Suspense, useCallback } from 'react';
 import * as THREE from 'three';
 import { useWorld } from '@/state/world';
 import type { Vec3 } from '@/types';
 import { sfx } from '@/audio/sfx';
-import { Block } from './Block';
+import { BlockInstances } from './BlockInstances';
 import { PlacementGrid } from './PlacementGrid';
+import { DayNightCycle } from './DayNightCycle';
 
-/* Postprocessing (Bloom/Vignette/SMAA) is intentionally disabled — the
-   library hit a temporal-dead-zone error in production minification
-   that crashed the entire app at module load. */
-
-/** Mobile heuristic — disable expensive features on phones to keep boot snappy. */
 const isMobile =
   typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
@@ -28,7 +24,6 @@ export function World() {
   const placeBlock = useWorld((s) => s.placeBlock);
   const commitPiece = useWorld((s) => s.commitPiece);
 
-  // Pointer hovering a block's face → preview placement in the adjacent cell.
   const handleFaceHover = useCallback(
     (cell: Vec3) => {
       if (pendingPiece) setPieceHover(cell);
@@ -37,13 +32,11 @@ export function World() {
     [pendingPiece, tool, setPieceHover, setHoveredCell]
   );
 
-  // Pointer clicking a block's face → place there (stacking), or select it.
   const handleFaceClick = useCallback(
     (cell: Vec3, blockId: string) => {
       if (pendingPiece) {
         const placed = commitPiece(cell);
         if (placed && placed.length) {
-          // Crisp snap that pitches up with stack height.
           sfx.snap(cell[1]);
           sfx.sparkle();
         } else {
@@ -56,7 +49,6 @@ export function World() {
         if (placed) sfx.snap(cell[1]);
         return;
       }
-      // select tool — pick the block that was clicked
       setSelected(blockId);
     },
     [pendingPiece, tool, activeBlockType, commitPiece, placeBlock, setSelected]
@@ -72,49 +64,31 @@ export function World() {
         powerPreference: 'default',
         failIfMajorPerformanceCaveat: false,
       }}
-      camera={{ position: [10, 8, 10], fov: 45, near: 0.1, far: 200 }}
+      camera={{ position: [12, 9, 14], fov: 45, near: 0.1, far: 220 }}
       dpr={isMobile ? [1, 1.5] : [1, 2]}
     >
-      <color attach="background" args={['#070A14']} />
-      <fog attach="fog" args={['#070A14', 28, 80]} />
+      <color attach="background" args={['#9DBBE5']} />
+      <fog attach="fog" args={['#A8C2DD', 32, 95]} />
 
       <Suspense fallback={null}>
-        {!isMobile && <SoftShadows size={28} samples={10} focus={0.7} />}
-
-        <ambientLight intensity={0.35} />
-        <hemisphereLight args={['#5B83FF', '#0A0E1A', 0.5]} />
-        <directionalLight
-          position={[12, 18, 8]}
-          intensity={1.2}
-          castShadow={!isMobile}
-          shadow-mapSize={isMobile ? [1024, 1024] : [2048, 2048]}
-          shadow-camera-left={-30}
-          shadow-camera-right={30}
-          shadow-camera-top={30}
-          shadow-camera-bottom={-30}
-        />
-        <directionalLight position={[-10, 6, -8]} intensity={0.45} color="#5B83FF" />
+        <DayNightCycle />
 
         <PlacementGrid />
 
-        {blocks.map((b) => (
-          <Block
-            key={b.id}
-            block={b}
-            selected={b.id === selectedBlockId}
-            onSelect={() => setSelected(b.id)}
-            onFaceHover={handleFaceHover}
-            onFaceClick={handleFaceClick}
-          />
-        ))}
+        <BlockInstances
+          blocks={blocks}
+          selectedBlockId={selectedBlockId}
+          onFaceHover={handleFaceHover}
+          onFaceClick={handleFaceClick}
+        />
 
         <OrbitControls
           enableDamping
           dampingFactor={0.08}
           minDistance={3}
-          maxDistance={50}
+          maxDistance={60}
           maxPolarAngle={Math.PI / 2 - 0.05}
-          target={[0, 0, 0]}
+          target={[0, 1, 0]}
           mouseButtons={{
             LEFT: undefined as unknown as THREE.MOUSE,
             MIDDLE: THREE.MOUSE.PAN,
