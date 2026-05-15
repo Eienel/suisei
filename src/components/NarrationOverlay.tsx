@@ -3,9 +3,9 @@ import { Bot } from 'lucide-react';
 import { useAgent } from '@/agent/useAgent';
 
 /**
- * Top-center toast showing the AI's narration. Auto-dismisses ~5s after
- * the build completes. Cleaner than chaining the prompt bar with a
- * thought bubble.
+ * Tiny narration chip pinned to the very top of the canvas — out of
+ * the way of the building that's happening in the middle of the view.
+ * Auto-dismisses ~5s after the build completes.
  */
 export function NarrationOverlay() {
   const phase = useAgent((s) => s.phase);
@@ -27,10 +27,10 @@ export function NarrationOverlay() {
   if (!visible || !narration) return null;
 
   return (
-    <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none animate-rise-in">
-      <div className="glass rounded-full px-4 py-2 flex items-center gap-2 shadow-glass max-w-[min(560px,92vw)]">
-        <Bot size={16} className="text-accent-cyan shrink-0" />
-        <span className="text-sm text-fg-dim leading-snug">{narration}</span>
+    <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-none animate-rise-in max-w-[min(420px,calc(100vw-32px))]">
+      <div className="rounded-full px-3 py-1.5 flex items-center gap-2 bg-ink-soft/85 backdrop-blur border border-ink-line/80 shadow-glass">
+        <Bot size={12} className="text-accent-cyan shrink-0" />
+        <span className="text-xs text-fg-dim leading-tight truncate">{narration}</span>
       </div>
     </div>
   );

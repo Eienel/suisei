@@ -71,6 +71,13 @@ export function Landing() {
               >
                 Visit other towns →
               </button>
+              <button
+                type="button"
+                onClick={() => setScreen('leaderboard')}
+                className="text-fg-dim hover:text-fg px-3 py-3 font-medium transition-colors text-base"
+              >
+                🏆 Leaderboard
+              </button>
               {hasProgress && (
                 <span className="font-mono text-xs text-fg-mute">
                   {completed.length} of {LESSONS.length} lessons done

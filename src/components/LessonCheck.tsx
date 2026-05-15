@@ -222,10 +222,10 @@ export function LessonCheck({
 
 function PlacementOverlay() {
   return (
-    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-      <div className="bg-accent-cyan/15 border border-accent-cyan/40 rounded-full px-4 py-1.5 text-xs font-mono text-accent-cyan flex items-center gap-2 animate-pulse-soft">
-        <MousePointer2 size={12} />
-        click anywhere on the map to drop your piece — R rotates
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none max-w-[calc(100vw-24px)]">
+      <div className="bg-ink-soft/95 backdrop-blur border border-accent-cyan/50 rounded-full px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-mono text-fg flex items-center gap-2 shadow-glass">
+        <MousePointer2 size={12} className="text-accent-cyan shrink-0" />
+        <span className="truncate">click the map to drop · R rotates</span>
       </div>
     </div>
   );

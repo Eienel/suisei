@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Trash2, RotateCw, MousePointer, Plus, HelpCircle } from 'lucide-react';
+import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft } from 'lucide-react';
 import { useWorld } from '@/state/world';
 import { useApp } from '@/state/app';
 import { AuthButton } from './AuthButton';
@@ -15,8 +15,8 @@ export function HUD() {
   const clearWorld = useWorld((s) => s.clearWorld);
   const setSelected = useWorld((s) => s.setSelected);
   const resetHowTo = useApp((s) => s.resetHowTo);
+  const setScreen = useApp((s) => s.setScreen);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA') return;
@@ -45,49 +45,59 @@ export function HUD() {
 
   return (
     <>
-      {/* Top bar — wordmark + counts + save (stub) */}
-      <header className="absolute top-0 inset-x-0 z-20 px-5 py-4 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-3 pointer-events-auto">
+      {/* Top bar — back + brand on the left, actions on the right. Tighter on mobile. */}
+      <header className="absolute top-0 inset-x-0 z-20 px-3 sm:px-5 py-2.5 sm:py-4 flex items-center justify-between gap-2 pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto min-w-0">
+          <button
+            type="button"
+            onClick={() => setScreen('lessons')}
+            aria-label="Back to lessons"
+            title="Back to lessons"
+            className="w-8 h-8 rounded-lg bg-ink-soft/85 backdrop-blur border border-ink-line/80 flex items-center justify-center text-fg-mute hover:text-fg transition-colors shrink-0"
+          >
+            <ArrowLeft size={14} />
+          </button>
           <Logomark />
-          <div className="leading-tight">
-            <div className="font-semibold tracking-tight text-fg">BlockBuilders</div>
-            <div className="text-[11px] text-fg-mute font-mono">v0.1 · sui testnet</div>
+          {/* Wordmark + version hidden on narrow phones; back arrow + logomark carry the brand. */}
+          <div className="hidden sm:block leading-tight min-w-0">
+            <div className="font-semibold tracking-tight text-fg truncate">BlockBuilders</div>
+            <div className="text-[11px] text-fg-mute font-mono">v0.2 · sui testnet</div>
           </div>
           <button
             type="button"
             onClick={() => resetHowTo()}
             aria-label="How to play"
             title="How to play"
-            className="ml-1 w-7 h-7 rounded-md flex items-center justify-center text-fg-mute hover:text-fg hover:bg-ink-line/60 transition-colors"
+            className="hidden sm:inline-flex w-7 h-7 rounded-md items-center justify-center text-fg-mute hover:text-fg hover:bg-ink-line/60 transition-colors"
           >
             <HelpCircle size={16} />
           </button>
         </div>
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <span className="glass rounded-lg px-3 py-1.5 text-xs font-mono text-fg-dim">
-            {blocks.length} {blocks.length === 1 ? 'block' : 'blocks'}
+        <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto">
+          <span className="hidden md:inline-flex glass rounded-lg px-2.5 py-1.5 text-xs font-mono text-fg-dim">
+            {blocks.length} blocks
           </span>
           <SaveWorldButton />
           <AuthButton />
         </div>
       </header>
 
-      {/* Left rail — tools */}
-      <aside className="absolute left-5 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
-        <div className="glass rounded-2xl p-1.5 flex flex-col gap-1 shadow-glass">
+      {/* Left rail — tools. Tighter widths on mobile so they don't crowd the canvas. */}
+      <aside className="absolute left-2 sm:left-5 top-1/2 -translate-y-1/2 z-20 pointer-events-auto">
+        <div className="glass rounded-2xl p-1 sm:p-1.5 flex flex-col gap-1 shadow-glass">
           <ToolBtn
             active={tool === 'place'}
             onClick={() => setTool('place')}
             label="Place"
             hotkey="B"
-            icon={<Plus size={18} />}
+            icon={<Plus size={16} />}
           />
           <ToolBtn
             active={tool === 'select'}
             onClick={() => setTool('select')}
             label="Select"
             hotkey="V"
-            icon={<MousePointer size={18} />}
+            icon={<MousePointer size={16} />}
           />
           <div className="h-px bg-ink-line/80 my-1 mx-1" />
           <ToolBtn
@@ -105,7 +115,7 @@ export function HUD() {
             }}
             label="Rotate"
             hotkey="R"
-            icon={<RotateCw size={18} />}
+            icon={<RotateCw size={16} />}
           />
           <ToolBtn
             active={false}
@@ -113,21 +123,21 @@ export function HUD() {
             onClick={() => selectedBlockId && removeBlock(selectedBlockId)}
             label="Delete"
             hotkey="⌫"
-            icon={<Trash2 size={18} />}
+            icon={<Trash2 size={16} />}
             danger
           />
         </div>
       </aside>
 
       {/* Bottom-right — clear */}
-      <div className="absolute bottom-5 right-5 z-20 pointer-events-auto">
+      <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 z-20 pointer-events-auto">
         <button
           type="button"
           onClick={() => {
             if (blocks.length === 0) return;
             if (confirm(`Clear all ${blocks.length} blocks?`)) clearWorld();
           }}
-          className="text-xs font-mono text-fg-mute hover:text-accent-magenta transition-colors"
+          className="text-[11px] font-mono text-fg-mute hover:text-accent-magenta transition-colors"
         >
           clear world
         </button>
@@ -158,7 +168,7 @@ function ToolBtn({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`group relative w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+      className={`group relative w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-all ${
         active
           ? 'bg-accent-cyan text-ink shadow-glow-soft'
           : disabled
@@ -170,7 +180,7 @@ function ToolBtn({
       title={`${label} (${hotkey})`}
     >
       {icon}
-      <span className="absolute left-12 top-1/2 -translate-y-1/2 whitespace-nowrap glass rounded-md px-2 py-1 text-xs opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+      <span className="hidden sm:flex absolute left-12 top-1/2 -translate-y-1/2 whitespace-nowrap glass rounded-md px-2 py-1 text-xs opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
         {label} <span className="kbd ml-1">{hotkey}</span>
       </span>
     </button>
@@ -179,9 +189,9 @@ function ToolBtn({
 
 function Logomark() {
   return (
-    <div className="w-8 h-8 rounded-lg bg-ink-soft border border-ink-line flex items-center justify-center">
+    <div className="w-7 h-7 rounded-lg bg-ink-soft border border-ink-line flex items-center justify-center shrink-0">
       <div
-        className="w-4 h-4 rounded"
+        className="w-3.5 h-3.5 rounded"
         style={{
           background: 'linear-gradient(135deg, #00E5FF, #8B5CF6)',
           boxShadow: '0 0 10px rgba(0, 229, 255, 0.5)',

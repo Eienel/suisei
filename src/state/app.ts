@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { LESSONS, SANDBOX_UNLOCK_COUNT, questionId } from '@/data/lessons';
 
-export type Screen = 'landing' | 'lessons' | 'lesson' | 'sandbox' | 'gallery';
+export type Screen = 'landing' | 'lessons' | 'lesson' | 'sandbox' | 'gallery' | 'leaderboard';
 export type LessonStage = 'read' | 'check' | 'done';
 
 interface AppState {
