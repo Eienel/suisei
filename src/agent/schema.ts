@@ -33,9 +33,18 @@ export const ActionSchema = z
     }
   });
 
+/**
+ * AgentResponse always has narration + actions. When the model needs
+ * more info before building, it can set actions=[] and populate
+ * clarifyingQuestion (+ optional quick-pick suggestions). This keeps
+ * one flat schema instead of a discriminated union that Gemini's
+ * structured output struggles with.
+ */
 export const AgentResponseSchema = z.object({
   narration: z.string().min(1).max(400),
   actions: z.array(ActionSchema).min(0).max(120),
+  clarifyingQuestion: z.string().min(1).max(280).optional(),
+  suggestions: z.array(z.string().min(1).max(80)).max(4).optional(),
 });
 
 export type Action = z.infer<typeof ActionSchema>;
@@ -74,6 +83,11 @@ export const geminiResponseSchema = {
           },
         },
       },
+    },
+    clarifyingQuestion: { type: 'string' },
+    suggestions: {
+      type: 'array',
+      items: { type: 'string' },
     },
   },
 } as const;

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Check, ArrowRight, Home, Cuboid } from 'lucide-react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import type { Lesson } from '@/data/lessons';
-import { LESSONS, SANDBOX_UNLOCK_COUNT, totalQuestions } from '@/data/lessons';
+import { LESSONS, SANDBOX_UNLOCK_COUNT, totalQuestions, builtinCompletedCount, isBuiltinLesson } from '@/data/lessons';
 import { useApp } from '@/state/app';
 import { useWorld } from '@/state/world';
 import { useSaveWorld } from '@/sui/useSaveWorld';
@@ -22,10 +22,13 @@ export function LessonDone({
   const completed = useApp((s) => s.completedLessons);
   const setScreen = useApp((s) => s.setScreen);
   const sandboxUnlocked = useApp((s) => s.isSandboxUnlocked());
+  const builtinDone = builtinCompletedCount(completed);
   const justUnlockedSandbox =
-    completed.length === SANDBOX_UNLOCK_COUNT && sandboxUnlocked;
+    builtinDone === SANDBOX_UNLOCK_COUNT && sandboxUnlocked;
   const placed = useWorld((s) => s.blocks.length);
-  const isFinal = completed.length === LESSONS.length;
+  // "Final" = all six built-in lessons done, AND this completion is one
+  // of the six (custom lessons after the fact don't re-trigger mint).
+  const isFinal = builtinDone === LESSONS.length && isBuiltinLesson(lesson.id);
   const totalQs = totalQuestions();
 
   // Auto-mint Crypto 101 NFT on the lesson-6 done screen IF:

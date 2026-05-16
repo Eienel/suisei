@@ -29,7 +29,12 @@ function devAgentRoute(env: Record<string, string>): Plugin {
         const r = req as IncomingMessage;
         const w = res as ServerResponse;
         if (r.method !== 'POST') return writeJSON(w, 405, { error: 'Method not allowed' });
-        let body: { prompt?: string; world?: unknown };
+        let body: {
+          prompt?: string;
+          world?: unknown;
+          image?: { base64?: string; mimeType?: string };
+          history?: unknown;
+        };
         try {
           body = (await readBody(r)) as typeof body;
         } catch {
@@ -37,8 +42,66 @@ function devAgentRoute(env: Record<string, string>): Plugin {
         }
         try {
           const { runAgent } = await import('./src/agent/runAgent');
+          const hasImage = !!(body.image?.base64 && body.image.mimeType);
           const result = await runAgent(
-            { prompt: body.prompt ?? '', world: (body.world as never) ?? [] },
+            {
+              prompt: body.prompt ?? '',
+              world: (body.world as never) ?? [],
+              image: hasImage
+                ? { base64: body.image!.base64!, mimeType: body.image!.mimeType! }
+                : undefined,
+              history: (body.history as never) ?? undefined,
+            },
+            { apiKey: env.GEMINI_API_KEY ?? '' }
+          );
+          writeJSON(w, 200, result);
+        } catch (err) {
+          writeJSON(w, 500, { error: err instanceof Error ? err.message : String(err) });
+        }
+      });
+
+      server.middlewares.use('/api/tour', async (req, res) => {
+        const r = req as IncomingMessage;
+        const w = res as ServerResponse;
+        if (r.method !== 'POST') return writeJSON(w, 405, { error: 'Method not allowed' });
+        let body: { blocks?: unknown; worldName?: string };
+        try {
+          body = (await readBody(r)) as typeof body;
+        } catch {
+          return writeJSON(w, 400, { error: 'Invalid JSON' });
+        }
+        if (!Array.isArray(body.blocks) || body.blocks.length === 0) {
+          return writeJSON(w, 400, { error: 'blocks required' });
+        }
+        try {
+          const { runTour } = await import('./src/agent/runTour');
+          const result = await runTour(
+            { blocks: body.blocks as never, worldName: body.worldName },
+            { apiKey: env.GEMINI_API_KEY ?? '' }
+          );
+          writeJSON(w, 200, result);
+        } catch (err) {
+          writeJSON(w, 500, { error: err instanceof Error ? err.message : String(err) });
+        }
+      });
+
+      server.middlewares.use('/api/lesson', async (req, res) => {
+        const r = req as IncomingMessage;
+        const w = res as ServerResponse;
+        if (r.method !== 'POST') return writeJSON(w, 405, { error: 'Method not allowed' });
+        let body: { topic?: string };
+        try {
+          body = (await readBody(r)) as typeof body;
+        } catch {
+          return writeJSON(w, 400, { error: 'Invalid JSON' });
+        }
+        if (!body.topic?.trim()) {
+          return writeJSON(w, 400, { error: 'topic required' });
+        }
+        try {
+          const { runCustomLesson } = await import('./src/agent/runCustomLesson');
+          const result = await runCustomLesson(
+            { topic: body.topic },
             { apiKey: env.GEMINI_API_KEY ?? '' }
           );
           writeJSON(w, 200, result);

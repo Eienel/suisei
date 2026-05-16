@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useApp } from '@/state/app';
 import { useWorld } from '@/state/world';
-import { LESSON_BY_ID, nextLessonId } from '@/data/lessons';
+import { LESSON_BY_ID, nextLessonId, isBuiltinLesson } from '@/data/lessons';
+import { useCustomLessons } from '@/state/customLessons';
 import { LessonRead } from './LessonRead';
 import { LessonCheck } from './LessonCheck';
 import { LessonDone } from './LessonDone';
@@ -14,15 +15,16 @@ export function LessonScreen() {
   const completeLesson = useApp((s) => s.completeLesson);
   const openLesson = useApp((s) => s.openLesson);
   const setMode = useWorld((s) => s.setMode);
+  const customLessons = useCustomLessons((s) => s.lessons);
 
-  // Lessons operate on the lesson-only world so they don't disturb the
-  // user's sandbox creation.
   useEffect(() => {
     setMode('lessons');
   }, [setMode]);
 
   if (!currentLessonId) return null;
-  const lesson = LESSON_BY_ID[currentLessonId];
+  const lesson =
+    LESSON_BY_ID[currentLessonId] ??
+    customLessons.find((l) => l.id === currentLessonId);
   if (!lesson) return null;
 
   if (stage === 'read') {
@@ -42,7 +44,8 @@ export function LessonScreen() {
     );
   }
 
-  const next = nextLessonId(lesson.id);
+  // Only chain to the next built-in lesson — custom lessons are one-offs.
+  const next = isBuiltinLesson(lesson.id) ? nextLessonId(lesson.id) : null;
   return (
     <LessonDone
       lesson={lesson}

@@ -418,6 +418,16 @@ export const LESSON_BY_ID: Record<string, Lesson> = LESSONS.reduce(
   {} as Record<string, Lesson>
 );
 
+/** True if the id matches one of the built-in curriculum lessons. */
+export function isBuiltinLesson(id: string): boolean {
+  return id in LESSON_BY_ID;
+}
+
+/** Count of built-in lessons completed (ignores custom AI lessons). */
+export function builtinCompletedCount(completed: readonly string[]): number {
+  return completed.filter((id) => id in LESSON_BY_ID).length;
+}
+
 /** Sandbox unlocks after this many lessons completed. */
 export const SANDBOX_UNLOCK_COUNT = 3;
 

@@ -57,6 +57,11 @@ Both live in the same Move package (`0x888787d0…56daf`), distinguished by an `
 | **Sandbox / Lessons NFT split** | Two persisted worlds, two separate on-chain identities |
 | **Walrus storage** | Public HTTP publisher / aggregator — town JSON lives off-chain |
 | **AI Builder Agent** | Type intent → Gemini returns structured `place_block` actions → animated apply queue |
+| **Conversational refinement** | Same prompt bar holds chat history — say "taller", "add water", "shift north" and the model edits surgically |
+| **Visual reference** | Paperclip in the prompt bar attaches an image; the model interprets it and builds the closest match |
+| **AI clarify** | If the prompt is too vague, the agent asks back with quick-pick chips instead of guessing |
+| **AI guided tours** | On any public town page, "Tour" plans a 3–5 stop camera walk with narration |
+| **AI custom lessons** | "Create your own" — pick any topic (MEV, rollups, …), Gemini writes a 2-page lesson + 4-question quiz |
 | **Public visit pages** | `/town/<address>` reads Sui + Walrus, auto-orbiting camera |
 | **Remix** | Visiting someone? One click copies their world into yours |
 | **Gallery** | Recent towns from Sui `WorldMinted` events |
@@ -100,7 +105,7 @@ VITE_WALRUS_AGGREGATOR_URL=
 | Shell | Vite + React 18 + TypeScript + Tailwind |
 | 3D | `@react-three/fiber` + `@react-three/drei` |
 | State | Zustand (persisted) — two-world store + agent store + app store |
-| AI | Google **Gemini 2.5 Flash** via Vercel Functions (`/api/agent` + `/api/tutor`) |
+| AI | Google **Gemini 2.5 Flash** via Vercel Functions (`/api/agent` builder + chat + image-vision · `/api/tutor` lesson rephrase · `/api/tour` guided camera walks · `/api/lesson` custom-topic lessons) |
 | Auth | `@mysten/dapp-kit` + `@mysten/enoki` (zkLogin) |
 | Storage | Walrus testnet HTTP publisher/aggregator |
 | Chain | `@mysten/sui` programmable transactions, Move 2024 |

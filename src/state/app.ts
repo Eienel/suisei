@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { LESSONS, SANDBOX_UNLOCK_COUNT, questionId } from '@/data/lessons';
+import { LESSONS, SANDBOX_UNLOCK_COUNT, questionId, builtinCompletedCount } from '@/data/lessons';
 
 export type Screen = 'landing' | 'lessons' | 'lesson' | 'sandbox' | 'gallery' | 'leaderboard';
 export type LessonStage = 'read' | 'check' | 'done';
@@ -78,7 +78,8 @@ export const useApp = create<AppState>()(
           screen: 'landing',
         }),
 
-      isSandboxUnlocked: () => get().completedLessons.length >= SANDBOX_UNLOCK_COUNT,
+      isSandboxUnlocked: () =>
+        builtinCompletedCount(get().completedLessons) >= SANDBOX_UNLOCK_COUNT,
     }),
     {
       name: 'blockbuilders-app',

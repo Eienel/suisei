@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { useApp, LESSONS, SANDBOX_UNLOCK_COUNT } from '@/state/app';
-import { isLessonUnlocked, totalQuestions } from '@/data/lessons';
+import { isLessonUnlocked, totalQuestions, builtinCompletedCount } from '@/data/lessons';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
 import { useWorld } from '@/state/world';
-import { Lock, Check, ArrowRight, Cuboid, Sparkles, RotateCcw } from 'lucide-react';
+import { useCustomLessons } from '@/state/customLessons';
+import { Lock, Check, ArrowRight, Cuboid, Sparkles, RotateCcw, Wand2, Trash2 } from 'lucide-react';
 import { AuthButton } from './AuthButton';
 import { SaveWorldButton } from './SaveWorldButton';
 import { ShareButton } from './ShareButton';
+import { CustomLessonModal } from './CustomLessonModal';
 
 export function LessonsList() {
   const completed = useApp((s) => s.completedLessons);
@@ -18,6 +21,10 @@ export function LessonsList() {
 
   const placed = useWorld((s) => s.blocks.length);
   const totalQs = totalQuestions();
+  const customLessons = useCustomLessons((s) => s.lessons);
+  const removeCustom = useCustomLessons((s) => s.remove);
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const builtinDone = builtinCompletedCount(completed);
 
   const onReset = () => {
     if (confirm('Reset all progress and clear the town? This cannot be undone.')) {
@@ -161,10 +168,85 @@ export function LessonsList() {
           </button>
         </div>
 
-        <footer className="mt-12 flex items-center justify-between text-xs font-mono text-fg-mute">
-          <span>
-            {completed.length} / {LESSONS.length} lessons complete
-          </span>
+        {/* Custom AI-generated lessons */}
+        {customLessons.length > 0 && (
+          <section className="mt-10">
+            <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Wand2 size={14} className="text-accent-violet" />
+                <h2 className="text-sm font-mono uppercase tracking-widest text-fg-dim">
+                  Your custom lessons
+                </h2>
+              </div>
+              <span className="text-[10px] font-mono text-fg-mute">extras — won't count toward Crypto 101</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {customLessons.map((l) => {
+                const isDone = completed.includes(l.id);
+                const placedHere = l.quiz.filter((_, qi) =>
+                  correctlyAnswered.includes(`${l.id}:${qi}`)
+                ).length;
+                return (
+                  <div
+                    key={l.id}
+                    className="group rounded-2xl p-5 border bg-ink-soft/60 border-ink-line hover:border-accent-violet/40 transition-all relative"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => removeCustom(l.id)}
+                      className="absolute top-3 right-3 p-1 rounded-md text-fg-mute hover:text-accent-magenta hover:bg-ink-line/60 opacity-0 group-hover:opacity-100 transition-all"
+                      aria-label="Remove lesson"
+                      title="Remove"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openLesson(l.id)}
+                      className="text-left w-full pr-8"
+                    >
+                      <div className="font-mono text-[10px] uppercase tracking-widest text-accent-violet mb-1">
+                        AI lesson · {l.district}
+                      </div>
+                      <h3 className="text-xl font-semibold text-fg leading-tight mb-2">{l.title}</h3>
+                      <p className="text-sm text-fg-mute mb-3 leading-relaxed">{l.blurb}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {isDone ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-accent-cyan">
+                            <Check size={11} /> done
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-mono text-fg-dim">
+                            <ArrowRight size={11} /> start
+                          </span>
+                        )}
+                        <span className="text-[11px] font-mono text-fg-mute">
+                          {placedHere}/{l.quiz.length} blocks
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <footer className="mt-12 flex items-center justify-between gap-3 flex-wrap text-xs font-mono text-fg-mute">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span>
+              {builtinDone} / {LESSONS.length} lessons complete
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowCustomModal(true)}
+              className="inline-flex items-center gap-1.5 text-accent-violet hover:text-accent-violet/80 transition-colors"
+              title="Generate a custom lesson with AI"
+            >
+              <Wand2 size={11} />
+              create your own
+            </button>
+          </div>
           {placed > 0 && (
             <button
               type="button"
@@ -178,6 +260,10 @@ export function LessonsList() {
           )}
         </footer>
       </main>
+
+      {showCustomModal && (
+        <CustomLessonModal onClose={() => setShowCustomModal(false)} />
+      )}
     </div>
   );
 }
