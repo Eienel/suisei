@@ -1,7 +1,7 @@
 import { Fragment, useMemo, type ReactNode } from 'react';
 import { Instance, Instances } from '@react-three/drei';
 import * as THREE from 'three';
-import type { ThreeEvent } from '@react-three/fiber';
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import type { Block as BlockData, BlockShape, BlockType, Vec3 } from '@/types';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
 import { getShapeGeometry } from '@/world/shapes';
@@ -101,6 +101,20 @@ function BlockGroup({
   const geometry = useMemo(() => getShapeGeometry(shape), [shape]);
 
   const material = useMemo(() => makeMaterial(type, nightFactor), [type, nightFactor]);
+
+  // Animated materials (water shimmer, AI neural pulse) — modulate
+  // emissiveIntensity around the baseline each frame.
+  useFrame((state) => {
+    if (!def.animated && type !== 'water' && type !== 'ai_neural') return;
+    const std = material as THREE.MeshStandardMaterial;
+    const base = (std.userData.baseEmissive as number | undefined) ?? std.emissiveIntensity;
+    if (std.userData.baseEmissive === undefined) std.userData.baseEmissive = base;
+    const t = state.clock.elapsedTime;
+    // Water = slow shimmer; AI = faster pulse
+    const freq = type === 'water' ? 0.7 : 1.6;
+    const amp = type === 'water' ? 0.35 : 0.25;
+    std.emissiveIntensity = base * (1 + Math.sin(t * freq) * amp);
+  });
 
   return (
     <Instances
@@ -234,7 +248,7 @@ function baseEmissiveFor(
     flags.isMetal ? 0.06 :
     flags.isMarble ? 0.0 :
     flags.isFoliage ? 0.04 :
-    flags.isWater ? 0.1 :
+    flags.isWater ? 0.32 : // mid-bright so shimmer reads
     0.2;
   if (!def.emitsAtNight) return dayBase;
   // Night boost: emissive multiplied up to ~3x at full night

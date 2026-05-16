@@ -1,8 +1,11 @@
+import { useEffect, useRef } from 'react';
 import { Check, ArrowRight, Home, Cuboid } from 'lucide-react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import type { Lesson } from '@/data/lessons';
 import { LESSONS, SANDBOX_UNLOCK_COUNT, totalQuestions } from '@/data/lessons';
 import { useApp } from '@/state/app';
 import { useWorld } from '@/state/world';
+import { useSaveWorld } from '@/sui/useSaveWorld';
 import { SaveWorldButton } from './SaveWorldButton';
 import { ShareButton } from './ShareButton';
 import { AuthButton } from './AuthButton';
@@ -25,6 +28,30 @@ export function LessonDone({
   const isFinal = completed.length === LESSONS.length;
   const totalQs = totalQuestions();
 
+  // Auto-mint Crypto 101 NFT on the lesson-6 done screen IF:
+  //   - this is the final lesson done
+  //   - a wallet is connected
+  //   - the lessons NFT hasn't already been minted
+  //   - we haven't already kicked off this auto-mint in this session
+  // The wallet still prompts to sign, but the user doesn't have to dig
+  // for the button.
+  const account = useCurrentAccount();
+  const { save, phase, kind: savedKind, hasLessons } = useSaveWorld();
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (!isFinal) return;
+    if (!account?.address) return;
+    if (hasLessons) return;
+    if (autoTriggered.current) return;
+    if (phase !== 'idle' && savedKind === 'lessons') return;
+    autoTriggered.current = true;
+    // Tiny delay so the screen has a chance to render first.
+    const t = setTimeout(() => {
+      save({ kind: 'lessons' }).catch(() => { /* surfaced in SaveWorldButton */ });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [isFinal, account?.address, hasLessons, phase, savedKind, save]);
+
   return (
     <div className="fixed inset-0 bg-ink flex items-center justify-center p-6">
       <div className="rounded-2xl p-8 max-w-md w-full bg-ink-soft border border-ink-line text-center animate-rise-in">
@@ -45,9 +72,11 @@ export function LessonDone({
               All six districts built
             </p>
             <p className="text-fg-dim text-sm leading-relaxed mb-3">
-              You can mint this exact town as a <strong>Crypto 101 NFT</strong> —
-              a one-time commemorative record of finishing every lesson.
-              Then head to Sandbox to build your own land separately.
+              {account
+                ? hasLessons
+                  ? 'Your Crypto 101 NFT is already on chain — visible on the leaderboard and at /town/your-address.'
+                  : 'Auto-minting your Crypto 101 NFT now — sign the prompt when your wallet asks. This freezes the town as a one-time achievement.'
+                : 'Connect a wallet below to mint this exact town as a Crypto 101 NFT — a one-time commemorative record of finishing every lesson.'}
             </p>
             <div className="flex flex-wrap gap-2 items-center">
               <SaveWorldButton kind="lessons" />
@@ -66,12 +95,13 @@ export function LessonDone({
           </div>
         )}
 
-        {/* Onchain row — auth + share (Save lives in the amber callout for isFinal). */}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 border-t border-ink-line/60 pt-5">
-          {!isFinal && <SaveWorldButton kind="lessons" />}
-          <ShareButton />
-          <AuthButton />
-        </div>
+        {/* Onchain row — only shown for non-final lessons (final has its own callout above) */}
+        {!isFinal && (
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 border-t border-ink-line/60 pt-5">
+            <ShareButton />
+            <AuthButton />
+          </div>
+        )}
 
         <div className="flex flex-col gap-2 mt-6">
           {onNext && (
