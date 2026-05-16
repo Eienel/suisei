@@ -61,8 +61,6 @@ interface WorldState {
   ) => Block | null;
   moveBlock: (id: string, position: Vec3) => void;
   rotateBlock: (id: string, rotation: Vec3) => void;
-  recolorBlock: (id: string, color: string | null) => void;
-  reshapeBlock: (id: string, shape: BlockShape) => void;
   removeBlock: (id: string) => void;
   clearWorld: () => void;
   loadSnapshot: (snap: WorldSnapshot) => void;
@@ -160,20 +158,6 @@ export const useWorld = create<WorldState>()(
         set((s) => {
           const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
           const next = blocks.map((b) => (b.id === id ? { ...b, rotation } : b));
-          return { ...withMode(s, next), blocks: next };
-        }),
-
-      recolorBlock: (id, color) =>
-        set((s) => {
-          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
-          const next = blocks.map((b) => (b.id === id ? { ...b, color: color ?? undefined } : b));
-          return { ...withMode(s, next), blocks: next };
-        }),
-
-      reshapeBlock: (id, shape) =>
-        set((s) => {
-          const blocks = s.mode === 'lessons' ? s.lessonBlocks : s.sandboxBlocks;
-          const next = blocks.map((b) => (b.id === id ? { ...b, shape } : b));
           return { ...withMode(s, next), blocks: next };
         }),
 

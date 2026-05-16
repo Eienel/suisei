@@ -210,12 +210,12 @@ export function VisitPage({ address }: Props) {
 
           <DayNightCycle />
 
-          {/* Floor */}
+          {/* Floor extends well past view so fog handles the falloff. */}
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-            <planeGeometry args={[120, 120]} />
-            <meshStandardMaterial color="#0F1422" roughness={0.95} metalness={0.05} />
+            <planeGeometry args={[400, 400]} />
+            <meshStandardMaterial color="#1A2336" roughness={0.95} metalness={0.05} />
           </mesh>
-          <gridHelper args={[64, 64, '#1F2638', '#161B2A']} position={[0, -0.499, 0]} />
+          <gridHelper args={[64, 64, '#2B3654', '#1F2840']} position={[0, -0.499, 0]} />
 
           {state.phase === 'ready' && (
             <BlockInstances blocks={state.blocks} />
