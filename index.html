@@ -105,14 +105,14 @@
             <span id="bb-status-text">loading…</span>
           </div>
           <div id="bb-troubleshoot">
-            <p>Looks like the app didn't load on this browser. Try one of these:</p>
+            <p>The app didn't load. Usually a stale cached file from an old version. Try this first:</p>
             <ol>
-              <li>Long-press refresh → <em>Reload Without Content Blockers</em></li>
-              <li>Open in a private tab (or another browser)</li>
-              <li>Try Chrome / Firefox / a desktop browser</li>
+              <li><strong>Clear cache &amp; retry</strong> wipes saved progress on this device and reloads with the latest version</li>
+              <li>If that doesn't work: open in a private/incognito tab</li>
+              <li>Or try a different browser</li>
             </ol>
-            <button onclick="location.href=location.pathname">Retry</button>
-            <a href="https://www.google.com/intl/en/chrome/" target="_blank" rel="noreferrer">Get Chrome</a>
+            <button id="bb-clear-btn">Clear cache &amp; retry</button>
+            <button id="bb-retry-btn">Plain retry</button>
           </div>
         </div>
       </div>
@@ -123,17 +123,70 @@
       </div>
     </noscript>
     <script>
-      // After 7 seconds, if the fallback is still in the DOM (React hasn't
-      // replaced it yet), upgrade it to the troubleshoot card.
+      // Two failure modes to defend against:
+      //   1. Stale index.html cached by the browser points to deleted
+      //      asset hashes → JS 404 → React never mounts. We surface a
+      //      "Clear cache & retry" button that wipes storage + hard reloads.
+      //   2. Corrupted persisted state (incompatible schema after deploy)
+      //      throws during React mount. We auto-clear once with a sentinel
+      //      so we don't infinite-loop.
       (function () {
+        var ATTEMPTED_KEY = 'bb-auto-cleared-once';
+
+        // If a previous attempt detected a crash and cleared storage,
+        // also clear the sentinel after a clean mount so subsequent
+        // breakage triggers another auto-recovery.
+        setTimeout(function () {
+          if (!document.getElementById('bb-fallback')) {
+            try { sessionStorage.removeItem(ATTEMPTED_KEY); } catch (_) {}
+          }
+        }, 4000);
+
+        // If React still hasn't mounted after 7s, show troubleshoot
+        // card and (if first crash this session) auto-trigger a clean
+        // reload one time.
         setTimeout(function () {
           var fallback = document.getElementById('bb-fallback');
-          if (!fallback) return; // React mounted, fallback is gone
+          if (!fallback) return;
           var statusText = document.getElementById('bb-status-text');
           if (statusText) statusText.textContent = "couldn't load";
           var ts = document.getElementById('bb-troubleshoot');
           if (ts) ts.style.display = 'block';
+          // First crash → quietly auto-recover
+          var attempted = false;
+          try { attempted = sessionStorage.getItem(ATTEMPTED_KEY) === '1'; } catch (_) {}
+          if (!attempted) {
+            try { sessionStorage.setItem(ATTEMPTED_KEY, '1'); } catch (_) {}
+            try {
+              // Wipe persisted Zustand stores (in case schema mismatch crashed React)
+              var keys = ['blockbuilders-app', 'blockbuilders-world', 'blockbuilders-custom-lessons'];
+              for (var i = 0; i < keys.length; i++) localStorage.removeItem(keys[i]);
+            } catch (_) {}
+            // Cache-bust the URL so stale index.html / JS gets revalidated
+            location.replace(location.pathname + '?_=' + Date.now());
+          }
         }, 7000);
+
+        function wipeAndReload(hard) {
+          try { localStorage.clear(); } catch (_) {}
+          try { sessionStorage.clear(); } catch (_) {}
+          try {
+            if ('caches' in window) {
+              caches.keys().then(function (ks) {
+                ks.forEach(function (k) { caches.delete(k); });
+              });
+            }
+          } catch (_) {}
+          var url = location.pathname + (hard ? '?_=' + Date.now() : '');
+          setTimeout(function () { location.replace(url); }, 60);
+        }
+
+        document.addEventListener('click', function (e) {
+          var t = e.target;
+          if (!t || !t.id) return;
+          if (t.id === 'bb-clear-btn') wipeAndReload(true);
+          if (t.id === 'bb-retry-btn') location.replace(location.pathname);
+        });
       })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
