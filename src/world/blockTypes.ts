@@ -120,6 +120,18 @@ export const BLOCK_DEFS: readonly BlockDef[] = [
     unlockAfterLessons: 1,
   },
   {
+    id: 'door', label: 'Door', short: 'DR', category: 'timber',
+    color: '#A0673A', defaultShape: 'panel',
+    blurb: 'Wood door panel — the entrance to a house. Plant it in a wall cell.',
+    unlockAfterLessons: 1,
+  },
+  {
+    id: 'window', label: 'Window', short: 'WN', category: 'timber',
+    color: '#A0673A', defaultShape: 'panel', emitsAtNight: true,
+    blurb: 'Glass window in a wood frame. Glows warm at night.',
+    unlockAfterLessons: 1,
+  },
+  {
     id: 'streetlight', label: 'Streetlight', short: 'LMP', category: 'light',
     color: '#FFD27A', defaultShape: 'pole', emitsAtNight: true,
     blurb: 'Glows warm at night. Line a road with these for streetlamps.',
@@ -148,7 +160,7 @@ export const BLOCK_TYPE_IDS: readonly BlockType[] = BLOCK_DEFS.map((d) => d.id);
 export const BLOCK_GROUPS: Array<{ label: string; types: BlockType[] }> = [
   {
     label: 'Town',
-    types: ['timber', 'roof', 'road', 'foliage', 'streetlight', 'water'],
+    types: ['timber', 'roof', 'door', 'window', 'road', 'foliage', 'streetlight', 'water'],
   },
   {
     label: 'Crypto',

@@ -73,6 +73,46 @@ export function trunkGeometry(): THREE.BufferGeometry {
   return g;
 }
 
+/**
+ * Inset door panel — a darker plank that sits inside a timber frame.
+ * 60% wide, 85% tall, pushed forward 0.06 so it reads as a real door
+ * recessed into the wall. Used by the door block's overlay render.
+ */
+export function doorPanelGeometry(): THREE.BufferGeometry {
+  return box(CELL * 0.6, CELL * 0.85, CELL * 0.04, -CELL * 0.04);
+}
+
+/** Tiny brass knob — sits on the right edge of the door panel. */
+export function doorKnobGeometry(): THREE.BufferGeometry {
+  const g = new THREE.SphereGeometry(CELL * 0.045, 8, 8);
+  g.translate(CELL * 0.22, -CELL * 0.05, 0);
+  return g;
+}
+
+/**
+ * Window glass pane — sits inside a timber frame. Slightly bigger than
+ * the door knob, slim, and a hair forward so the frame reads behind it.
+ */
+export function windowPaneGeometry(): THREE.BufferGeometry {
+  return box(CELL * 0.55, CELL * 0.55, CELL * 0.05, CELL * 0.02);
+}
+
+/** Window cross bar (one horizontal + one vertical). Two thin boxes. */
+export function windowCrossGeometry(): THREE.BufferGeometry {
+  const horiz = box(CELL * 0.6, CELL * 0.06, CELL * 0.06, CELL * 0.02);
+  const vert = box(CELL * 0.06, CELL * 0.6, CELL * 0.06, CELL * 0.02);
+  // Merge by hand — both share the same vertex / index layout
+  const a = horiz.attributes.position.array as Float32Array;
+  const b = vert.attributes.position.array as Float32Array;
+  const merged = new Float32Array(a.length + b.length);
+  merged.set(a, 0);
+  merged.set(b, a.length);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(merged, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
 export const SHAPES: Record<BlockShape, ShapeDef> = {
   cube: { id: 'cube', label: 'Cube', build: () => box(CELL, CELL, CELL) },
   slab: { id: 'slab', label: 'Slab', build: () => box(CELL, CELL * 0.32, CELL, -CELL * 0.34) },

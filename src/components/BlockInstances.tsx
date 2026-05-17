@@ -4,7 +4,14 @@ import * as THREE from 'three';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import type { Block as BlockData, BlockShape, BlockType, Vec3 } from '@/types';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
-import { getShapeGeometry, trunkGeometry } from '@/world/shapes';
+import {
+  getShapeGeometry,
+  trunkGeometry,
+  doorPanelGeometry,
+  doorKnobGeometry,
+  windowPaneGeometry,
+  windowCrossGeometry,
+} from '@/world/shapes';
 
 interface Props {
   blocks: readonly BlockData[];
@@ -141,6 +148,8 @@ function BlockGroup({
       {shape === 'tree' && (
         <TreeTrunks blocks={blocks} onFaceHover={onFaceHover} onFaceClick={onFaceClick} />
       )}
+      {type === 'door' && <DoorDetails blocks={blocks} />}
+      {type === 'window' && <WindowDetails blocks={blocks} nightFactor={nightFactor} />}
     </Fragment>
   );
 }
@@ -201,6 +210,126 @@ function TreeTrunks({
         />
       ))}
     </Instances>
+  );
+}
+
+/**
+ * Door — frame is the standard panel render; this overlay adds the
+ * inset darker plank + a brass knob so the panel reads as a real
+ * door instead of just a slab of wood.
+ */
+function DoorDetails({ blocks }: { blocks: BlockData[] }) {
+  const panelGeom = useMemo(() => doorPanelGeometry(), []);
+  const knobGeom = useMemo(() => doorKnobGeometry(), []);
+  const panelMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#5C3C1E',
+        roughness: 0.7,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  const knobMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#D4A14A',
+        roughness: 0.25,
+        metalness: 0.85,
+      }),
+    [],
+  );
+  return (
+    <Fragment>
+      <Instances
+        geometry={panelGeom}
+        material={panelMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-door-panel'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+      <Instances
+        geometry={knobGeom}
+        material={knobMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-door-knob'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+    </Fragment>
+  );
+}
+
+/**
+ * Window — frame is the standard panel render; this overlay adds the
+ * cyan glass pane (emissive at night so windows glow) and a thin cross
+ * mullion that gives the window its shape.
+ */
+function WindowDetails({ blocks, nightFactor = 0 }: { blocks: BlockData[]; nightFactor?: number }) {
+  const paneGeom = useMemo(() => windowPaneGeometry(), []);
+  const crossGeom = useMemo(() => windowCrossGeometry(), []);
+  const paneMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#7BD4FF',
+        emissive: new THREE.Color('#FFD27A'),
+        emissiveIntensity: 0.2 + nightFactor * 2.2,
+        roughness: 0.15,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.85,
+      }),
+    [nightFactor],
+  );
+  const crossMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#5C3C1E',
+        roughness: 0.7,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  return (
+    <Fragment>
+      <Instances
+        geometry={paneGeom}
+        material={paneMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-window-pane'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+      <Instances
+        geometry={crossGeom}
+        material={crossMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-window-cross'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+    </Fragment>
   );
 }
 

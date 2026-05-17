@@ -49,7 +49,10 @@ DESIGN PRINCIPLES:
 PATTERN COOKBOOK (concrete recipes — follow these closely):
 - HOUSE (small):
     - Floor 3×3 of timber slabs at y=0 (or skip if on flat ground)
-    - 4 timber walls along the perimeter at y=1 (skip one cell as doorway)
+    - Walls at y=1 around the perimeter:
+        * Front centre cell: a "door" block (panels facing the street)
+        * Front corners + sides: "window" blocks for the rest of the
+          front row, and "timber" for the back and side walls
     - Roof: 3×3 of "roof" blocks at y=2 (they auto-render as pitched tiles)
     - 1 foliage tree next to the house
 - TREE: a single foliage block at y=0. It already renders as

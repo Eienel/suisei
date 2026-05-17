@@ -22,7 +22,9 @@ export type BlockType =
   | 'foliage'
   | 'streetlight'
   | 'timber'
-  | 'roof';
+  | 'roof'
+  | 'door'
+  | 'window';
 
 /** Geometry variants — turns voxels into architecture. */
 export type BlockShape = 'cube' | 'slab' | 'pole' | 'panel' | 'ramp' | 'tree';
