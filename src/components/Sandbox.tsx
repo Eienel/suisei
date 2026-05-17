@@ -31,7 +31,7 @@ export function Sandbox() {
       <HUD />
       <NarrationOverlay />
 
-      <div className="absolute bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 w-full px-2 sm:px-0 sm:w-auto">
+      <div className="absolute bottom-3 sm:bottom-5 left-14 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 sm:w-auto">
         <Toolbar />
         <PromptBar />
       </div>

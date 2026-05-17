@@ -94,7 +94,7 @@ export function PromptBar() {
         : 'Ask the Builder Agent to construct something… (⌘K)';
 
   return (
-    <div className="pointer-events-auto w-[min(620px,92vw)] animate-rise-in">
+    <div className="pointer-events-auto w-full sm:w-[min(620px,92vw)] animate-rise-in">
       {error && (
         <div className="mb-2 glass rounded-xl px-3 py-2 text-sm text-accent-magenta border-accent-magenta/40 flex items-center justify-between gap-2">
           <span className="font-mono text-xs truncate">{error}</span>
