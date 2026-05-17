@@ -7,7 +7,23 @@
  */
 
 let ctx: AudioContext | null = null;
-let muted = false;
+let muted = readStoredMute();
+
+function readStoredMute(): boolean {
+  try {
+    return typeof localStorage !== 'undefined' && localStorage.getItem('bb-muted') === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writeStoredMute(m: boolean) {
+  try {
+    localStorage.setItem('bb-muted', m ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+}
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -122,6 +138,7 @@ export const sfx = {
   },
   setMuted(m: boolean) {
     muted = m;
+    writeStoredMute(m);
   },
   isMuted() {
     return muted;

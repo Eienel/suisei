@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
-import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import { useWorld } from '@/state/world';
 import { useApp } from '@/state/app';
 import { sfx } from '@/audio/sfx';
+import { music } from '@/audio/music';
 import { AuthButton } from './AuthButton';
 import { SaveWorldButton } from './SaveWorldButton';
 
@@ -80,6 +81,7 @@ export function HUD() {
           <span className="hidden md:inline-flex glass rounded-lg px-2.5 py-1.5 text-xs font-mono text-fg-dim">
             {blocks.length} blocks
           </span>
+          <MuteToggle />
           <SaveWorldButton />
           <AuthButton />
         </div>
@@ -206,5 +208,32 @@ function Logomark() {
         }}
       />
     </div>
+  );
+}
+
+/**
+ * Single master mute — silences SFX and the ambient music together,
+ * persisted to localStorage as bb-muted so the preference sticks
+ * across sessions.
+ */
+function MuteToggle() {
+  const [muted, setMutedState] = useState(() => sfx.isMuted());
+  const toggle = () => {
+    const next = !muted;
+    sfx.setMuted(next);
+    music.setMuted(next);
+    if (!next) music.start(); // unmute → resume the loop
+    setMutedState(next);
+  };
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+      title={muted ? 'Sound off' : 'Sound on'}
+      className="glass rounded-lg px-2.5 py-1.5 text-fg-mute hover:text-fg flex items-center transition-colors"
+    >
+      {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+    </button>
   );
 }

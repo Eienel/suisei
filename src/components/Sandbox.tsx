@@ -7,6 +7,7 @@ import { PromptBar } from './PromptBar';
 import { NarrationOverlay } from './NarrationOverlay';
 import { HowToModal } from './HowToModal';
 import { useWorld } from '@/state/world';
+import { music } from '@/audio/music';
 
 /**
  * Free-play mode. The Sandbox works on its OWN persistent world —
@@ -19,6 +20,16 @@ export function Sandbox() {
   useEffect(() => {
     setMode('sandbox');
   }, [setMode]);
+
+  // Ambient music: kick in whenever the sandbox mounts, stop on unmount.
+  // The music module respects its persisted-mute flag and a one-shot
+  // user-gesture fallback if the browser blocked autoplay.
+  useEffect(() => {
+    music.start();
+    return () => {
+      music.stop();
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-ink overflow-hidden">
