@@ -102,6 +102,24 @@ export const sfx = {
     tone({ freq: 1320, duration: 0.22, type: 'sine', volume: 0.06, delay: 0.1 });
     buzz([12, 30, 24]);
   },
+  /** Soft tick — for tool / type / shape toggles in the toolbar. */
+  tick() {
+    tone({ freq: 980, duration: 0.04, type: 'square', volume: 0.025 });
+  },
+  /** Hollow pop — for deleting / removing a block. */
+  pop() {
+    tone({ freq: 420, freqEnd: 80, duration: 0.13, type: 'triangle', volume: 0.06 });
+    buzz(20);
+  },
+  /** Quick whoosh — for rotating a placed block or piece. */
+  whoosh() {
+    tone({ freq: 320, freqEnd: 640, duration: 0.09, type: 'sine', volume: 0.035 });
+  },
+  /** Two-tone page turn — for advancing a lesson page. */
+  page() {
+    tone({ freq: 520, duration: 0.05, type: 'sine', volume: 0.03 });
+    tone({ freq: 720, duration: 0.06, type: 'sine', volume: 0.03, delay: 0.05 });
+  },
   setMuted(m: boolean) {
     muted = m;
   },

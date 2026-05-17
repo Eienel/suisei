@@ -24,6 +24,7 @@ export function PlacementGrid() {
   const ghostRef = useRef<THREE.Mesh>(null);
 
   const tool = useWorld((s) => s.tool);
+  const mode = useWorld((s) => s.mode);
   const activeBlockType = useWorld((s) => s.activeBlockType);
   const activeShape = useWorld((s) => s.activeShape);
   const activeColor = useWorld((s) => s.activeColor);
@@ -31,6 +32,8 @@ export function PlacementGrid() {
   const setHoveredCell = useWorld((s) => s.setHoveredCell);
   const placeBlock = useWorld((s) => s.placeBlock);
   const setSelected = useWorld((s) => s.setSelected);
+  // Lessons mode locks freeform placement — only earned pieces drop.
+  const allowFreeform = mode !== 'lessons';
 
   const pendingPiece = useWorld((s) => s.pendingPiece);
   const setPieceHover = useWorld((s) => s.setPieceHover);
@@ -64,7 +67,7 @@ export function PlacementGrid() {
 
   useFrame(() => {
     if (!ghostRef.current) return;
-    const showSingle = !!hoveredCell && tool === 'place' && !pendingPiece;
+    const showSingle = !!hoveredCell && tool === 'place' && !pendingPiece && allowFreeform;
     ghostRef.current.visible = showSingle;
     if (hoveredCell) {
       ghostRef.current.position.set(hoveredCell[0], hoveredCell[1], hoveredCell[2]);
@@ -79,7 +82,7 @@ export function PlacementGrid() {
       gl.domElement.style.cursor = 'pointer';
       return;
     }
-    if (tool !== 'place') return;
+    if (tool !== 'place' || !allowFreeform) return;
     setHoveredCell(cell);
     gl.domElement.style.cursor = 'crosshair';
   };
@@ -109,7 +112,7 @@ export function PlacementGrid() {
       return;
     }
 
-    if (tool !== 'place') {
+    if (tool !== 'place' || !allowFreeform) {
       setSelected(null);
       return;
     }

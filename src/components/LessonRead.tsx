@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ArrowRight, ArrowLeft, BookOpen } from 'lucide-react';
 import type { Lesson } from '@/data/lessons';
+import { useApp } from '@/state/app';
+import { sfx } from '@/audio/sfx';
 import { AskTutor } from './AskTutor';
 
 export function LessonRead({
@@ -14,12 +16,23 @@ export function LessonRead({
   const total = lesson.pages.length;
   const p = lesson.pages[page];
   const isLast = page === total - 1;
+  const closeLesson = useApp((s) => s.closeLesson);
 
   return (
     <div className="fixed inset-0 bg-ink flex flex-col">
       <header className="px-6 sm:px-10 py-5 flex items-center gap-3 border-b border-ink-line/60">
-        <BookOpen size={18} className="text-accent-cyan" />
-        <div>
+        <button
+          type="button"
+          onClick={closeLesson}
+          aria-label="Back to lessons"
+          title="Back to lessons"
+          className="btn-ghost flex items-center gap-1.5 text-sm shrink-0"
+        >
+          <ArrowLeft size={14} />
+          Lessons
+        </button>
+        <BookOpen size={18} className="text-accent-cyan shrink-0" />
+        <div className="min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-widest text-fg-mute">
             Lesson · {lesson.title}
           </div>
@@ -42,7 +55,7 @@ export function LessonRead({
       <footer className="px-6 sm:px-10 py-5 border-t border-ink-line/60 flex items-center justify-between">
         <button
           type="button"
-          onClick={() => setPage((x) => Math.max(0, x - 1))}
+          onClick={() => { if (page > 0) { setPage((x) => x - 1); sfx.page(); } }}
           disabled={page === 0}
           className="btn-ghost flex items-center gap-1.5 disabled:opacity-40"
         >
@@ -61,7 +74,11 @@ export function LessonRead({
         </div>
         <button
           type="button"
-          onClick={() => (isLast ? onAdvance() : setPage((x) => x + 1))}
+          onClick={() => {
+            sfx.page();
+            if (isLast) onAdvance();
+            else setPage((x) => x + 1);
+          }}
           className="btn-primary flex items-center gap-1.5"
         >
           {isLast ? 'Quick check' : 'Next'}

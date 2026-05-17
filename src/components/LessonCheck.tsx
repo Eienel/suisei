@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, X, ArrowRight, BookOpen, MousePointer2, RotateCw } from 'lucide-react';
+import { Check, X, ArrowRight, ArrowLeft, BookOpen, MousePointer2, RotateCw } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { World } from './World';
 import type { Lesson } from '@/data/lessons';
@@ -20,6 +20,7 @@ export function LessonCheck({
 }) {
   const recordCorrect = useApp((s) => s.recordCorrect);
   const hasAnsweredCorrect = useApp((s) => s.hasAnsweredCorrect);
+  const closeLesson = useApp((s) => s.closeLesson);
   const startPiece = useWorld((s) => s.startPiece);
   const cancelPiece = useWorld((s) => s.cancelPiece);
   const pendingPiece = useWorld((s) => s.pendingPiece);
@@ -95,10 +96,19 @@ export function LessonCheck({
 
   return (
     <div className="fixed inset-0 bg-ink flex flex-col">
-      <header className="px-4 sm:px-6 py-3 flex items-center gap-3 border-b border-ink-line/60 z-30 shrink-0">
+      <header className="px-4 sm:px-6 py-3 flex items-center gap-2 sm:gap-3 border-b border-ink-line/60 z-30 shrink-0">
+        <button
+          type="button"
+          onClick={closeLesson}
+          className="btn-ghost flex items-center gap-1.5 text-sm"
+          title="Back to lessons"
+        >
+          <ArrowLeft size={14} />
+          <span className="hidden sm:inline">Lessons</span>
+        </button>
         <button type="button" onClick={onReread} className="btn-ghost flex items-center gap-1.5 text-sm">
           <BookOpen size={14} />
-          Re-read
+          <span className="hidden sm:inline">Re-read</span>
         </button>
         <div className="flex-1 min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-widest text-fg-mute">
