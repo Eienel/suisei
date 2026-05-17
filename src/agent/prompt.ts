@@ -58,8 +58,12 @@ PATTERN COOKBOOK (concrete recipes — follow these closely):
 - TREE: a single foliage block at y=0. It already renders as
   trunk + leafy canopy. DON'T stack timber + foliage manually — just
   use foliage on its own. Repeat across a 5×5 area for a forest.
-- PARK: 4-8 foliage trees scattered, plus 1-2 road slabs as paths,
-  optionally a small water pond (3-4 water blocks together).
+- GRASS / LAWN: grass blocks at y=0. Cover any open ground around a
+  house, park, or pond — a 5×5 grass patch reads as a yard. Don't
+  use grass on roads or water.
+- PARK: a base of grass blocks (5×5 or larger), 4-8 foliage trees
+  scattered on top, 1-2 road slabs as paths, optionally a small water
+  pond (3-4 water blocks together).
 - TOWER (crypto-themed): stack 5-8 of the same vertical block type
   (contract_obelisk, governance_marble, data_core) at the same x,z
   going up in y. Add a token_prism or zk_crystal on top as a finial.

@@ -114,6 +114,12 @@ export const BLOCK_DEFS: readonly BlockDef[] = [
     unlockAfterLessons: 2,
   },
   {
+    id: 'grass', label: 'Grass', short: 'GR', category: 'foliage',
+    color: '#4D9C3A', defaultShape: 'slab',
+    blurb: 'A flat green grass patch with a few blades on top. Perfect for lawns + meadows.',
+    unlockAfterLessons: 2,
+  },
+  {
     id: 'roof', label: 'Roof', short: 'RF', category: 'timber',
     color: '#B85A38', defaultShape: 'ramp',
     blurb: 'Pitched terracotta roof tile. Place on top of timber walls to finish a house.',
@@ -160,7 +166,7 @@ export const BLOCK_TYPE_IDS: readonly BlockType[] = BLOCK_DEFS.map((d) => d.id);
 export const BLOCK_GROUPS: Array<{ label: string; types: BlockType[] }> = [
   {
     label: 'Town',
-    types: ['timber', 'roof', 'door', 'window', 'road', 'foliage', 'streetlight', 'water'],
+    types: ['timber', 'roof', 'door', 'window', 'road', 'grass', 'foliage', 'streetlight', 'water'],
   },
   {
     label: 'Crypto',

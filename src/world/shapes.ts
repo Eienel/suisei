@@ -97,6 +97,31 @@ export function windowPaneGeometry(): THREE.BufferGeometry {
   return box(CELL * 0.55, CELL * 0.55, CELL * 0.05, CELL * 0.02);
 }
 
+/**
+ * A few thin green blades that sit on top of a grass slab, giving it
+ * texture from a distance. Three small boxes at fixed offsets so the
+ * pattern reads as deliberate clumps not noise.
+ */
+export function grassTuftsGeometry(): THREE.BufferGeometry {
+  const blade = (x: number, z: number, h = CELL * 0.22) =>
+    box(CELL * 0.07, h, CELL * 0.07, -CELL * 0.34 + h / 2)
+      .translate(x, 0, z);
+
+  const a = blade(-CELL * 0.22, -CELL * 0.18, CELL * 0.26);
+  const b = blade(CELL * 0.18, -CELL * 0.12, CELL * 0.2);
+  const c = blade(CELL * 0.04, CELL * 0.24, CELL * 0.24);
+  const arr = (g: THREE.BufferGeometry) => g.attributes.position.array as Float32Array;
+  const ap = arr(a), bp = arr(b), cp = arr(c);
+  const merged = new Float32Array(ap.length + bp.length + cp.length);
+  merged.set(ap, 0);
+  merged.set(bp, ap.length);
+  merged.set(cp, ap.length + bp.length);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(merged, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
 /** Window cross bar (one horizontal + one vertical). Two thin boxes. */
 export function windowCrossGeometry(): THREE.BufferGeometry {
   const horiz = box(CELL * 0.6, CELL * 0.06, CELL * 0.06, CELL * 0.02);

@@ -11,6 +11,7 @@ import {
   doorKnobGeometry,
   windowPaneGeometry,
   windowCrossGeometry,
+  grassTuftsGeometry,
 } from '@/world/shapes';
 
 interface Props {
@@ -150,6 +151,7 @@ function BlockGroup({
       )}
       {type === 'door' && <DoorDetails blocks={blocks} />}
       {type === 'window' && <WindowDetails blocks={blocks} nightFactor={nightFactor} />}
+      {type === 'grass' && <GrassTufts blocks={blocks} />}
     </Fragment>
   );
 }
@@ -330,6 +332,38 @@ function WindowDetails({ blocks, nightFactor = 0 }: { blocks: BlockData[]; night
         ))}
       </Instances>
     </Fragment>
+  );
+}
+
+/**
+ * A few thin green blades on top of every grass slab — gives the
+ * lawn texture from above without a heavy material/shader.
+ */
+function GrassTufts({ blocks }: { blocks: BlockData[] }) {
+  const geometry = useMemo(() => grassTuftsGeometry(), []);
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#7BC74A',
+        roughness: 0.8,
+        metalness: 0,
+      }),
+    [],
+  );
+  return (
+    <Instances
+      geometry={geometry}
+      material={material}
+      limit={Math.max(64, blocks.length * 2)}
+    >
+      {blocks.map((b) => (
+        <Instance
+          key={b.id + '-tuft'}
+          position={b.position}
+          rotation={b.rotation}
+        />
+      ))}
+    </Instances>
   );
 }
 
