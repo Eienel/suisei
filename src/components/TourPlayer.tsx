@@ -39,11 +39,18 @@ export function TourPlayer({
   useEffect(() => {
     const stop = tour.stops[stopIdx];
     if (!stop) return;
+    // Safety clamp: keep the camera above the floor and at a sane
+    // distance. The model picks freely; an underground or absurdly-far
+    // camera makes the tour look broken.
+    const camY = Math.max(2, Math.min(stop.camera[1], 30));
+    const camX = Math.max(-40, Math.min(stop.camera[0], 40));
+    const camZ = Math.max(-40, Math.min(stop.camera[2], 40));
+    const lookY = Math.max(0, Math.min(stop.lookAt[1], 20));
     seg.current = {
       startPos: camera.position.clone(),
-      endPos: new THREE.Vector3(stop.camera[0], stop.camera[1], stop.camera[2]),
+      endPos: new THREE.Vector3(camX, camY, camZ),
       startTarget: target.current.clone(),
-      endTarget: new THREE.Vector3(stop.lookAt[0], stop.lookAt[1], stop.lookAt[2]),
+      endTarget: new THREE.Vector3(stop.lookAt[0], lookY, stop.lookAt[2]),
       startMs: performance.now(),
     };
     onAdvance(stopIdx);
