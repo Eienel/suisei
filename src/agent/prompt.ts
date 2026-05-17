@@ -1,5 +1,5 @@
-import { BLOCK_DEFS } from '../world/blockTypes';
-import type { Block } from '../types';
+import { BLOCK_DEFS } from '../world/blockTypes.js';
+import type { Block } from '../types.js';
 
 /**
  * The system prompt that turns Gemini into a 3D world architect.

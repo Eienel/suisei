@@ -1,6 +1,6 @@
 import { useWorld } from '@/state/world';
 import { sameCell } from '@/world/grid';
-import type { Action } from './schema';
+import type { Action } from './schema.js';
 
 const STEP_MS = 90;
 

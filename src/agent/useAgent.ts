@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { useWorld } from '@/state/world';
 import { sfx } from '@/audio/sfx';
-import { AgentResponseSchema, type AgentResponse } from './schema';
-import { applyActions } from './applyActions';
-import type { ChatTurn } from './runAgent';
+import { AgentResponseSchema, type AgentResponse } from './schema.js';
+import { applyActions } from './applyActions.js';
+import type { ChatTurn } from './runAgent.js';
 
 export type AgentPhase = 'idle' | 'thinking' | 'building' | 'clarify' | 'error';
 

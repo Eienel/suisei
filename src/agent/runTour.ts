@@ -9,8 +9,8 @@
  */
 
 import { z } from 'zod';
-import { BLOCK_DEFS } from '../world/blockTypes';
-import type { Block } from '../types';
+import { BLOCK_DEFS } from '../world/blockTypes.js';
+import type { Block } from '../types.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;

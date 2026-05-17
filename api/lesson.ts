@@ -1,4 +1,4 @@
-import { runCustomLesson } from '../src/agent/runCustomLesson';
+import { runCustomLesson } from '../src/agent/runCustomLesson.js';
 
 /**
  * POST /api/lesson — generate a custom lesson + quiz from a free topic.

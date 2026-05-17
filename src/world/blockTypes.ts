@@ -1,4 +1,4 @@
-import type { BlockType, BlockShape } from '../types';
+import type { BlockType, BlockShape } from '../types.js';
 
 /**
  * Visual identity per block type. Block "type" drives the material

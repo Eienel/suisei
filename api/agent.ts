@@ -1,5 +1,5 @@
-import { runAgent, type ChatTurn } from '../src/agent/runAgent';
-import type { Block } from '../src/types';
+import { runAgent, type ChatTurn } from '../src/agent/runAgent.js';
+import type { Block } from '../src/types.js';
 
 /**
  * POST /api/agent — Vercel Function.

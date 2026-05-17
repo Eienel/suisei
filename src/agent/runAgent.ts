@@ -1,6 +1,6 @@
-import { AgentResponseSchema, geminiResponseSchema, type AgentResponse } from './schema';
-import { systemPrompt, describeWorld } from './prompt';
-import type { Block } from '../types';
+import { AgentResponseSchema, geminiResponseSchema, type AgentResponse } from './schema.js';
+import { systemPrompt, describeWorld } from './prompt.js';
+import type { Block } from '../types.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
