@@ -1,11 +1,23 @@
-import { runAgent } from '../src/agent/runAgent';
+import { runAgent, type ChatTurn } from '../src/agent/runAgent';
 import type { Block } from '../src/types';
 
 /**
  * POST /api/agent — Vercel Function.
- * Body: { prompt: string, world: Block[] }
+ * Body: {
+ *   prompt: string,
+ *   world: Block[],
+ *   image?: { base64: string, mimeType: string },
+ *   history?: ChatTurn[]
+ * }
  * Returns the validated AgentResponse, or 4xx/5xx with { error }.
  */
+interface AgentBody {
+  prompt?: string;
+  world?: Block[];
+  image?: { base64?: string; mimeType?: string };
+  history?: ChatTurn[];
+}
+
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
@@ -14,15 +26,16 @@ export default async function handler(req: Request): Promise<Response> {
     });
   }
 
-  let body: { prompt?: string; world?: Block[] };
+  let body: AgentBody;
   try {
-    body = (await req.json()) as { prompt?: string; world?: Block[] };
+    body = (await req.json()) as AgentBody;
   } catch {
     return json({ error: 'Invalid JSON body' }, 400);
   }
 
-  if (typeof body.prompt !== 'string' || !body.prompt.trim()) {
-    return json({ error: 'prompt required' }, 400);
+  const hasImage = !!(body.image?.base64 && body.image.mimeType);
+  if (!hasImage && (typeof body.prompt !== 'string' || !body.prompt.trim())) {
+    return json({ error: 'prompt or image required' }, 400);
   }
   if (!Array.isArray(body.world)) {
     return json({ error: 'world array required' }, 400);
@@ -33,7 +46,14 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     const result = await runAgent(
-      { prompt: body.prompt, world: body.world },
+      {
+        prompt: body.prompt ?? '',
+        world: body.world,
+        image: hasImage
+          ? { base64: body.image!.base64!, mimeType: body.image!.mimeType! }
+          : undefined,
+        history: body.history,
+      },
       { apiKey }
     );
     return json(result);

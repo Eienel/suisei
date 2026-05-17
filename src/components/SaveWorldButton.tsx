@@ -1,86 +1,111 @@
 import { useEffect, useState } from 'react';
-import { Save, Check, Loader2, AlertCircle } from 'lucide-react';
+import { Save, Check, Loader2, AlertCircle, Trophy } from 'lucide-react';
 import { useSaveWorld } from '@/sui/useSaveWorld';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useWorld } from '@/state/world';
 import { PACKAGE_CONFIGURED } from '@/sui/config';
 
+interface Props {
+  /**
+   * Which NFT to mint/update. Defaults to the current world.mode so
+   * the Sandbox HUD saves the sandbox NFT, the LessonDone screen
+   * saves the lessons NFT, etc.
+   */
+  kind?: 'sandbox' | 'lessons';
+  /** Override the default label (e.g. "Mint Crypto 101" on lesson finish). */
+  labelOverride?: { idle?: string; firstMint?: string };
+}
+
 /**
- * "Save World" CTA in the HUD. Surfaces full lifecycle:
- *  idle → uploading (Walrus) → signing (wallet) → success → idle.
- * Auto-clears the success state after 4s.
+ * "Save World" CTA. Surfaces full save lifecycle. Handles BOTH NFT
+ * kinds — sandbox (creative land) and lessons (commemorative town).
  */
-export function SaveWorldButton() {
+export function SaveWorldButton({ kind: kindProp, labelOverride }: Props = {}) {
   const account = useCurrentAccount();
-  const blockCount = useWorld((s) => s.blocks.length);
-  const { phase, error, txDigest, save, hasExisting } = useSaveWorld();
+  const mode = useWorld((s) => s.mode);
+  const lessonBlocks = useWorld((s) => s.lessonBlocks);
+  const sandboxBlocks = useWorld((s) => s.sandboxBlocks);
+  const kind: 'sandbox' | 'lessons' = kindProp ?? mode;
+  const blockCount = kind === 'lessons' ? lessonBlocks.length : sandboxBlocks.length;
+  const { phase, error, txDigest, kind: savedKind, save, hasSandbox, hasLessons } = useSaveWorld();
+  const hasExisting = kind === 'lessons' ? hasLessons : hasSandbox;
+
   const [showNamePrompt, setShowNamePrompt] = useState(false);
-  const [name, setName] = useState('My World');
+  const [name, setName] = useState(kind === 'lessons' ? 'Crypto 101' : 'My Land');
+
+  // Only react to this kind's save phase
+  const ownsPhase = savedKind === null || savedKind === kind;
+  const localPhase = ownsPhase ? phase : 'idle';
 
   useEffect(() => {
-    if (phase === 'success') {
-      const t = setTimeout(() => useSaveWorld.bind(null), 4000);
+    if (localPhase === 'success') {
+      const t = setTimeout(() => {}, 4000);
       return () => clearTimeout(t);
     }
-  }, [phase]);
+  }, [localPhase]);
 
   const onClick = () => {
     if (!account || blockCount === 0) return;
     if (!hasExisting) {
       setShowNamePrompt(true);
     } else {
-      save({});
+      save({ kind });
     }
   };
 
   const confirmMint = () => {
     setShowNamePrompt(false);
-    save({ worldName: name });
+    save({ worldName: name, kind });
   };
 
   const disabled =
     !PACKAGE_CONFIGURED ||
     !account ||
     blockCount === 0 ||
-    phase === 'uploading' ||
-    phase === 'signing';
+    localPhase === 'uploading' ||
+    localPhase === 'signing';
 
-  let label = 'Save World';
-  let icon = <Save size={14} />;
-  let tone = 'btn-ghost';
+  const defaultIdle =
+    kind === 'lessons' ? 'Mint Crypto 101' : 'Save World';
+  const defaultFirstMint =
+    kind === 'lessons' ? 'Mint Crypto 101' : 'Mint World';
 
-  if (phase === 'uploading') {
+  let label = labelOverride?.idle ?? defaultIdle;
+  let icon = kind === 'lessons' ? <Trophy size={14} /> : <Save size={14} />;
+  let tone = kind === 'lessons' ? 'rounded-md px-3 py-1.5 font-semibold text-sm bg-accent-amber text-ink hover:bg-accent-amber/90' : 'btn-ghost';
+
+  if (localPhase === 'uploading') {
     label = 'Uploading to Walrus…';
     icon = <Loader2 size={14} className="animate-spin" />;
-  } else if (phase === 'signing') {
+  } else if (localPhase === 'signing') {
     label = 'Sign in wallet…';
     icon = <Loader2 size={14} className="animate-spin" />;
-  } else if (phase === 'success') {
-    label = 'Saved on Sui ✓';
+  } else if (localPhase === 'success') {
+    label = kind === 'lessons' ? 'Minted ✓' : 'Saved on Sui ✓';
     icon = <Check size={14} />;
     tone = 'bg-accent-cyan text-ink rounded-md px-3 py-1.5 font-semibold text-sm';
-  } else if (phase === 'error') {
-    label = 'Retry save';
+  } else if (localPhase === 'error') {
+    label = 'Retry';
     icon = <AlertCircle size={14} />;
   } else if (!account) {
     label = 'Connect to save';
   } else if (blockCount === 0) {
-    label = 'Place blocks first';
+    label = kind === 'lessons' ? 'Finish lessons first' : 'Place blocks first';
   } else if (hasExisting) {
-    label = 'Update World';
+    label = kind === 'lessons' ? 'Update Crypto 101' : 'Update World';
   } else {
-    label = 'Mint World';
+    label = labelOverride?.firstMint ?? defaultFirstMint;
   }
 
   return (
     <>
       <div className="flex items-center gap-2">
-        {phase === 'error' && error && (
-          <span className="text-xs text-accent-magenta font-mono max-w-[280px] truncate" title={error}>
+        {localPhase === 'error' && error && (
+          <span className="text-xs text-accent-magenta font-mono max-w-[220px] truncate" title={error}>
             {error}
           </span>
         )}
-        {phase === 'success' && txDigest && (
+        {localPhase === 'success' && txDigest && (
           <a
             href={`https://suiscan.xyz/testnet/tx/${txDigest}`}
             target="_blank"
@@ -105,24 +130,23 @@ export function SaveWorldButton() {
       {showNamePrompt && (
         <div className="fixed inset-0 z-40 bg-ink/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="glass rounded-2xl p-6 max-w-sm w-full shadow-glass">
-            <h3 className="font-semibold text-fg mb-1">Mint your World</h3>
+            <h3 className="font-semibold text-fg mb-1">
+              {kind === 'lessons' ? 'Mint your Crypto 101 NFT' : 'Mint your World'}
+            </h3>
             <p className="text-sm text-fg-mute mb-4">
-              This creates an NFT on Sui testnet that holds your world's metadata.
-              You can re-save anytime to update it.
+              {kind === 'lessons'
+                ? 'A commemorative NFT on Sui testnet showing the town you built from quiz answers. Mint once — it freezes as a record of completion.'
+                : 'Creates an NFT on Sui testnet that holds your land\'s metadata. You can re-save anytime to update it. Anyone with the URL can visit.'}
             </p>
             <input
               autoFocus
               value={name}
-              onChange={(e) => setName(e.target.value.slice(0, 64))}
-              placeholder="World name"
+              onChange={(e) => setName(e.target.value.slice(0, 60))}
+              placeholder={kind === 'lessons' ? 'Crypto 101' : 'My Land'}
               className="w-full bg-ink-soft border border-ink-line rounded-lg px-3 py-2 text-fg outline-none focus:border-accent-cyan transition-colors mb-4"
             />
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowNamePrompt(false)}
-                className="btn-ghost"
-              >
+              <button type="button" onClick={() => setShowNamePrompt(false)} className="btn-ghost">
                 Cancel
               </button>
               <button
@@ -131,7 +155,7 @@ export function SaveWorldButton() {
                 disabled={!name.trim()}
                 className="btn-primary disabled:opacity-50"
               >
-                Mint World
+                {kind === 'lessons' ? 'Mint NFT' : 'Mint World'}
               </button>
             </div>
           </div>

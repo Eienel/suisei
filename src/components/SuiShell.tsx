@@ -4,6 +4,7 @@ import { LessonsList } from './LessonsList';
 import { LessonScreen } from './LessonScreen';
 import { Sandbox } from './Sandbox';
 import { Gallery } from './Gallery';
+import { Leaderboard } from './Leaderboard';
 
 /**
  * Single lazy boundary that pulls in SuiProviders + all Sui-using
@@ -21,6 +22,7 @@ export default function SuiShell() {
       {screen === 'lesson' && <LessonScreen />}
       {screen === 'sandbox' && <Sandbox />}
       {screen === 'gallery' && <Gallery />}
+      {screen === 'leaderboard' && <Leaderboard />}
     </SuiProviders>
   );
 }

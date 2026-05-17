@@ -46,13 +46,15 @@ export function LessonCheck({
     }
   }, [pendingPiece, phase]);
 
-  // Auto-advance when current lesson's quiz is fully answered.
+  // Auto-advance only AFTER the last piece has been placed.
+  // (Previously this fired the instant correctSoFar === total, which
+  // unmounted the canvas before the player could drop their final piece.)
   useEffect(() => {
-    if (correctSoFar === total) {
+    if (correctSoFar === total && phase === 'placed') {
       const t = setTimeout(() => onPass(), 700);
       return () => clearTimeout(t);
     }
-  }, [correctSoFar, total, onPass]);
+  }, [correctSoFar, total, onPass, phase]);
 
   // Cancel any pending piece if user navigates away.
   useEffect(() => {
@@ -222,10 +224,10 @@ export function LessonCheck({
 
 function PlacementOverlay() {
   return (
-    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-      <div className="bg-accent-cyan/15 border border-accent-cyan/40 rounded-full px-4 py-1.5 text-xs font-mono text-accent-cyan flex items-center gap-2 animate-pulse-soft">
-        <MousePointer2 size={12} />
-        click anywhere on the map to drop your piece — R rotates
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none max-w-[calc(100vw-24px)]">
+      <div className="bg-ink-soft/95 backdrop-blur border border-accent-cyan/50 rounded-full px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-mono text-fg flex items-center gap-2 shadow-glass">
+        <MousePointer2 size={12} className="text-accent-cyan shrink-0" />
+        <span className="truncate">click the map to drop · R rotates</span>
       </div>
     </div>
   );

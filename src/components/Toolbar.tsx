@@ -49,24 +49,28 @@ export function Toolbar() {
   const group = BLOCK_GROUPS.find((g) => g.label === tab) ?? BLOCK_GROUPS[0];
 
   return (
-    <div className="pointer-events-auto glass rounded-2xl shadow-glass animate-rise-in flex flex-col">
-      {/* Tabs */}
-      <div className="px-2 pt-2 flex items-center gap-1">
-        {BLOCK_GROUPS.map((g) => {
-          const active = g.label === tab;
-          return (
-            <button
-              key={g.label}
-              type="button"
-              onClick={() => setTab(g.label)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-mono uppercase tracking-widest transition-colors ${
-                active ? 'bg-ink-line text-fg' : 'text-fg-mute hover:text-fg'
-              }`}
-            >
-              {g.label}
-            </button>
-          );
-        })}
+    <div className="pointer-events-auto glass rounded-2xl shadow-glass animate-rise-in flex flex-col max-w-full">
+      {/* Tabs — clear segmented control */}
+      <div className="px-2 pt-2">
+        <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-ink/60 border border-ink-line/80">
+          {BLOCK_GROUPS.map((g) => {
+            const active = g.label === tab;
+            return (
+              <button
+                key={g.label}
+                type="button"
+                onClick={() => setTab(g.label)}
+                className={`px-3 py-1 rounded-md text-[11px] font-semibold uppercase tracking-widest transition-colors ${
+                  active
+                    ? 'bg-accent-cyan text-ink'
+                    : 'text-fg-mute hover:text-fg-dim'
+                }`}
+              >
+                {g.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Type row */}
@@ -123,9 +127,9 @@ export function Toolbar() {
       </div>
 
       {/* Shape + colour row */}
-      <div className="px-2 pb-2 pt-1 flex items-center gap-3 border-t border-ink-line/60">
+      <div className="px-2 pb-2 pt-1 flex items-center gap-2 sm:gap-3 border-t border-ink-line/60 overflow-x-auto max-w-[min(640px,92vw)]">
         {/* Shape pills */}
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 shrink-0">
           {SHAPE_LIST.map((s) => {
             const active = s.id === activeShape;
             return (
@@ -144,10 +148,10 @@ export function Toolbar() {
           })}
         </div>
 
-        <div className="h-5 w-px bg-ink-line" />
+        <div className="h-5 w-px bg-ink-line shrink-0" />
 
         {/* Colour tint */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <Droplet size={11} className="text-fg-mute" />
           {COLOR_SWATCHES.map((c) => {
             const isDefault = c === 'default';

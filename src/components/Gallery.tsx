@@ -1,4 +1,4 @@
-import { ArrowLeft, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, ExternalLink, Trophy } from 'lucide-react';
 import { useGallery } from '@/sui/useGallery';
 import { useApp } from '@/state/app';
 
@@ -29,6 +29,14 @@ export function Gallery() {
         >
           <ArrowLeft size={14} />
           Home
+        </button>
+        <button
+          type="button"
+          onClick={() => setScreen('leaderboard')}
+          className="btn-ghost text-sm flex items-center gap-1.5"
+        >
+          <Trophy size={14} className="text-accent-amber" />
+          Leaderboard
         </button>
         <div className="text-right">
           <p className="font-mono text-[11px] text-fg-mute uppercase tracking-widest">

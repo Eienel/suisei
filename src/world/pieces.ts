@@ -28,6 +28,10 @@ export type PieceKey =
   | 'S'
   | 'Z';
 
+export const PIECE_KEYS: readonly PieceKey[] = [
+  'DOT', 'DUO', 'LINE_3', 'TRI_L', 'LINE_4', 'SQUARE', 'T', 'L', 'S', 'Z',
+];
+
 export const PIECES: Record<PieceKey, Piece> = {
   DOT: { key: 'DOT', name: 'single', shape: [[0, 0]] },
   DUO: { key: 'DUO', name: 'duo', shape: [[0, 0], [1, 0]] },

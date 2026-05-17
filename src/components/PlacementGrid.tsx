@@ -119,7 +119,8 @@ export function PlacementGrid() {
 
   return (
     <>
-      {/* The big raycast plane (floor). */}
+      {/* The big raycast plane (floor) — sized well past the visible grid
+          so the edges fall off into fog rather than ending on a hard line. */}
       <mesh
         ref={planeRef}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -129,10 +130,12 @@ export function PlacementGrid() {
         onPointerLeave={handleLeave}
         onPointerDown={handleDown}
       >
-        <planeGeometry args={[GRID_SIZE, GRID_SIZE]} />
+        <planeGeometry args={[400, 400]} />
         <meshStandardMaterial color="#1A2336" roughness={0.95} metalness={0.05} />
       </mesh>
 
+      {/* Visible build grid — sized to match the buildable extent
+          (WORLD_HALF_EXTENT * 2 = 64), fog from the Canvas softens far edges. */}
       <gridHelper
         args={[GRID_SIZE, GRID_SIZE, '#2B3654', '#1F2840']}
         position={[0, -0.499, 0]}

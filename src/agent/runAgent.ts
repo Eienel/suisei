@@ -5,9 +5,28 @@ import type { Block } from '../types';
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
+export interface ChatTurn {
+  role: 'user' | 'assistant';
+  text: string;
+}
+
 export interface AgentRequest {
   prompt: string;
   world: Block[];
+  /**
+   * Optional reference image. Base64-encoded (no `data:` prefix) plus
+   * its mime. Gemini 2.5 Flash is multimodal and uses the image to
+   * inform the structured-output build plan.
+   */
+  image?: {
+    base64: string;
+    mimeType: string;
+  };
+  /**
+   * Recent chat turns for multi-turn / conversational planning.
+   * Order: oldest → newest. Max ~6 turns recommended for context budget.
+   */
+  history?: readonly ChatTurn[];
 }
 
 export interface AgentRunOptions {
@@ -15,23 +34,58 @@ export interface AgentRunOptions {
   signal?: AbortSignal;
 }
 
+interface GeminiPart {
+  text?: string;
+  inline_data?: { mime_type: string; data: string };
+}
+
+interface GeminiContent {
+  role: 'user' | 'model';
+  parts: GeminiPart[];
+}
+
 /**
- * Server-side core. Takes a user prompt + current world, calls Gemini
- * with strict responseSchema, validates with Zod, returns a typed
- * AgentResponse. Throws with a clear message on any failure.
+ * Server-side core. Calls Gemini with strict responseSchema, supports
+ * optional image attachment + chat history for conversational planning,
+ * validates with Zod, returns a typed AgentResponse.
  */
 export async function runAgent(
-  { prompt, world }: AgentRequest,
+  { prompt, world, image, history = [] }: AgentRequest,
   { apiKey, signal }: AgentRunOptions
 ): Promise<AgentResponse> {
   if (!apiKey) throw new Error('Missing GEMINI_API_KEY');
-  if (!prompt.trim()) throw new Error('Empty prompt');
+  if (!prompt.trim() && !image) throw new Error('Empty prompt and no image');
 
   const sys = systemPrompt();
-  const userMsg = `${describeWorld(world)}\n\nUser intent: ${prompt.trim()}`;
+  const worldContext = describeWorld(world);
+
+  // Build the conversation. The very first user turn includes the world
+  // context so the AI knows what's already on the board; follow-up turns
+  // are just text.
+  const contents: GeminiContent[] = [];
+  for (const turn of history) {
+    contents.push({
+      role: turn.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: turn.text }],
+    });
+  }
+  // Compose the latest user turn — image + fresh world context + the
+  // prompt. Always include world state because it changes between
+  // turns (the AI's previous actions or the user's manual edits).
+  const finalParts: GeminiPart[] = [];
+  if (image) {
+    finalParts.push({
+      inline_data: { mime_type: image.mimeType, data: image.base64 },
+    });
+  }
+  const intent = prompt.trim() || (image ? 'Build what the reference image shows.' : '(continue)');
+  finalParts.push({
+    text: `${worldContext}\n\nUser intent: ${intent}`,
+  });
+  contents.push({ role: 'user', parts: finalParts });
 
   const body = {
-    contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+    contents,
     systemInstruction: { parts: [{ text: sys }] },
     generationConfig: {
       temperature: 0.85,
@@ -40,8 +94,7 @@ export async function runAgent(
     },
   };
 
-  const url = `${ENDPOINT}?key=${apiKey}`;
-  const res = await fetch(url, {
+  const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),

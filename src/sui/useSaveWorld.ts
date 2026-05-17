@@ -7,7 +7,11 @@ import { Transaction } from '@mysten/sui/transactions';
 import { useCallback } from 'react';
 import { useWorld } from '@/state/world';
 import { sfx } from '@/audio/sfx';
-import { useUserWorld } from './useUserWorld';
+import {
+  useUserWorld,
+  SANDBOX_NAME_PREFIX,
+  LESSONS_NAME_PREFIX,
+} from './useUserWorld';
 import { uploadBlob, jsonToBytes } from './walrus';
 import { WORLD_PACKAGE_ID, PACKAGE_CONFIGURED } from './config';
 
@@ -18,6 +22,7 @@ interface SaveStatus {
   error: string | null;
   txDigest: string | null;
   blobId: string | null;
+  kind: 'sandbox' | 'lessons' | null;
   set: (s: Partial<Omit<SaveStatus, 'set'>>) => void;
 }
 
@@ -26,6 +31,7 @@ const useSaveStatus = create<SaveStatus>((set) => ({
   error: null,
   txDigest: null,
   blobId: null,
+  kind: null,
   set: (s) => set(s),
 }));
 
@@ -35,51 +41,76 @@ function bytes(s: string): number[] {
 }
 
 /**
- * Orchestrates "Save World":
- *  1. Serialize world state to JSON
- *  2. Upload to Walrus → get blobId / uri
- *  3. If user has no World NFT yet → moveCall mint_world(name, uri, count)
- *     else                        → moveCall update_world(world, uri, count)
- *  4. Sign + execute via the connected wallet (or Enoki zkLogin)
+ * Orchestrates Save World for either NFT kind:
+ *
+ *   kind='sandbox' → user's creative land. Mint once, update on every
+ *                    subsequent save. Anyone can visit.
+ *   kind='lessons' → the commemorative town built from quiz answers.
+ *                    Minted once when all lessons are done. Effectively
+ *                    immutable (the player has nothing to update).
+ *
+ * The on-chain `name` carries a one-letter prefix ("S:" / "L:") so
+ * useUserWorld can split kinds without fetching every Walrus blob.
  */
 export function useSaveWorld() {
   const account = useCurrentAccount();
-  const { world: userWorld, refetch } = useUserWorld();
+  const { sandbox, lessons, refetch } = useUserWorld();
   const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
   const status = useSaveStatus();
 
   const save = useCallback(
-    async ({ worldName }: { worldName?: string }) => {
+    async ({
+      worldName,
+      kind = 'sandbox',
+    }: { worldName?: string; kind?: 'sandbox' | 'lessons' } = {}) => {
       if (!PACKAGE_CONFIGURED) {
-        status.set({ phase: 'error', error: 'Move package not configured' });
+        status.set({ phase: 'error', error: 'Move package not configured', kind });
         return;
       }
       if (!account?.address) {
-        status.set({ phase: 'error', error: 'Connect a wallet first' });
+        status.set({ phase: 'error', error: 'Connect a wallet first', kind });
         return;
       }
 
-      const blocks = useWorld.getState().blocks;
-      try {
-        status.set({ phase: 'uploading', error: null, txDigest: null, blobId: null });
+      // Pull blocks from whichever world the snapshot maps to.
+      const state = useWorld.getState();
+      const blocks =
+        kind === 'lessons' ? state.lessonBlocks : state.sandboxBlocks;
 
-        const payload = { blocks, version: 1, savedAt: Date.now() };
+      if (blocks.length === 0) {
+        status.set({ phase: 'error', error: 'Nothing to save — place some blocks first', kind });
+        return;
+      }
+
+      try {
+        status.set({
+          phase: 'uploading',
+          error: null,
+          txDigest: null,
+          blobId: null,
+          kind,
+        });
+
+        const payload = { blocks, kind, version: 1, savedAt: Date.now() };
         const blob = await uploadBlob(jsonToBytes(payload));
 
         status.set({ phase: 'signing', blobId: blob.blobId });
 
+        const existing = kind === 'lessons' ? lessons : sandbox;
         const tx = new Transaction();
-        if (userWorld) {
+        if (existing) {
           tx.moveCall({
             target: `${WORLD_PACKAGE_ID}::world::update_world`,
             arguments: [
-              tx.object(userWorld.objectId),
+              tx.object(existing.objectId),
               tx.pure.vector('u8', bytes(blob.uri)),
               tx.pure.u64(blocks.length),
             ],
           });
         } else {
-          const name = (worldName ?? 'My World').slice(0, 64);
+          const prefix = kind === 'lessons' ? LESSONS_NAME_PREFIX : SANDBOX_NAME_PREFIX;
+          const display = (worldName ?? (kind === 'lessons' ? 'Crypto 101' : 'My Land')).slice(0, 60);
+          const name = `${prefix}${display}`;
           tx.moveCall({
             target: `${WORLD_PACKAGE_ID}::world::mint_world`,
             arguments: [
@@ -90,12 +121,9 @@ export function useSaveWorld() {
           });
         }
 
-        // dapp-kit and @mysten/sui resolve Transaction across nested
-        // package copies; the runtime shape matches.
         const result = await signAndExecute({ transaction: tx as never });
         sfx.sparkle();
         status.set({ phase: 'success', txDigest: result.digest });
-        // Give Sui a beat then refetch so the next save updates rather than mints.
         setTimeout(() => refetch(), 2000);
       } catch (err) {
         status.set({
@@ -104,13 +132,14 @@ export function useSaveWorld() {
         });
       }
     },
-    [account?.address, signAndExecute, userWorld, refetch, status]
+    [account?.address, signAndExecute, sandbox, lessons, refetch, status]
   );
 
   return {
     ...status,
     save,
     canSave: !!account?.address && PACKAGE_CONFIGURED,
-    hasExisting: !!userWorld,
+    hasSandbox: !!sandbox,
+    hasLessons: !!lessons,
   };
 }

@@ -7,20 +7,18 @@ import { PromptBar } from './PromptBar';
 import { NarrationOverlay } from './NarrationOverlay';
 import { HowToModal } from './HowToModal';
 import { useWorld } from '@/state/world';
-import { useApp } from '@/state/app';
-import { ArrowLeft } from 'lucide-react';
 
 /**
- * Free-play mode — the full V1 builder. Clears any leftover blocks from
- * a previous lesson build on entry so the user starts fresh.
+ * Free-play mode. The Sandbox works on its OWN persistent world —
+ * separate from the lesson-built town, anyone-visitable, the "land"
+ * a player actually keeps.
  */
 export function Sandbox() {
-  const setScreen = useApp((s) => s.setScreen);
-  const clearWorld = useWorld((s) => s.clearWorld);
+  const setMode = useWorld((s) => s.setMode);
 
   useEffect(() => {
-    clearWorld();
-  }, [clearWorld]);
+    setMode('sandbox');
+  }, [setMode]);
 
   return (
     <div className="fixed inset-0 bg-ink overflow-hidden">
@@ -33,20 +31,10 @@ export function Sandbox() {
       <HUD />
       <NarrationOverlay />
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2">
+      <div className="absolute bottom-3 sm:bottom-5 left-14 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2 sm:w-auto">
         <Toolbar />
         <PromptBar />
       </div>
-
-      {/* Back button overlaid in the corner */}
-      <button
-        type="button"
-        onClick={() => setScreen('lessons')}
-        className="absolute top-3 left-1/2 -translate-x-1/2 z-30 glass rounded-full px-3 py-1.5 text-xs font-mono text-fg-mute hover:text-fg flex items-center gap-1.5"
-      >
-        <ArrowLeft size={12} />
-        Back to lessons
-      </button>
 
       <HowToModal />
     </div>

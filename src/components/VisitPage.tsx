@@ -8,8 +8,10 @@ import type { Block as BlockData } from '@/types';
 import { BlockInstances } from './BlockInstances';
 import { DayNightCycle } from './DayNightCycle';
 import { ErrorBoundary } from './ErrorBoundary';
+import { TourPlayer } from './TourPlayer';
 import { useWorld } from '@/state/world';
-import { ArrowLeft, Copy, Check, Loader2, AlertCircle, Wand2 } from 'lucide-react';
+import { TourSchema, type Tour } from '@/agent/runTour';
+import { ArrowLeft, Copy, Check, Loader2, AlertCircle, Wand2, Play, X } from 'lucide-react';
 
 interface Props {
   address: string;
@@ -46,6 +48,10 @@ export function VisitPage({ address }: Props) {
     error: null,
   });
   const [copied, setCopied] = useState(false);
+  const [tour, setTour] = useState<Tour | null>(null);
+  const [tourStop, setTourStop] = useState(0);
+  const [tourLoading, setTourLoading] = useState(false);
+  const [tourError, setTourError] = useState<string | null>(null);
 
   const shortAddr = useMemo(
     () => `${address.slice(0, 6)}…${address.slice(-4)}`,
@@ -144,6 +150,40 @@ export function VisitPage({ address }: Props) {
     }
   };
 
+  const startTour = async () => {
+    if (state.phase !== 'ready' || tourLoading) return;
+    setTourLoading(true);
+    setTourError(null);
+    try {
+      const res = await fetch('/api/tour', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          blocks: state.blocks,
+          worldName: state.worldName,
+        }),
+      });
+      if (!res.ok) {
+        const err = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(err?.error ?? `Server ${res.status}`);
+      }
+      const parsed = TourSchema.safeParse(await res.json());
+      if (!parsed.success) throw new Error('Bad tour response');
+      setTour(parsed.data);
+      setTourStop(0);
+    } catch (err) {
+      setTourError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setTourLoading(false);
+    }
+  };
+
+  const endTour = () => {
+    setTour(null);
+    setTourStop(0);
+    setTourError(null);
+  };
+
   const remix = () => {
     if (state.phase !== 'ready') return;
     const ok = confirm(
@@ -179,7 +219,28 @@ export function VisitPage({ address }: Props) {
           {copied ? <Check size={12} className="text-accent-cyan" /> : <Copy size={12} />}
           {copied ? 'copied' : 'share'}
         </button>
-        {state.phase === 'ready' && (
+        {state.phase === 'ready' && !tour && (
+          <button
+            type="button"
+            onClick={startTour}
+            disabled={tourLoading}
+            className="pointer-events-auto rounded-xl border border-accent-violet/40 bg-accent-violet/15 text-accent-violet px-3 py-1.5 text-xs font-mono hover:bg-accent-violet/25 disabled:opacity-60 flex items-center gap-1.5"
+            title="AI-generated guided tour of this town"
+          >
+            {tourLoading ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
+            {tourLoading ? 'planning' : 'tour'}
+          </button>
+        )}
+        {tour && (
+          <button
+            type="button"
+            onClick={endTour}
+            className="pointer-events-auto rounded-xl border border-ink-line bg-ink-soft/80 backdrop-blur px-3 py-1.5 text-xs font-mono text-fg-mute hover:text-fg flex items-center gap-1.5"
+          >
+            <X size={12} /> end tour
+          </button>
+        )}
+        {state.phase === 'ready' && !tour && (
           <button
             type="button"
             onClick={remix}
@@ -210,29 +271,68 @@ export function VisitPage({ address }: Props) {
 
           <DayNightCycle />
 
-          {/* Floor */}
+          {/* Floor extends well past view so fog handles the falloff. */}
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-            <planeGeometry args={[120, 120]} />
-            <meshStandardMaterial color="#0F1422" roughness={0.95} metalness={0.05} />
+            <planeGeometry args={[400, 400]} />
+            <meshStandardMaterial color="#1A2336" roughness={0.95} metalness={0.05} />
           </mesh>
-          <gridHelper args={[64, 64, '#1F2638', '#161B2A']} position={[0, -0.499, 0]} />
+          <gridHelper args={[64, 64, '#2B3654', '#1F2840']} position={[0, -0.499, 0]} />
 
           {state.phase === 'ready' && (
             <BlockInstances blocks={state.blocks} />
           )}
 
-          <OrbitControls
-            enableDamping
-            dampingFactor={0.08}
-            autoRotate
-            autoRotateSpeed={0.6}
-            minDistance={6}
-            maxDistance={50}
-            maxPolarAngle={Math.PI / 2 - 0.05}
-            target={[0, 1, 0]}
-          />
+          {tour && (
+            <TourPlayer
+              tour={tour}
+              onAdvance={setTourStop}
+              onComplete={endTour}
+            />
+          )}
+
+          {!tour && (
+            <OrbitControls
+              enableDamping
+              dampingFactor={0.08}
+              autoRotate
+              autoRotateSpeed={0.6}
+              minDistance={6}
+              maxDistance={50}
+              maxPolarAngle={Math.PI / 2 - 0.05}
+              target={[0, 1, 0]}
+            />
+          )}
         </Canvas>
       </ErrorBoundary>
+
+      {/* Tour narration overlay */}
+      {tour && (
+        <div className="absolute bottom-20 inset-x-0 z-20 px-4 flex justify-center pointer-events-none">
+          <div
+            key={tourStop}
+            className="pointer-events-auto max-w-xl rounded-2xl border border-accent-violet/30 bg-ink-soft/85 backdrop-blur px-5 py-3 text-sm text-fg shadow-glass animate-rise-in"
+          >
+            <div className="font-mono text-[10px] uppercase tracking-widest text-accent-violet mb-1.5 flex items-center gap-2">
+              <span>{tour.title}</span>
+              <span className="text-fg-mute">·</span>
+              <span>stop {tourStop + 1} of {tour.stops.length}</span>
+            </div>
+            <p className="leading-relaxed">{tour.stops[tourStop]?.narration}</p>
+          </div>
+        </div>
+      )}
+
+      {tourError && (
+        <div className="absolute top-16 inset-x-0 z-20 px-4 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto rounded-xl bg-accent-magenta/15 border border-accent-magenta/40 px-4 py-2 text-sm text-accent-magenta flex items-center gap-2 font-mono">
+            <AlertCircle size={14} />
+            {tourError}
+            <button onClick={() => setTourError(null)} className="ml-2 opacity-70 hover:opacity-100">
+              <X size={12} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bottom badge */}
       <footer className="absolute bottom-4 inset-x-0 z-20 px-4 flex justify-center pointer-events-none">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, MousePointer, Save, Cuboid, Keyboard } from 'lucide-react';
+import { Sparkles, MousePointer, Save, Cuboid, Keyboard, MessageSquare, Paperclip } from 'lucide-react';
 import { useApp } from '@/state/app';
 
 export function HowToModal() {
@@ -44,6 +44,16 @@ export function HowToModal() {
             <span className="text-fg-dim">“build a zk learning city.”</span>{' '}
             The AI returns structured actions and the world builds itself in
             front of you. Try the chip suggestions if you’re stuck.
+          </Step>
+          <Step
+            icon={<MessageSquare size={16} className="text-accent-violet" />}
+            title="Refine in plain English"
+          >
+            After a first build, just say{' '}
+            <span className="text-fg-dim">"taller", "add water", "shift north"</span>{' '}
+            — the agent treats it as a follow-up and makes surgical edits.
+            Click <Paperclip size={11} className="inline -mt-0.5" /> to attach a
+            reference photo and it'll build the closest match.
           </Step>
           <Step
             icon={<Cuboid size={16} className="text-accent-violet" />}

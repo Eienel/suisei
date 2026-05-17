@@ -103,8 +103,8 @@ export const BLOCK_DEFS: readonly BlockDef[] = [
   },
   {
     id: 'road', label: 'Road', short: 'RD', category: 'road',
-    color: '#2A2F3D', defaultShape: 'slab',
-    blurb: 'Dark slab — pave streets, plazas, paths.',
+    color: '#5C6677', defaultShape: 'slab',
+    blurb: 'Slab of asphalt grey — pave streets, plazas, paths.',
     unlockAfterLessons: 1,
   },
   {
