@@ -4,7 +4,7 @@ import { SHAPE_LIST } from '@/world/shapes';
 import { useWorld } from '@/state/world';
 import { useApp } from '@/state/app';
 import type { BlockShape } from '@/types';
-import { Box, Layers, ArrowUpFromLine, RectangleHorizontal, Triangle, Droplet, Lock } from 'lucide-react';
+import { Box, Layers, ArrowUpFromLine, RectangleHorizontal, Triangle, TreePine, Droplet, Lock } from 'lucide-react';
 
 const COLOR_SWATCHES: readonly string[] = [
   'default',  // sentinel — use type's default
@@ -27,6 +27,7 @@ const SHAPE_ICONS: Record<BlockShape, React.ReactNode> = {
   pole: <ArrowUpFromLine size={14} />,
   panel: <RectangleHorizontal size={14} />,
   ramp: <Triangle size={14} />,
+  tree: <TreePine size={14} />,
 };
 
 /**

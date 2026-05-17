@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import type { Block as BlockData, BlockShape, BlockType, Vec3 } from '@/types';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
-import { getShapeGeometry } from '@/world/shapes';
+import { getShapeGeometry, trunkGeometry } from '@/world/shapes';
 
 interface Props {
   blocks: readonly BlockData[];
@@ -68,7 +68,11 @@ interface BlockGroup {
 function groupByTypeShape(blocks: readonly BlockData[]): BlockGroup[] {
   const map = new Map<string, BlockGroup>();
   for (const b of blocks) {
-    const shape = (b.shape ?? 'cube') as BlockShape;
+    // Forward-compat: older saves stored foliage as a cube. Always
+    // render it as a proper tree now so existing towns visibly upgrade.
+    const rawShape = (b.shape ?? 'cube') as BlockShape;
+    const shape: BlockShape =
+      b.type === 'foliage' && (rawShape === 'cube' || rawShape === 'tree') ? 'tree' : rawShape;
     const k = `${b.type}__${shape}`;
     let g = map.get(k);
     if (!g) {
@@ -117,19 +121,83 @@ function BlockGroup({
   });
 
   return (
+    <Fragment>
+      <Instances
+        geometry={geometry}
+        material={material}
+        limit={Math.max(64, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <BlockInstance
+            key={b.id}
+            block={b}
+            defaultColor={def.color}
+            selected={b.id === selectedBlockId}
+            onFaceHover={onFaceHover}
+            onFaceClick={onFaceClick}
+          />
+        ))}
+      </Instances>
+      {shape === 'tree' && (
+        <TreeTrunks blocks={blocks} onFaceHover={onFaceHover} onFaceClick={onFaceClick} />
+      )}
+    </Fragment>
+  );
+}
+
+/**
+ * Renders brown trunks underneath every tree-shaped block. Trunks
+ * have their own material so the foliage canopy's green doesn't bleed
+ * into the trunk's brown. Trunks ignore per-instance colour tint —
+ * a tree always has a brown trunk.
+ */
+function TreeTrunks({
+  blocks,
+  onFaceHover,
+  onFaceClick,
+}: {
+  blocks: BlockData[];
+  onFaceHover?: (cell: Vec3) => void;
+  onFaceClick?: (cell: Vec3, blockId: string) => void;
+}) {
+  const geometry = useMemo(() => trunkGeometry(), []);
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#A0673A',
+        roughness: 0.85,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  return (
     <Instances
       geometry={geometry}
       material={material}
       limit={Math.max(64, blocks.length * 2)}
     >
       {blocks.map((b) => (
-        <BlockInstance
-          key={b.id}
-          block={b}
-          defaultColor={def.color}
-          selected={b.id === selectedBlockId}
-          onFaceHover={onFaceHover}
-          onFaceClick={onFaceClick}
+        <Instance
+          key={b.id + '-trunk'}
+          position={b.position}
+          rotation={b.rotation}
+          onPointerMove={
+            onFaceHover
+              ? (e) => {
+                  e.stopPropagation();
+                  onFaceHover([b.position[0], b.position[1] + 1, b.position[2]]);
+                }
+              : undefined
+          }
+          onPointerDown={
+            onFaceClick
+              ? (e) => {
+                  e.stopPropagation();
+                  if (e.button !== 0) return;
+                  onFaceClick([b.position[0], b.position[1] + 1, b.position[2]], b.id);
+                }
+              : undefined
+          }
         />
       ))}
     </Instances>

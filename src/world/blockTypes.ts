@@ -108,10 +108,16 @@ export const BLOCK_DEFS: readonly BlockDef[] = [
     unlockAfterLessons: 1,
   },
   {
-    id: 'foliage', label: 'Foliage', short: 'TRE', category: 'foliage',
-    color: '#22C55E',
-    blurb: 'Hedges, treetops, parks. Stack a pole + foliage = tree.',
+    id: 'foliage', label: 'Tree', short: 'TRE', category: 'foliage',
+    color: '#22C55E', defaultShape: 'tree',
+    blurb: 'A proper tree — brown trunk + leafy green canopy. Drop one on grass or road.',
     unlockAfterLessons: 2,
+  },
+  {
+    id: 'roof', label: 'Roof', short: 'RF', category: 'timber',
+    color: '#B85A38', defaultShape: 'ramp',
+    blurb: 'Pitched terracotta roof tile. Place on top of timber walls to finish a house.',
+    unlockAfterLessons: 1,
   },
   {
     id: 'streetlight', label: 'Streetlight', short: 'LMP', category: 'light',
@@ -141,8 +147,8 @@ export const BLOCK_TYPE_IDS: readonly BlockType[] = BLOCK_DEFS.map((d) => d.id);
 /** Higher-level grouping for the palette UI. */
 export const BLOCK_GROUPS: Array<{ label: string; types: BlockType[] }> = [
   {
-    label: 'City',
-    types: ['road', 'water', 'streetlight', 'foliage', 'timber'],
+    label: 'Town',
+    types: ['timber', 'roof', 'road', 'foliage', 'streetlight', 'water'],
   },
   {
     label: 'Crypto',

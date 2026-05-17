@@ -1,5 +1,7 @@
 import { useWorld } from '@/state/world';
 import { sameCell } from '@/world/grid';
+import { BLOCK_BY_ID } from '@/world/blockTypes';
+import type { BlockType } from '@/types';
 import type { Action } from './schema.js';
 
 const STEP_MS = 90;
@@ -25,10 +27,13 @@ function applyOne(action: Action) {
   const state = useWorld.getState();
   if (action.type === 'place_block') {
     if (!action.block) return;
-    // AI builds with default cubes; the user can pick shapes / colours manually.
+    // Each block type carries a defaultShape so AI placements respect
+    // semantic geometry (foliage → tree, roof → ramp, road → slab, …).
+    // Cube remains the catch-all for types without an opinion.
+    const def = BLOCK_BY_ID[action.block as BlockType];
     state.placeBlock(action.block as never, action.position, {
       rotation: action.rotation ?? [0, 0, 0],
-      shape: 'cube',
+      shape: def?.defaultShape ?? 'cube',
       color: null,
     });
   } else if (action.type === 'remove_block') {

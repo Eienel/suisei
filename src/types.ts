@@ -21,10 +21,11 @@ export type BlockType =
   | 'water'
   | 'foliage'
   | 'streetlight'
-  | 'timber';
+  | 'timber'
+  | 'roof';
 
 /** Geometry variants — turns voxels into architecture. */
-export type BlockShape = 'cube' | 'slab' | 'pole' | 'panel' | 'ramp';
+export type BlockShape = 'cube' | 'slab' | 'pole' | 'panel' | 'ramp' | 'tree';
 
 export type Vec3 = [number, number, number];
 

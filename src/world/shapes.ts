@@ -55,12 +55,31 @@ function wedge(): THREE.BufferGeometry {
   return g;
 }
 
+/**
+ * Tree canopy — chunky icosahedron that reads as leafy from far away
+ * but stays low-poly. Rendered with a separate trunk mesh in
+ * BlockInstances so the colours don't bleed.
+ */
+function canopy(): THREE.BufferGeometry {
+  const g = new THREE.IcosahedronGeometry(CELL * 0.42, 0);
+  g.translate(0, CELL * 0.18, 0); // sit above the trunk
+  return g;
+}
+
+/** Tree trunk — narrow brown cylinder, slightly off the ground. */
+export function trunkGeometry(): THREE.BufferGeometry {
+  const g = new THREE.CylinderGeometry(CELL * 0.11, CELL * 0.14, CELL * 0.65, 8);
+  g.translate(0, -CELL * 0.18, 0); // base at -0.5, top meets the canopy
+  return g;
+}
+
 export const SHAPES: Record<BlockShape, ShapeDef> = {
   cube: { id: 'cube', label: 'Cube', build: () => box(CELL, CELL, CELL) },
   slab: { id: 'slab', label: 'Slab', build: () => box(CELL, CELL * 0.32, CELL, -CELL * 0.34) },
   pole: { id: 'pole', label: 'Pole', build: () => box(CELL * 0.34, CELL, CELL * 0.34) },
   panel: { id: 'panel', label: 'Panel', build: () => box(CELL, CELL, CELL * 0.2) },
   ramp: { id: 'ramp', label: 'Ramp', build: () => wedge() },
+  tree: { id: 'tree', label: 'Tree', build: () => canopy() },
 };
 
 export const SHAPE_LIST: readonly ShapeDef[] = Object.values(SHAPES);
