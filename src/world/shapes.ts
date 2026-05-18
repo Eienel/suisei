@@ -11,7 +11,7 @@ import type { BlockShape } from '@/types';
  * base at y = -0.5 (so a slab lies on the ground, a pole stands up).
  */
 
-const CELL = 0.94; // slightly under 1 so neighbours read as separate bricks
+const CELL = 1.0;
 
 export interface ShapeDef {
   id: BlockShape;
