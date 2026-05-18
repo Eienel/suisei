@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft, Volume2, VolumeX, Music } from 'lucide-react';
 import { useWorld } from '@/state/world';
 import { useApp } from '@/state/app';
 import { sfx } from '@/audio/sfx';
@@ -81,6 +81,7 @@ export function HUD() {
           <span className="hidden md:inline-flex glass rounded-lg px-2.5 py-1.5 text-xs font-mono text-fg-dim">
             {blocks.length} blocks
           </span>
+          <TrackSelector />
           <MuteToggle />
           <SaveWorldButton />
           <AuthButton />
@@ -208,6 +209,26 @@ function Logomark() {
         }}
       />
     </div>
+  );
+}
+
+/** Cycles through music tracks; shows current track name on sm+. */
+function TrackSelector() {
+  const [label, setLabel] = useState(() => music.getTrackLabel());
+  const cycle = () => {
+    music.nextTrack();
+    setLabel(music.getTrackLabel());
+  };
+  return (
+    <button
+      type="button"
+      onClick={cycle}
+      title={`Now playing: ${label} — click to switch track`}
+      className="glass rounded-lg px-2.5 py-1.5 text-fg-mute hover:text-fg flex items-center gap-1.5 transition-colors"
+    >
+      <Music size={14} />
+      <span className="hidden sm:inline text-xs font-mono">{label}</span>
+    </button>
   );
 }
 
