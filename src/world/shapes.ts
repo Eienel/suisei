@@ -55,12 +55,96 @@ function wedge(): THREE.BufferGeometry {
   return g;
 }
 
+/**
+ * Tree canopy — chunky icosahedron that reads as leafy from far away
+ * but stays low-poly. Rendered with a separate trunk mesh in
+ * BlockInstances so the colours don't bleed.
+ */
+function canopy(): THREE.BufferGeometry {
+  const g = new THREE.IcosahedronGeometry(CELL * 0.42, 0);
+  g.translate(0, CELL * 0.18, 0); // sit above the trunk
+  return g;
+}
+
+/** Tree trunk — narrow brown cylinder, slightly off the ground. */
+export function trunkGeometry(): THREE.BufferGeometry {
+  const g = new THREE.CylinderGeometry(CELL * 0.11, CELL * 0.14, CELL * 0.65, 8);
+  g.translate(0, -CELL * 0.18, 0); // base at -0.5, top meets the canopy
+  return g;
+}
+
+/**
+ * Inset door panel — a darker plank that sits inside a timber frame.
+ * 60% wide, 85% tall, pushed forward 0.06 so it reads as a real door
+ * recessed into the wall. Used by the door block's overlay render.
+ */
+export function doorPanelGeometry(): THREE.BufferGeometry {
+  return box(CELL * 0.6, CELL * 0.85, CELL * 0.04, -CELL * 0.04);
+}
+
+/** Tiny brass knob — sits on the right edge of the door panel. */
+export function doorKnobGeometry(): THREE.BufferGeometry {
+  const g = new THREE.SphereGeometry(CELL * 0.045, 8, 8);
+  g.translate(CELL * 0.22, -CELL * 0.05, 0);
+  return g;
+}
+
+/**
+ * Window glass pane — sits inside a timber frame. Slightly bigger than
+ * the door knob, slim, and a hair forward so the frame reads behind it.
+ */
+export function windowPaneGeometry(): THREE.BufferGeometry {
+  return box(CELL * 0.55, CELL * 0.55, CELL * 0.05, CELL * 0.02);
+}
+
+/**
+ * A few thin green blades that sit on top of a grass slab, giving it
+ * texture from a distance. Three small boxes at fixed offsets so the
+ * pattern reads as deliberate clumps not noise.
+ */
+export function grassTuftsGeometry(): THREE.BufferGeometry {
+  const blade = (x: number, z: number, h = CELL * 0.22) =>
+    box(CELL * 0.07, h, CELL * 0.07, -CELL * 0.34 + h / 2)
+      .translate(x, 0, z);
+
+  const a = blade(-CELL * 0.22, -CELL * 0.18, CELL * 0.26);
+  const b = blade(CELL * 0.18, -CELL * 0.12, CELL * 0.2);
+  const c = blade(CELL * 0.04, CELL * 0.24, CELL * 0.24);
+  const arr = (g: THREE.BufferGeometry) => g.attributes.position.array as Float32Array;
+  const ap = arr(a), bp = arr(b), cp = arr(c);
+  const merged = new Float32Array(ap.length + bp.length + cp.length);
+  merged.set(ap, 0);
+  merged.set(bp, ap.length);
+  merged.set(cp, ap.length + bp.length);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(merged, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+/** Window cross bar (one horizontal + one vertical). Two thin boxes. */
+export function windowCrossGeometry(): THREE.BufferGeometry {
+  const horiz = box(CELL * 0.6, CELL * 0.06, CELL * 0.06, CELL * 0.02);
+  const vert = box(CELL * 0.06, CELL * 0.6, CELL * 0.06, CELL * 0.02);
+  // Merge by hand — both share the same vertex / index layout
+  const a = horiz.attributes.position.array as Float32Array;
+  const b = vert.attributes.position.array as Float32Array;
+  const merged = new Float32Array(a.length + b.length);
+  merged.set(a, 0);
+  merged.set(b, a.length);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(merged, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
 export const SHAPES: Record<BlockShape, ShapeDef> = {
   cube: { id: 'cube', label: 'Cube', build: () => box(CELL, CELL, CELL) },
   slab: { id: 'slab', label: 'Slab', build: () => box(CELL, CELL * 0.32, CELL, -CELL * 0.34) },
   pole: { id: 'pole', label: 'Pole', build: () => box(CELL * 0.34, CELL, CELL * 0.34) },
   panel: { id: 'panel', label: 'Panel', build: () => box(CELL, CELL, CELL * 0.2) },
   ramp: { id: 'ramp', label: 'Ramp', build: () => wedge() },
+  tree: { id: 'tree', label: 'Tree', build: () => canopy() },
 };
 
 export const SHAPE_LIST: readonly ShapeDef[] = Object.values(SHAPES);

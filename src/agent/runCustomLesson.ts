@@ -6,10 +6,10 @@
  */
 
 import { z } from 'zod';
-import { BLOCK_TYPE_IDS } from '../world/blockTypes';
-import { PIECE_KEYS } from '../world/pieces';
-import type { BlockType } from '../types';
-import type { PieceKey } from '../world/pieces';
+import { BLOCK_TYPE_IDS } from '../world/blockTypes.js';
+import { PIECE_KEYS } from '../world/pieces.js';
+import type { BlockType } from '../types.js';
+import type { PieceKey } from '../world/pieces.js';
 
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;

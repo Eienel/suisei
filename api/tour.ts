@@ -1,5 +1,5 @@
-import { runTour } from '../src/agent/runTour';
-import type { Block } from '../src/types';
+import { runTour } from '../src/agent/runTour.js';
+import type { Block } from '../src/types.js';
 
 /**
  * POST /api/tour — generate a guided tour for a snapshot of blocks.

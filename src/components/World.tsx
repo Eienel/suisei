@@ -16,6 +16,7 @@ export function World() {
   const blocks = useWorld((s) => s.blocks);
   const selectedBlockId = useWorld((s) => s.selectedBlockId);
   const tool = useWorld((s) => s.tool);
+  const mode = useWorld((s) => s.mode);
   const activeBlockType = useWorld((s) => s.activeBlockType);
   const pendingPiece = useWorld((s) => s.pendingPiece);
   const setSelected = useWorld((s) => s.setSelected);
@@ -24,12 +25,17 @@ export function World() {
   const placeBlock = useWorld((s) => s.placeBlock);
   const commitPiece = useWorld((s) => s.commitPiece);
 
+  // In lessons mode the only legal placement is committing an earned
+  // piece — freeform clicks should NOT drop blocks on top of the
+  // quiz-built town. This is enforced here and in PlacementGrid.
+  const allowFreeformPlacement = mode !== 'lessons';
+
   const handleFaceHover = useCallback(
     (cell: Vec3) => {
       if (pendingPiece) setPieceHover(cell);
-      else if (tool === 'place') setHoveredCell(cell);
+      else if (tool === 'place' && allowFreeformPlacement) setHoveredCell(cell);
     },
-    [pendingPiece, tool, setPieceHover, setHoveredCell]
+    [pendingPiece, tool, allowFreeformPlacement, setPieceHover, setHoveredCell]
   );
 
   const handleFaceClick = useCallback(
@@ -44,14 +50,14 @@ export function World() {
         }
         return;
       }
-      if (tool === 'place') {
+      if (tool === 'place' && allowFreeformPlacement) {
         const placed = placeBlock(activeBlockType, cell);
         if (placed) sfx.snap(cell[1]);
         return;
       }
       setSelected(blockId);
     },
-    [pendingPiece, tool, activeBlockType, commitPiece, placeBlock, setSelected]
+    [pendingPiece, tool, allowFreeformPlacement, activeBlockType, commitPiece, placeBlock, setSelected]
   );
 
   return (

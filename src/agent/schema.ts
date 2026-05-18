@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { BLOCK_TYPE_IDS } from '../world/blockTypes';
-import { WORLD_HALF_EXTENT } from '../world/grid';
+import { BLOCK_TYPE_IDS } from '../world/blockTypes.js';
+import { WORLD_HALF_EXTENT } from '../world/grid.js';
 
 const EXTENT = WORLD_HALF_EXTENT;
 

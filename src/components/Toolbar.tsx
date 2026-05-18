@@ -3,8 +3,9 @@ import { BLOCK_BY_ID, BLOCK_GROUPS, isBlockUnlocked } from '@/world/blockTypes';
 import { SHAPE_LIST } from '@/world/shapes';
 import { useWorld } from '@/state/world';
 import { useApp } from '@/state/app';
+import { sfx } from '@/audio/sfx';
 import type { BlockShape } from '@/types';
-import { Box, Layers, ArrowUpFromLine, RectangleHorizontal, Triangle, Droplet, Lock } from 'lucide-react';
+import { Box, Layers, ArrowUpFromLine, RectangleHorizontal, Triangle, TreePine, Droplet, Lock } from 'lucide-react';
 
 const COLOR_SWATCHES: readonly string[] = [
   'default',  // sentinel — use type's default
@@ -27,6 +28,7 @@ const SHAPE_ICONS: Record<BlockShape, React.ReactNode> = {
   pole: <ArrowUpFromLine size={14} />,
   panel: <RectangleHorizontal size={14} />,
   ramp: <Triangle size={14} />,
+  tree: <TreePine size={14} />,
 };
 
 /**
@@ -59,7 +61,7 @@ export function Toolbar() {
               <button
                 key={g.label}
                 type="button"
-                onClick={() => setTab(g.label)}
+                onClick={() => { setTab(g.label); sfx.tick(); }}
                 className={`px-3 py-1 rounded-md text-[11px] font-semibold uppercase tracking-widest transition-colors ${
                   active
                     ? 'bg-accent-cyan text-ink'
@@ -89,6 +91,7 @@ export function Toolbar() {
                 if (!unlocked) return;
                 setActiveBlockType(def.id);
                 if (def.defaultShape) setActiveShape(def.defaultShape);
+                sfx.tick();
               }}
               title={
                 unlocked
@@ -136,7 +139,7 @@ export function Toolbar() {
               <button
                 key={s.id}
                 type="button"
-                onClick={() => setActiveShape(s.id)}
+                onClick={() => { setActiveShape(s.id); sfx.tick(); }}
                 title={s.label}
                 className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${
                   active ? 'bg-accent-cyan text-ink' : 'text-fg-mute hover:text-fg hover:bg-ink-line/60'
@@ -160,7 +163,7 @@ export function Toolbar() {
               <button
                 key={c}
                 type="button"
-                onClick={() => setActiveColor(isDefault ? null : c)}
+                onClick={() => { setActiveColor(isDefault ? null : c); sfx.tick(); }}
                 title={isDefault ? 'Default colour' : c}
                 className={`w-5 h-5 rounded-full transition-all ${
                   isActive ? 'ring-2 ring-accent-cyan ring-offset-2 ring-offset-ink-soft' : ''

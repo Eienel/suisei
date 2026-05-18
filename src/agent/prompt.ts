@@ -1,5 +1,5 @@
-import { BLOCK_DEFS } from '../world/blockTypes';
-import type { Block } from '../types';
+import { BLOCK_DEFS } from '../world/blockTypes.js';
+import type { Block } from '../types.js';
 
 /**
  * The system prompt that turns Gemini into a 3D world architect.
@@ -33,6 +33,9 @@ BLOCK CATALOG (use the block whose category matches the concept):
 ${blockCatalog}
 
 DESIGN PRINCIPLES:
+- Build RECOGNIZABLE structures, not abstract block clusters. If the
+  user asks for a house, build something that LOOKS like a house. If
+  they ask for a park, scatter trees on grass and add a path.
 - Group blocks by concept into clusters / districts.
 - Use height for hierarchy: governance and contract blocks make tall
   pillars; data and AI nodes form clustered grids; security forms
@@ -42,6 +45,35 @@ DESIGN PRINCIPLES:
 - Leave space between districts so the world is readable from above.
 - Reuse a block multiple times to show repetition / scale (a row of
   bunkers, a wall of data cores, etc.).
+
+PATTERN COOKBOOK (concrete recipes — follow these closely):
+- HOUSE (small):
+    - Floor 3×3 of timber slabs at y=0 (or skip if on flat ground)
+    - Walls at y=1 around the perimeter:
+        * Front centre cell: a "door" block (panels facing the street)
+        * Front corners + sides: "window" blocks for the rest of the
+          front row, and "timber" for the back and side walls
+    - Roof: 3×3 of "roof" blocks at y=2 (they auto-render as pitched tiles)
+    - 1 foliage tree next to the house
+- TREE: a single foliage block at y=0. It already renders as
+  trunk + leafy canopy. DON'T stack timber + foliage manually — just
+  use foliage on its own. Repeat across a 5×5 area for a forest.
+- GRASS / LAWN: grass blocks at y=0. Cover any open ground around a
+  house, park, or pond — a 5×5 grass patch reads as a yard. Don't
+  use grass on roads or water.
+- PARK: a base of grass blocks (5×5 or larger), 4-8 foliage trees
+  scattered on top, 1-2 road slabs as paths, optionally a small water
+  pond (3-4 water blocks together).
+- TOWER (crypto-themed): stack 5-8 of the same vertical block type
+  (contract_obelisk, governance_marble, data_core) at the same x,z
+  going up in y. Add a token_prism or zk_crystal on top as a finial.
+- WALL / FENCE: a single row of timber blocks at y=0, or
+  security_bunker blocks for a defensive look.
+- LAKE / POND: 4-12 water blocks in a roughly circular cluster at y=0.
+- ROAD: a row of road blocks at y=0. Pair with streetlights every
+  3-4 cells.
+- CITY BLOCK: a 5×5 area of pavement (road blocks at y=0) bordered by
+  small houses (3-4 tiny houses) and trees.
 
 NARRATION:
 - One short sentence, first person, present tense.

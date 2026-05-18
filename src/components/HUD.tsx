@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
-import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Trash2, RotateCw, MousePointer, Plus, HelpCircle, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import { useWorld } from '@/state/world';
 import { useApp } from '@/state/app';
+import { sfx } from '@/audio/sfx';
+import { music } from '@/audio/music';
 import { AuthButton } from './AuthButton';
 import { SaveWorldButton } from './SaveWorldButton';
 
@@ -21,11 +23,12 @@ export function HUD() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA') return;
       if (e.key === 'Escape') setSelected(null);
-      if (e.key === 'v' || e.key === 'V') setTool('select');
-      if (e.key === 'b' || e.key === 'B') setTool('place');
+      if (e.key === 'v' || e.key === 'V') { setTool('select'); sfx.tick(); }
+      if (e.key === 'b' || e.key === 'B') { setTool('place'); sfx.tick(); }
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedBlockId) {
         e.preventDefault();
         removeBlock(selectedBlockId);
+        sfx.pop();
       }
       if (e.key === 'r' || e.key === 'R') {
         if (!selectedBlockId) return;
@@ -37,6 +40,7 @@ export function HUD() {
           block.rotation[2],
         ];
         rotateBlock(selectedBlockId, next);
+        sfx.whoosh();
       }
     };
     window.addEventListener('keydown', onKey);
@@ -77,6 +81,7 @@ export function HUD() {
           <span className="hidden md:inline-flex glass rounded-lg px-2.5 py-1.5 text-xs font-mono text-fg-dim">
             {blocks.length} blocks
           </span>
+          <MuteToggle />
           <SaveWorldButton />
           <AuthButton />
         </div>
@@ -87,14 +92,14 @@ export function HUD() {
         <div className="glass rounded-2xl p-1 sm:p-1.5 flex flex-col gap-1 shadow-glass">
           <ToolBtn
             active={tool === 'place'}
-            onClick={() => setTool('place')}
+            onClick={() => { setTool('place'); sfx.tick(); }}
             label="Place"
             hotkey="B"
             icon={<Plus size={16} />}
           />
           <ToolBtn
             active={tool === 'select'}
-            onClick={() => setTool('select')}
+            onClick={() => { setTool('select'); sfx.tick(); }}
             label="Select"
             hotkey="V"
             icon={<MousePointer size={16} />}
@@ -112,6 +117,7 @@ export function HUD() {
                 block.rotation[1] + Math.PI / 2,
                 block.rotation[2],
               ]);
+              sfx.whoosh();
             }}
             label="Rotate"
             hotkey="R"
@@ -120,7 +126,11 @@ export function HUD() {
           <ToolBtn
             active={false}
             disabled={!selectedBlockId}
-            onClick={() => selectedBlockId && removeBlock(selectedBlockId)}
+            onClick={() => {
+              if (!selectedBlockId) return;
+              removeBlock(selectedBlockId);
+              sfx.pop();
+            }}
             label="Delete"
             hotkey="⌫"
             icon={<Trash2 size={16} />}
@@ -198,5 +208,32 @@ function Logomark() {
         }}
       />
     </div>
+  );
+}
+
+/**
+ * Single master mute — silences SFX and the ambient music together,
+ * persisted to localStorage as bb-muted so the preference sticks
+ * across sessions.
+ */
+function MuteToggle() {
+  const [muted, setMutedState] = useState(() => sfx.isMuted());
+  const toggle = () => {
+    const next = !muted;
+    sfx.setMuted(next);
+    music.setMuted(next);
+    if (!next) music.start(); // unmute → resume the loop
+    setMutedState(next);
+  };
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={muted ? 'Unmute audio' : 'Mute audio'}
+      title={muted ? 'Sound off' : 'Sound on'}
+      className="glass rounded-lg px-2.5 py-1.5 text-fg-mute hover:text-fg flex items-center transition-colors"
+    >
+      {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+    </button>
   );
 }

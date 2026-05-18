@@ -4,7 +4,15 @@ import * as THREE from 'three';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import type { Block as BlockData, BlockShape, BlockType, Vec3 } from '@/types';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
-import { getShapeGeometry } from '@/world/shapes';
+import {
+  getShapeGeometry,
+  trunkGeometry,
+  doorPanelGeometry,
+  doorKnobGeometry,
+  windowPaneGeometry,
+  windowCrossGeometry,
+  grassTuftsGeometry,
+} from '@/world/shapes';
 
 interface Props {
   blocks: readonly BlockData[];
@@ -68,7 +76,11 @@ interface BlockGroup {
 function groupByTypeShape(blocks: readonly BlockData[]): BlockGroup[] {
   const map = new Map<string, BlockGroup>();
   for (const b of blocks) {
-    const shape = (b.shape ?? 'cube') as BlockShape;
+    // Forward-compat: older saves stored foliage as a cube. Always
+    // render it as a proper tree now so existing towns visibly upgrade.
+    const rawShape = (b.shape ?? 'cube') as BlockShape;
+    const shape: BlockShape =
+      b.type === 'foliage' && (rawShape === 'cube' || rawShape === 'tree') ? 'tree' : rawShape;
     const k = `${b.type}__${shape}`;
     let g = map.get(k);
     if (!g) {
@@ -117,19 +129,238 @@ function BlockGroup({
   });
 
   return (
+    <Fragment>
+      <Instances
+        geometry={geometry}
+        material={material}
+        limit={Math.max(64, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <BlockInstance
+            key={b.id}
+            block={b}
+            defaultColor={def.color}
+            selected={b.id === selectedBlockId}
+            onFaceHover={onFaceHover}
+            onFaceClick={onFaceClick}
+          />
+        ))}
+      </Instances>
+      {shape === 'tree' && (
+        <TreeTrunks blocks={blocks} onFaceHover={onFaceHover} onFaceClick={onFaceClick} />
+      )}
+      {type === 'door' && <DoorDetails blocks={blocks} />}
+      {type === 'window' && <WindowDetails blocks={blocks} nightFactor={nightFactor} />}
+      {type === 'grass' && <GrassTufts blocks={blocks} />}
+    </Fragment>
+  );
+}
+
+/**
+ * Renders brown trunks underneath every tree-shaped block. Trunks
+ * have their own material so the foliage canopy's green doesn't bleed
+ * into the trunk's brown. Trunks ignore per-instance colour tint —
+ * a tree always has a brown trunk.
+ */
+function TreeTrunks({
+  blocks,
+  onFaceHover,
+  onFaceClick,
+}: {
+  blocks: BlockData[];
+  onFaceHover?: (cell: Vec3) => void;
+  onFaceClick?: (cell: Vec3, blockId: string) => void;
+}) {
+  const geometry = useMemo(() => trunkGeometry(), []);
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#A0673A',
+        roughness: 0.85,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  return (
     <Instances
       geometry={geometry}
       material={material}
       limit={Math.max(64, blocks.length * 2)}
     >
       {blocks.map((b) => (
-        <BlockInstance
-          key={b.id}
-          block={b}
-          defaultColor={def.color}
-          selected={b.id === selectedBlockId}
-          onFaceHover={onFaceHover}
-          onFaceClick={onFaceClick}
+        <Instance
+          key={b.id + '-trunk'}
+          position={b.position}
+          rotation={b.rotation}
+          onPointerMove={
+            onFaceHover
+              ? (e) => {
+                  e.stopPropagation();
+                  onFaceHover([b.position[0], b.position[1] + 1, b.position[2]]);
+                }
+              : undefined
+          }
+          onPointerDown={
+            onFaceClick
+              ? (e) => {
+                  e.stopPropagation();
+                  if (e.button !== 0) return;
+                  onFaceClick([b.position[0], b.position[1] + 1, b.position[2]], b.id);
+                }
+              : undefined
+          }
+        />
+      ))}
+    </Instances>
+  );
+}
+
+/**
+ * Door — frame is the standard panel render; this overlay adds the
+ * inset darker plank + a brass knob so the panel reads as a real
+ * door instead of just a slab of wood.
+ */
+function DoorDetails({ blocks }: { blocks: BlockData[] }) {
+  const panelGeom = useMemo(() => doorPanelGeometry(), []);
+  const knobGeom = useMemo(() => doorKnobGeometry(), []);
+  const panelMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#5C3C1E',
+        roughness: 0.7,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  const knobMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#D4A14A',
+        roughness: 0.25,
+        metalness: 0.85,
+      }),
+    [],
+  );
+  return (
+    <Fragment>
+      <Instances
+        geometry={panelGeom}
+        material={panelMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-door-panel'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+      <Instances
+        geometry={knobGeom}
+        material={knobMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-door-knob'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+    </Fragment>
+  );
+}
+
+/**
+ * Window — frame is the standard panel render; this overlay adds the
+ * cyan glass pane (emissive at night so windows glow) and a thin cross
+ * mullion that gives the window its shape.
+ */
+function WindowDetails({ blocks, nightFactor = 0 }: { blocks: BlockData[]; nightFactor?: number }) {
+  const paneGeom = useMemo(() => windowPaneGeometry(), []);
+  const crossGeom = useMemo(() => windowCrossGeometry(), []);
+  const paneMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#7BD4FF',
+        emissive: new THREE.Color('#FFD27A'),
+        emissiveIntensity: 0.2 + nightFactor * 2.2,
+        roughness: 0.15,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.85,
+      }),
+    [nightFactor],
+  );
+  const crossMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#5C3C1E',
+        roughness: 0.7,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  return (
+    <Fragment>
+      <Instances
+        geometry={paneGeom}
+        material={paneMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-window-pane'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+      <Instances
+        geometry={crossGeom}
+        material={crossMat}
+        limit={Math.max(32, blocks.length * 2)}
+      >
+        {blocks.map((b) => (
+          <Instance
+            key={b.id + '-window-cross'}
+            position={b.position}
+            rotation={b.rotation}
+          />
+        ))}
+      </Instances>
+    </Fragment>
+  );
+}
+
+/**
+ * A few thin green blades on top of every grass slab — gives the
+ * lawn texture from above without a heavy material/shader.
+ */
+function GrassTufts({ blocks }: { blocks: BlockData[] }) {
+  const geometry = useMemo(() => grassTuftsGeometry(), []);
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#7BC74A',
+        roughness: 0.8,
+        metalness: 0,
+      }),
+    [],
+  );
+  return (
+    <Instances
+      geometry={geometry}
+      material={material}
+      limit={Math.max(64, blocks.length * 2)}
+    >
+      {blocks.map((b) => (
+        <Instance
+          key={b.id + '-tuft'}
+          position={b.position}
+          rotation={b.rotation}
         />
       ))}
     </Instances>
