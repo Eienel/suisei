@@ -1,52 +1,55 @@
 /**
- * Module-scoped, mutable sky/time state.
+ * Real-world-time sky state. Samples the system clock each frame so the
+ * game's day/night matches the player's actual local time — no artificial
+ * timers. Sunrise ≈ 6 AM, sunset ≈ 6 PM in the player's timezone.
  *
- * Timing: 30 min bright day → 1 min dusk → 3 min deep night → 1 min dawn → repeat.
- * nightFactor: 0 = full day, 1 = full night.
- * sunAngle: 0 = sunrise (east horizon), π/2 = noon, π = sunset (west horizon).
+ * nightFactor: 0 = full day, 1 = full night. Smoothly transitions through
+ *   a ~30-min twilight band around sunrise/sunset (civil twilight model).
+ *
+ * sunAngle: 0 = sunrise (east horizon), π/2 = solar noon,
+ *           π = sunset (west horizon), 3π/2 = midnight (underground).
  */
 export const sky = {
+  /** Fraction of the 24-hour day (0 = midnight, 0.25 = 6 AM, 0.5 = noon). */
   t: 0,
+  /** 0 = full day, 1 = full night. */
   nightFactor: 0,
+  /** Radians — drives directional-light position. */
   sunAngle: 0,
 };
 
-const DAY_SECS   = 1800; // 30 min full daylight
-const DUSK_SECS  = 60;   // 1 min sunset transition
-const NIGHT_SECS = 180;  // 3 min deep night
-const DAWN_SECS  = 60;   // 1 min sunrise transition
-export const CYCLE_SECONDS = DAY_SECS + DUSK_SECS + NIGHT_SECS + DAWN_SECS; // 35 min total
+/** Kept for callers that reference it; now represents seconds in a full day. */
+export const CYCLE_SECONDS = 86400;
 
-const DUSK_START  = DAY_SECS;
-const NIGHT_START = DAY_SECS + DUSK_SECS;
-const DAWN_START  = DAY_SECS + DUSK_SECS + NIGHT_SECS;
+/** Width of the twilight transition band (sin of ~7°). */
+const TWILIGHT = 0.12;
 
-function computeState(elapsed: number) {
-  if (elapsed < DUSK_START) {
-    sky.nightFactor = 0;
-  } else if (elapsed < NIGHT_START) {
-    sky.nightFactor = (elapsed - DUSK_START) / DUSK_SECS;
-  } else if (elapsed < DAWN_START) {
-    sky.nightFactor = 1;
-  } else {
-    sky.nightFactor = 1 - (elapsed - DAWN_START) / DAWN_SECS;
-  }
-
-  // Sun above horizon during day (0 → π), below during night (π → 2π)
-  if (elapsed <= DUSK_START) {
-    sky.sunAngle = (elapsed / DUSK_START) * Math.PI;
-  } else {
-    const ne = elapsed - DUSK_START;
-    sky.sunAngle = Math.PI + (ne / (CYCLE_SECONDS - DUSK_START)) * Math.PI;
-  }
+function applyAngle(angle: number) {
+  sky.sunAngle = angle;
+  const h = Math.sin(angle); // sun height above/below horizon
+  sky.nightFactor =
+    h >= TWILIGHT  ? 0 :
+    h <= -TWILIGHT ? 1 :
+    0.5 - h / (2 * TWILIGHT);
 }
 
-export function advanceSky(deltaSeconds: number) {
-  sky.t = (sky.t + deltaSeconds / CYCLE_SECONDS) % 1;
-  computeState(sky.t * CYCLE_SECONDS);
+/** Called every frame by DayNightCycle. Reads the real system clock. */
+export function advanceSky(_dt: number) {
+  const now = new Date();
+  const s =
+    now.getHours()        * 3600 +
+    now.getMinutes()      * 60   +
+    now.getSeconds()             +
+    now.getMilliseconds() / 1000;
+  sky.t = s / 86400;
+  // sunAngle orbit: 0 at 6 AM, π/2 at noon, π at 6 PM, 3π/2 at midnight.
+  const angle = ((sky.t - 0.25) * Math.PI * 2 + Math.PI * 2) % (Math.PI * 2);
+  applyAngle(angle);
 }
 
+/** Manual override for demos/tests; next advanceSky() call will revert to real time. */
 export function setSkyPhase(phase: number) {
   sky.t = ((phase % 1) + 1) % 1;
-  computeState(sky.t * CYCLE_SECONDS);
+  const angle = ((sky.t - 0.25) * Math.PI * 2 + Math.PI * 2) % (Math.PI * 2);
+  applyAngle(angle);
 }
