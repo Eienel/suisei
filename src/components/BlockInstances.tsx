@@ -7,7 +7,8 @@ import { BLOCK_BY_ID } from '@/world/blockTypes';
 import {
   getShapeGeometry,
   trunkGeometry,
-  doorPanelGeometry,
+  doorBodyGeometry,
+  doorPanelsGeometry,
   doorKnobGeometry,
   windowPaneGeometry,
   windowCrossGeometry,
@@ -221,13 +222,26 @@ function TreeTrunks({
  * door instead of just a slab of wood.
  */
 function DoorDetails({ blocks }: { blocks: BlockData[] }) {
-  const panelGeom = useMemo(() => doorPanelGeometry(), []);
+  const bodyGeom = useMemo(() => doorBodyGeometry(), []);
+  const panelsGeom = useMemo(() => doorPanelsGeometry(), []);
   const knobGeom = useMemo(() => doorKnobGeometry(), []);
-  const panelMat = useMemo(
+  // Dark walnut door body — clear contrast against the lighter timber frame.
+  const bodyMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#5C3C1E',
-        roughness: 0.7,
+        color: '#3A2818',
+        roughness: 0.75,
+        metalness: 0.05,
+      }),
+    [],
+  );
+  // Raised inset panels in caramel oak — visibly lighter than the body so
+  // they read as proper applied trim, not just a paint stripe.
+  const panelsMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: '#7A5430',
+        roughness: 0.6,
         metalness: 0.05,
       }),
     [],
@@ -235,38 +249,28 @@ function DoorDetails({ blocks }: { blocks: BlockData[] }) {
   const knobMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#D4A14A',
-        roughness: 0.25,
-        metalness: 0.85,
+        color: '#E8B954',
+        roughness: 0.2,
+        metalness: 0.9,
       }),
     [],
   );
+  const limit = Math.max(32, blocks.length * 2);
   return (
     <Fragment>
-      <Instances
-        geometry={panelGeom}
-        material={panelMat}
-        limit={Math.max(32, blocks.length * 2)}
-      >
+      <Instances geometry={bodyGeom} material={bodyMat} limit={limit}>
         {blocks.map((b) => (
-          <Instance
-            key={b.id + '-door-panel'}
-            position={b.position}
-            rotation={b.rotation}
-          />
+          <Instance key={b.id + '-door-body'} position={b.position} rotation={b.rotation} />
         ))}
       </Instances>
-      <Instances
-        geometry={knobGeom}
-        material={knobMat}
-        limit={Math.max(32, blocks.length * 2)}
-      >
+      <Instances geometry={panelsGeom} material={panelsMat} limit={limit}>
         {blocks.map((b) => (
-          <Instance
-            key={b.id + '-door-knob'}
-            position={b.position}
-            rotation={b.rotation}
-          />
+          <Instance key={b.id + '-door-panels'} position={b.position} rotation={b.rotation} />
+        ))}
+      </Instances>
+      <Instances geometry={knobGeom} material={knobMat} limit={limit}>
+        {blocks.map((b) => (
+          <Instance key={b.id + '-door-knob'} position={b.position} rotation={b.rotation} />
         ))}
       </Instances>
     </Fragment>

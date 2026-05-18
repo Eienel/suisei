@@ -74,27 +74,47 @@ export function trunkGeometry(): THREE.BufferGeometry {
 }
 
 /**
- * Inset door panel — a darker plank that sits inside a timber frame.
- * 60% wide, 85% tall, pushed forward 0.06 so it reads as a real door
- * recessed into the wall. Used by the door block's overlay render.
+ * Inset door panels — the recognizable parts of a real door.
+ * Composed of three separate geometries (body, raised panels, knob)
+ * so DoorDetails in BlockInstances can render each with its own material.
+ *
+ * Layered front-to-back inside the timber panel block (which is 0.2 deep):
+ *   - door body at z ≈ +0.08 (sits in front of the frame interior)
+ *   - raised inset panels at z ≈ +0.105 (read as raised trim on the door)
+ *   - brass knob at z ≈ +0.14 (visibly protrudes past the wall)
  */
-export function doorPanelGeometry(): THREE.BufferGeometry {
-  return box(CELL * 0.6, CELL * 0.85, CELL * 0.04, -CELL * 0.04);
+export function doorBodyGeometry(): THREE.BufferGeometry {
+  // Dark wood door surface — fills most of the frame but leaves a clear
+  // lintel above and slim jambs on the sides.
+  const g = box(CELL * 0.7, CELL * 0.86, CELL * 0.04, -CELL * 0.04);
+  g.translate(0, 0, CELL * 0.08);
+  return g;
 }
 
-/** Tiny brass knob — sits on the right edge of the door panel. */
+/** Two raised inset panels — classic paneled-door look (top + bottom). */
+export function doorPanelsGeometry(): THREE.BufferGeometry {
+  const top = box(CELL * 0.5, CELL * 0.28, CELL * 0.025, CELL * 0.14);
+  const bot = box(CELL * 0.5, CELL * 0.28, CELL * 0.025, -CELL * 0.22);
+  top.translate(0, 0, CELL * 0.105);
+  bot.translate(0, 0, CELL * 0.105);
+  return mergeGeoms(top, bot);
+}
+
+/** Brass knob — protrudes from the right edge of the door. */
 export function doorKnobGeometry(): THREE.BufferGeometry {
-  const g = new THREE.SphereGeometry(CELL * 0.045, 8, 8);
-  g.translate(CELL * 0.22, -CELL * 0.05, 0);
+  const g = new THREE.SphereGeometry(CELL * 0.055, 10, 8);
+  g.translate(CELL * 0.22, -CELL * 0.05, CELL * 0.14);
   return g;
 }
 
 /**
- * Window glass pane — sits inside a timber frame. Slightly bigger than
- * the door knob, slim, and a hair forward so the frame reads behind it.
+ * Window glass pane — a generous square of glass, slightly recessed
+ * inside the timber frame so the wood reads around the edges.
  */
 export function windowPaneGeometry(): THREE.BufferGeometry {
-  return box(CELL * 0.55, CELL * 0.55, CELL * 0.05, CELL * 0.02);
+  const g = box(CELL * 0.7, CELL * 0.7, CELL * 0.04, 0);
+  g.translate(0, 0, CELL * 0.075);
+  return g;
 }
 
 /**
@@ -122,20 +142,43 @@ export function grassTuftsGeometry(): THREE.BufferGeometry {
   return g;
 }
 
-/** Window cross bar (one horizontal + one vertical). Two thin boxes. */
+/**
+ * Window cross mullion — one horizontal + one vertical bar in front of
+ * the glass, splitting it into 4 panes. Thin (~5% of cell) so the glass
+ * still reads as glass, not as a wall of wood.
+ */
 export function windowCrossGeometry(): THREE.BufferGeometry {
-  const horiz = box(CELL * 0.6, CELL * 0.06, CELL * 0.06, CELL * 0.02);
-  const vert = box(CELL * 0.06, CELL * 0.6, CELL * 0.06, CELL * 0.02);
-  // Merge by hand — both share the same vertex / index layout
-  const a = horiz.attributes.position.array as Float32Array;
-  const b = vert.attributes.position.array as Float32Array;
-  const merged = new Float32Array(a.length + b.length);
-  merged.set(a, 0);
-  merged.set(b, a.length);
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(merged, 3));
-  g.computeVertexNormals();
-  return g;
+  const horiz = box(CELL * 0.72, CELL * 0.05, CELL * 0.04, 0);
+  const vert  = box(CELL * 0.05, CELL * 0.72, CELL * 0.04, 0);
+  horiz.translate(0, 0, CELL * 0.105);
+  vert.translate(0, 0, CELL * 0.105);
+  return mergeGeoms(horiz, vert);
+}
+
+/**
+ * Merge multiple BufferGeometries into one non-indexed geometry.
+ * BoxGeometry is indexed by default; if you concatenate its raw position
+ * array without indices you render garbage triangles. toNonIndexed()
+ * expands the vertices first so the merged result is renderable.
+ */
+function mergeGeoms(...geoms: THREE.BufferGeometry[]): THREE.BufferGeometry {
+  let total = 0;
+  const expanded = geoms.map((g) => {
+    const ng = g.index ? g.toNonIndexed() : g;
+    total += (ng.attributes.position.array as Float32Array).length;
+    return ng;
+  });
+  const positions = new Float32Array(total);
+  let offset = 0;
+  for (const g of expanded) {
+    const arr = g.attributes.position.array as Float32Array;
+    positions.set(arr, offset);
+    offset += arr.length;
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  out.computeVertexNormals();
+  return out;
 }
 
 export const SHAPES: Record<BlockShape, ShapeDef> = {
