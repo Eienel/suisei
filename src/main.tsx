@@ -1,5 +1,6 @@
 import { StrictMode, useEffect, useState, lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import '@fontsource/geist-sans/400.css';
 import '@fontsource/geist-sans/500.css';
 import '@fontsource/geist-sans/600.css';
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <Router />
+      <Analytics />
     </ErrorBoundary>
   </StrictMode>
 );
