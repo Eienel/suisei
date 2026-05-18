@@ -105,49 +105,41 @@ export const BLOCK_DEFS: readonly BlockDef[] = [
     id: 'road', label: 'Road', short: 'RD', category: 'road',
     color: '#5C6677', defaultShape: 'slab',
     blurb: 'Slab of asphalt grey — pave streets, plazas, paths.',
-    unlockAfterLessons: 1,
   },
   {
     id: 'foliage', label: 'Tree', short: 'TRE', category: 'foliage',
     color: '#22C55E', defaultShape: 'tree',
     blurb: 'A proper tree — brown trunk + leafy green canopy. Drop one on grass or road.',
-    unlockAfterLessons: 2,
   },
   {
     id: 'grass', label: 'Grass', short: 'GR', category: 'foliage',
     color: '#4D9C3A', defaultShape: 'slab',
     blurb: 'A flat green grass patch with a few blades on top. Perfect for lawns + meadows.',
-    unlockAfterLessons: 2,
   },
   {
     id: 'roof', label: 'Roof', short: 'RF', category: 'timber',
     color: '#B85A38', defaultShape: 'ramp',
     blurb: 'Pitched terracotta roof tile. Place on top of timber walls to finish a house.',
-    unlockAfterLessons: 1,
   },
   {
     id: 'door', label: 'Door', short: 'DR', category: 'timber',
     color: '#A0673A', defaultShape: 'panel',
     blurb: 'Wood door panel — the entrance to a house. Plant it in a wall cell.',
-    unlockAfterLessons: 1,
   },
   {
     id: 'window', label: 'Window', short: 'WN', category: 'timber',
     color: '#A0673A', defaultShape: 'panel', emitsAtNight: true,
     blurb: 'Glass window in a wood frame. Glows warm at night.',
-    unlockAfterLessons: 1,
   },
   {
     id: 'streetlight', label: 'Streetlight', short: 'LMP', category: 'light',
     color: '#FFD27A', defaultShape: 'pole', emitsAtNight: true,
     blurb: 'Glows warm at night. Line a road with these for streetlamps.',
-    unlockAfterLessons: 3,
   },
   {
     id: 'water', label: 'Water', short: 'H₂O', category: 'water',
     color: '#1E6BFF', defaultShape: 'slab', animated: true,
     blurb: 'Animated water — for rivers, lakes, moats.',
-    unlockAfterLessons: 4,
   },
 ];
 

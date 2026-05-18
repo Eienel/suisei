@@ -1,53 +1,142 @@
 /**
- * Procedural ambient music — a slow A-minor pentatonic loop generated
- * on the fly via WebAudio. No assets, ~6s loop, low volume so it sits
- * behind SFX rather than fighting them.
+ * Procedural game music — three tracks, all synthesised via WebAudio.
+ * No audio files; everything is oscillators, noise buffers, and envelopes.
  *
- * Layers:
- *   - sustained pad chord on the downbeat (A or G root, 1.5x and 2x harmonics)
- *   - low sub-bass pulse on beats 1 and 5
- *   - sparse pentatonic arpeggio (high register) sprinkled across the loop
+ * Tracks
+ *   0 "Block Party" — 130 BPM · C major · arpeggios + kick + snare  (energetic default)
+ *   1 "Chiptune"    — 95 BPM  · C major pentatonic · square/triangle (8-bit retro)
+ *   2 "Synthwave"   — 120 BPM · A minor · sawtooth lead + drums      (dark & driving)
  *
- * Browsers require a user gesture before audio starts, so start()
- * will resume() and also attach a one-shot click listener that resumes
- * if the initial start was blocked.
+ * API: music.start / stop / setMuted / isMuted / isPlaying /
+ *      music.nextTrack / music.getTrackLabel / music.getTrackCount / music.getTrackIdx
+ *
+ * Track preference is persisted to localStorage as 'bb-track'.
  */
 
 let ctx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
+let noiseBuffer: AudioBuffer | null = null;
 let playing = false;
 let timer: ReturnType<typeof setInterval> | null = null;
 let muted = readStoredMute();
+let trackIdx = readStoredTrack();
 let stepIdx = 0;
 let nextNoteTime = 0;
 let gestureCleanup: (() => void) | null = null;
 
-const STEP_SEC = 0.45; // ~133 bpm eighth notes
-const LOOK_AHEAD = 0.4; // schedule this many seconds in advance
-const PATTERN_LEN = 16; // 16 steps × 0.45s = 7.2s loop
+const LOOK_AHEAD  = 0.35;
+const PATTERN_LEN = 16;
 
-// A minor pentatonic — always reads as "calm/melodic", never dissonant
-const PENT = {
-  A3: 220.0, C4: 261.6, D4: 293.7, E4: 329.6, G4: 392.0,
-  A4: 440.0, C5: 523.3, D5: 587.3, E5: 659.3, G5: 784.0,
-};
+// ─── Note frequencies (Hz) ───────────────────────────────────────────────────
+const C3 = 130.81, E3 = 164.81, F3 = 174.61, G3 = 196.00, A3 = 220.00;
+const A4 = 440.00;
+const C5 = 523.25, D5 = 587.33, E5 = 659.25, F5 = 698.46, G5 = 783.99, A5 = 880.00;
 
+// ─── Track definitions ───────────────────────────────────────────────────────
+interface TrackDef {
+  id: string;
+  label: string;
+  stepSec: number;
+  melody: ReadonlyArray<number | null>;
+  bass: ReadonlyArray<number | null>;
+  hats: ReadonlyArray<number>;    // per-step hat velocity (0 = off)
+  kicks: ReadonlyArray<number>;   // per-step kick velocity (0 = off)
+  snares: ReadonlyArray<number>;  // per-step snare velocity (0 = off)
+  melodyType: OscillatorType;
+}
+
+const TRACKS: readonly TrackDef[] = [
+  // ── 0: Block Party ── 130 BPM, C major, triadic arpeggio + full drums ─────
+  {
+    id: 'block-party', label: 'Block Party',
+    stepSec: 60 / (130 * 4), // ≈ 0.1154 s per 16th note
+    melody: [
+      C5,  E5,  G5,  E5,
+      A5,  G5,  E5,  C5,
+      F5,  A5,  C5,  A5,
+      G5,  E5,  D5,  C5,
+    ],
+    bass: [
+      C3,  null, null, null,
+      G3,  null, null, null,
+      F3,  null, null, null,
+      G3,  null, null, null,
+    ],
+    hats:   [0.7, 0.3, 0.7, 0.3,  0.7, 0.3, 0.7, 0.3,  0.7, 0.3, 0.7, 0.3,  0.7, 0.3, 0.7, 0.3],
+    kicks:  [1,   0,   0,   0,     1,   0,   0,   0,     1,   0,   0,   0,     1,   0,   0,   0  ],
+    snares: [0,   0,   0,   0,     1,   0,   0,   0,     0,   0,   0,   0,     1,   0,   0,   0  ],
+    melodyType: 'square',
+  },
+
+  // ── 1: Chiptune ── 95 BPM, C major pentatonic, pure 8-bit ─────────────────
+  {
+    id: 'chiptune', label: 'Chiptune',
+    stepSec: 0.16, // ≈ 94 BPM
+    melody: [
+      C5,  null, E5,  G5,
+      A5,  G5,   E5,  C5,
+      D5,  null, G5,  E5,
+      D5,  C5,   E5,  G5,
+    ],
+    bass: [
+      C3,  null, null, null,
+      G3,  null, null, null,
+      A3,  null, null, null,
+      G3,  null, null, null,
+    ],
+    hats:   [1.0, 0.3, 0.6, 0.3,  1.0, 0.3, 0.6, 0.3,  1.0, 0.3, 0.6, 0.3,  1.0, 0.3, 0.6, 0.5],
+    kicks:  [0,   0,   0,   0,     0,   0,   0,   0,     0,   0,   0,   0,     0,   0,   0,   0  ],
+    snares: [0,   0,   0,   0,     0,   0,   0,   0,     0,   0,   0,   0,     0,   0,   0,   0  ],
+    melodyType: 'square',
+  },
+
+  // ── 2: Synthwave ── 120 BPM, A minor pentatonic, sawtooth + drums ──────────
+  {
+    id: 'synthwave', label: 'Synthwave',
+    stepSec: 60 / (120 * 4), // = 0.125 s per 16th note
+    melody: [
+      A5,  null, G5,  E5,
+      A5,  G5,   E5,  D5,
+      E5,  null, G5,  A5,
+      E5,  D5,   null, A4,
+    ],
+    bass: [
+      A3,  null, null, null,
+      E3,  null, null, null,
+      A3,  null, null, null,
+      G3,  null, null, null,
+    ],
+    hats:   [0.5, 0,   0.5, 0,    0.5, 0,   0.5, 0,    0.5, 0,   0.5, 0,    0.5, 0,   0.5, 0  ],
+    kicks:  [1,   0,   0,   0,     1,   0,   0,   0,     1,   0,   0,   0,     1,   0,   0,   0  ],
+    snares: [0,   0,   0,   0,     1,   0,   0,   0,     0,   0,   0,   0,     1,   0,   0,   0  ],
+    melodyType: 'sawtooth',
+  },
+];
+
+// ─── Storage ─────────────────────────────────────────────────────────────────
 function readStoredMute(): boolean {
   try {
     return typeof localStorage !== 'undefined' && localStorage.getItem('bb-muted') === '1';
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 function writeStoredMute(m: boolean) {
-  try {
-    localStorage.setItem('bb-muted', m ? '1' : '0');
-  } catch {
-    /* ignore */
-  }
+  try { localStorage.setItem('bb-muted', m ? '1' : '0'); } catch { /* */ }
 }
 
+function readStoredTrack(): number {
+  try {
+    const v = localStorage.getItem('bb-track');
+    const n = v !== null ? parseInt(v, 10) : 0;
+    return (isNaN(n) || n < 0 || n >= TRACKS.length) ? 0 : n;
+  } catch { return 0; }
+}
+
+function writeStoredTrack(idx: number) {
+  try { localStorage.setItem('bb-track', String(idx)); } catch { /* */ }
+}
+
+// ─── Audio context ───────────────────────────────────────────────────────────
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (ctx && ctx.state !== 'closed') return ctx;
@@ -57,91 +146,136 @@ function getCtx(): AudioContext | null {
       // @ts-expect-error legacy webkit
       window.webkitAudioContext;
     ctx = new Ctor();
-  } catch {
-    return null;
-  }
+  } catch { return null; }
   return ctx;
 }
 
-interface NoteOpts {
-  freq: number;
-  dur: number;
-  when: number;
-  vol?: number;
-  type?: OscillatorType;
-  /** Detune in cents — small drift gives a richer pad. */
-  detune?: number;
+function getNoiseBuffer(ac: AudioContext): AudioBuffer {
+  if (noiseBuffer && noiseBuffer.sampleRate === ac.sampleRate) return noiseBuffer;
+  const len = Math.floor(ac.sampleRate * 0.08);
+  const buf = ac.createBuffer(1, len, ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  noiseBuffer = buf;
+  return buf;
 }
 
-function note({ freq, dur, when, vol = 0.025, type = 'sine', detune = 0 }: NoteOpts) {
+// ─── Synthesisers ────────────────────────────────────────────────────────────
+interface NoteOpts {
+  freq: number; dur: number; when: number;
+  vol?: number; type?: OscillatorType;
+}
+
+function tone({ freq, dur, when, vol = 0.04, type = 'square' }: NoteOpts) {
   if (!ctx || !masterGain) return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, when);
-  if (detune) osc.detune.setValueAtTime(detune, when);
-  const atk = Math.min(0.4, dur * 0.35);
-  const tail = Math.max(0.2, dur * 0.55);
+  const atk = 0.006;
+  const rel = Math.max(0.05, dur - atk);
   gain.gain.setValueAtTime(0, when);
   gain.gain.linearRampToValueAtTime(vol, when + atk);
-  gain.gain.exponentialRampToValueAtTime(0.0008, when + atk + tail);
+  gain.gain.exponentialRampToValueAtTime(0.001, when + atk + rel);
   osc.connect(gain).connect(masterGain);
   osc.start(when);
-  osc.stop(when + atk + tail + 0.1);
+  osc.stop(when + atk + rel + 0.04);
 }
 
-/** Drop a pad chord (root + 5th + octave) starting at `when`. */
-function padChord(root: number, when: number, dur: number, vol = 0.012) {
-  note({ freq: root, dur, when, vol, type: 'sine', detune: -4 });
-  note({ freq: root * 1.5, dur, when, vol: vol * 0.8, type: 'sine', detune: +5 });
-  note({ freq: root * 2, dur, when, vol: vol * 0.55, type: 'sine', detune: +2 });
+function hat(when: number, vol: number) {
+  if (!ctx || !masterGain) return;
+  const src = ctx.createBufferSource();
+  src.buffer = getNoiseBuffer(ctx);
+  const hp = ctx.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 5000;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, when);
+  gain.gain.linearRampToValueAtTime(vol, when + 0.002);
+  gain.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
+  src.connect(hp).connect(gain).connect(masterGain);
+  src.start(when);
+  src.stop(when + 0.08);
 }
 
+/** 808-style sine kick — pitch sweeps 150 → 40 Hz. */
+function kick(when: number, vel: number) {
+  if (!ctx || !masterGain) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(150, when);
+  osc.frequency.exponentialRampToValueAtTime(40, when + 0.08);
+  gain.gain.setValueAtTime(0.65 * vel, when);
+  gain.gain.exponentialRampToValueAtTime(0.001, when + 0.35);
+  osc.connect(gain).connect(masterGain);
+  osc.start(when);
+  osc.stop(when + 0.4);
+}
+
+/** Bandpass noise + triangle snap = snare. */
+function snare(when: number, vel: number) {
+  if (!ctx || !masterGain) return;
+  const src = ctx.createBufferSource();
+  src.buffer = getNoiseBuffer(ctx);
+  const bp = ctx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.value = 2000;
+  bp.Q.value = 0.7;
+  const ng = ctx.createGain();
+  ng.gain.setValueAtTime(0.32 * vel, when);
+  ng.gain.exponentialRampToValueAtTime(0.001, when + 0.12);
+  src.connect(bp).connect(ng).connect(masterGain);
+  src.start(when);
+  src.stop(when + 0.15);
+
+  const osc = ctx.createOscillator();
+  const og = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.value = 220;
+  og.gain.setValueAtTime(0.1 * vel, when);
+  og.gain.exponentialRampToValueAtTime(0.001, when + 0.07);
+  osc.connect(og).connect(masterGain);
+  osc.start(when);
+  osc.stop(when + 0.09);
+}
+
+// ─── Scheduler ───────────────────────────────────────────────────────────────
 function scheduleStep(step: number, when: number) {
-  // === Pad: alternating Am and G major chords every 8 steps ===
-  if (step === 0) padChord(PENT.A3, when, STEP_SEC * 7.5);
-  if (step === 8) padChord(PENT.G4 / 2 /* G3 */, when, STEP_SEC * 7.5);
+  const trk = TRACKS[trackIdx];
+  const ss = trk.stepSec;
 
-  // === Sub-bass pulse on downbeats ===
-  if (step === 0) note({ freq: PENT.A3 / 4 /* A1-ish */, dur: 0.9, when, vol: 0.04, type: 'sine' });
-  if (step === 8) note({ freq: PENT.A3 / 4 * (196 / 220) /* G1 */, dur: 0.9, when, vol: 0.04, type: 'sine' });
+  const m = trk.melody[step];
+  if (m) tone({ freq: m, dur: ss * 1.5, when, vol: 0.042, type: trk.melodyType });
 
-  // === Sparse melodic notes (pentatonic) at fixed steps for repeatability ===
-  // Eighth-note positions in the 16-step loop.
-  const MELODY: Record<number, number | undefined> = {
-    2: PENT.E4,
-    5: PENT.G4,
-    7: PENT.A4,
-    10: PENT.D4,
-    12: PENT.C4,
-    14: PENT.E4,
-  };
-  const f = MELODY[step];
-  if (f) note({ freq: f, dur: STEP_SEC * 1.8, when, vol: 0.022, type: 'triangle' });
-
-  // === High shimmer — a single bell-ish note once per loop on step 6 ===
-  if (step === 6) {
-    note({ freq: PENT.C5, dur: 1.2, when: when + 0.05, vol: 0.015, type: 'sine' });
-    note({ freq: PENT.E5, dur: 1.2, when: when + 0.18, vol: 0.012, type: 'sine' });
+  const b = trk.bass[step];
+  if (b) {
+    tone({ freq: b,     dur: ss * 3.5, when, vol: 0.055, type: 'triangle' });
+    tone({ freq: b * 2, dur: ss * 3.0, when, vol: 0.022, type: 'triangle' });
   }
+
+  const hv = trk.hats[step];
+  if (hv) hat(when, 0.018 * hv);
+
+  const kv = trk.kicks[step];
+  if (kv) kick(when, kv);
+
+  const sv = trk.snares[step];
+  if (sv) snare(when, sv);
 }
 
 function loop() {
   if (!ctx || !playing) return;
+  const ss = TRACKS[trackIdx].stepSec;
   while (nextNoteTime < ctx.currentTime + LOOK_AHEAD) {
     scheduleStep(stepIdx, nextNoteTime);
     stepIdx = (stepIdx + 1) % PATTERN_LEN;
-    nextNoteTime += STEP_SEC;
+    nextNoteTime += ss;
   }
 }
 
+// ─── Public API ──────────────────────────────────────────────────────────────
 export const music = {
-  /**
-   * Start the ambient loop. Safe to call repeatedly — it's a no-op
-   * if already playing or if the user has muted music. Browsers
-   * require a gesture before audio can start; we attach a one-shot
-   * click listener as a fallback if the AudioContext is suspended.
-   */
   start() {
     if (playing || muted) return;
     const ac = getCtx();
@@ -153,18 +287,15 @@ export const music = {
     }
     playing = true;
     stepIdx = 0;
-    nextNoteTime = ac.currentTime + 0.1;
-    // Fade in over 1.5s
+    nextNoteTime = ac.currentTime + 0.08;
     masterGain.gain.cancelScheduledValues(ac.currentTime);
     masterGain.gain.setValueAtTime(masterGain.gain.value, ac.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0.55, ac.currentTime + 1.5);
+    masterGain.gain.linearRampToValueAtTime(0.6, ac.currentTime + 0.6);
 
     const tick = () => loop();
-    timer = setInterval(tick, 120);
+    timer = setInterval(tick, 80);
     tick();
 
-    // If the context is still suspended (autoplay blocked), arm a
-    // one-shot listener so the next user gesture kicks it off.
     if (ac.state === 'suspended') {
       const resume = () => {
         ac.resume().catch(() => {});
@@ -180,35 +311,38 @@ export const music = {
     }
   },
 
-  /** Stop the loop. Fades the master gain out so it doesn't click. */
   stop() {
     if (!playing) return;
     playing = false;
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
+    if (timer) { clearInterval(timer); timer = null; }
     if (gestureCleanup) gestureCleanup();
     const ac = ctx;
     if (ac && masterGain) {
       masterGain.gain.cancelScheduledValues(ac.currentTime);
       masterGain.gain.setValueAtTime(masterGain.gain.value, ac.currentTime);
-      masterGain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.4);
+      masterGain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.3);
     }
   },
 
-  /** Apply the persisted mute preference. */
   setMuted(m: boolean) {
     muted = m;
     writeStoredMute(m);
     if (m) this.stop();
   },
 
-  isMuted() {
-    return muted;
+  isMuted()  { return muted; },
+  isPlaying() { return playing; },
+
+  /** Cycle to the next track. Resets the pattern; the change takes effect within ~80 ms. */
+  nextTrack() {
+    const newIdx = (trackIdx + 1) % TRACKS.length;
+    trackIdx = newIdx;
+    stepIdx = 0;
+    if (ctx && playing) nextNoteTime = ctx.currentTime + 0.05;
+    writeStoredTrack(newIdx);
   },
 
-  isPlaying() {
-    return playing;
-  },
+  getTrackLabel() { return TRACKS[trackIdx].label; },
+  getTrackCount() { return TRACKS.length; },
+  getTrackIdx()   { return trackIdx; },
 };
