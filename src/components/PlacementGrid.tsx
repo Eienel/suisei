@@ -138,11 +138,11 @@ export function PlacementGrid() {
         <meshStandardMaterial color="#2D4A1F" roughness={0.98} metalness={0.0} />
       </mesh>
 
-      {/* Barely-visible grid — just enough contrast for placement reference
-          without reading as a wireframe. Dark lines on dark ground fade into
-          terrain texture. */}
+      {/* Grid shows a little — soft sage lines that sit gently above the
+          ground green so they read as a placement reference without
+          dominating the terrain. */}
       <gridHelper
-        args={[GRID_SIZE, GRID_SIZE, '#3D5A2F', '#2A3F1A']}
+        args={[GRID_SIZE, GRID_SIZE, '#5E7B43', '#436031']}
         position={[0, -0.499, 0]}
       />
 
