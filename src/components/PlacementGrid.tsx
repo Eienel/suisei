@@ -122,8 +122,10 @@ export function PlacementGrid() {
 
   return (
     <>
-      {/* The big raycast plane (floor) — sized well past the visible grid
-          so the edges fall off into fog rather than ending on a hard line. */}
+      {/* Solid grass ground — sized well past the visible build grid so
+          the edges fall off into fog rather than ending on a hard line.
+          A warm meadow green at noon, naturally cools into blue at night
+          because the day/night key-light tints everything. */}
       <mesh
         ref={planeRef}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -134,13 +136,14 @@ export function PlacementGrid() {
         onPointerDown={handleDown}
       >
         <planeGeometry args={[400, 400]} />
-        <meshStandardMaterial color="#1A2336" roughness={0.95} metalness={0.05} />
+        <meshStandardMaterial color="#3F5A2D" roughness={0.95} metalness={0.0} />
       </mesh>
 
-      {/* Visible build grid — sized to match the buildable extent
-          (WORLD_HALF_EXTENT * 2 = 64), fog from the Canvas softens far edges. */}
+      {/* Subtle build grid — barely-there lines on the grass, just enough
+          for placement reference. Colors are tuned close to the ground so
+          the grid reads as terrain texture, not as a wireframe overlay. */}
       <gridHelper
-        args={[GRID_SIZE, GRID_SIZE, '#2B3654', '#1F2840']}
+        args={[GRID_SIZE, GRID_SIZE, '#5C7745', '#4A6535']}
         position={[0, -0.499, 0]}
       />
 
