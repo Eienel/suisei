@@ -1,9 +1,10 @@
-import { Fragment, useMemo, type ReactNode } from 'react';
+import { Fragment, useMemo, useRef, type ReactNode } from 'react';
 import { Instance, Instances } from '@react-three/drei';
 import * as THREE from 'three';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import type { Block as BlockData, BlockShape, BlockType, Vec3 } from '@/types';
 import { BLOCK_BY_ID } from '@/world/blockTypes';
+import { sky } from '@/world/sky';
 import {
   getShapeGeometry,
   trunkGeometry,
@@ -57,6 +58,7 @@ export function BlockInstances({
           nightFactor={nightFactor}
         />
       ))}
+      <StreetlightLights blocks={blocks} />
       {/* Selection outline drawn separately so we don't break instancing. */}
       {selectedBlockId && (
         <SelectionOutline
@@ -115,18 +117,25 @@ function BlockGroup({
 
   const material = useMemo(() => makeMaterial(type, nightFactor), [type, nightFactor]);
 
-  // Animated materials (water shimmer, AI neural pulse) — modulate
-  // emissiveIntensity around the baseline each frame.
+  // Only emitting / animated blocks need a per-frame emissive update.
+  const isAnimated = !!def.animated || type === 'water' || type === 'ai_neural';
+  const needsUpdate = isAnimated || !!def.emitsAtNight;
+
+  // Live emissive: day baseline + night glow (read from the global sky
+  // each frame so we never rebuild materials), times the animation wobble.
   useFrame((state) => {
-    if (!def.animated && type !== 'water' && type !== 'ai_neural') return;
+    if (!needsUpdate) return;
     const std = material as THREE.MeshStandardMaterial;
-    const base = (std.userData.baseEmissive as number | undefined) ?? std.emissiveIntensity;
-    if (std.userData.baseEmissive === undefined) std.userData.baseEmissive = base;
-    const t = state.clock.elapsedTime;
-    // Water = slow shimmer; AI = faster pulse
-    const freq = type === 'water' ? 0.7 : 1.6;
-    const amp = type === 'water' ? 0.35 : 0.25;
-    std.emissiveIntensity = base * (1 + Math.sin(t * freq) * amp);
+    const dayBase = (std.userData.dayBase as number | undefined) ?? std.emissiveIntensity;
+    const nightGlow = std.userData.emitsAtNight ? sky.nightFactor * NIGHT_EMISSIVE_BOOST : 0;
+    let intensity = dayBase + nightGlow;
+    if (isAnimated) {
+      const t = state.clock.elapsedTime;
+      const freq = type === 'water' ? 0.7 : 1.6;
+      const amp = type === 'water' ? 0.35 : 0.25;
+      intensity *= 1 + Math.sin(t * freq) * amp;
+    }
+    std.emissiveIntensity = intensity;
   });
 
   return (
@@ -282,7 +291,7 @@ function DoorDetails({ blocks }: { blocks: BlockData[] }) {
  * cyan glass pane (emissive at night so windows glow) and a thin cross
  * mullion that gives the window its shape.
  */
-function WindowDetails({ blocks, nightFactor = 0 }: { blocks: BlockData[]; nightFactor?: number }) {
+function WindowDetails({ blocks }: { blocks: BlockData[]; nightFactor?: number }) {
   const paneGeom = useMemo(() => windowPaneGeometry(), []);
   const crossGeom = useMemo(() => windowCrossGeometry(), []);
   const paneMat = useMemo(
@@ -290,14 +299,20 @@ function WindowDetails({ blocks, nightFactor = 0 }: { blocks: BlockData[]; night
       new THREE.MeshStandardMaterial({
         color: '#7BD4FF',
         emissive: new THREE.Color('#FFD27A'),
-        emissiveIntensity: 0.2 + nightFactor * 2.2,
+        emissiveIntensity: 0.2,
         roughness: 0.15,
         metalness: 0.1,
         transparent: true,
         opacity: 0.85,
       }),
-    [nightFactor],
+    [],
   );
+  // Live night glow: panes light up warm and read as solid lit glass at night.
+  useFrame(() => {
+    const n = sky.nightFactor;
+    paneMat.emissiveIntensity = 0.18 + n * 3.4;
+    paneMat.opacity = 0.7 + n * 0.28;
+  });
   const crossMat = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -368,6 +383,45 @@ function GrassTufts({ blocks }: { blocks: BlockData[] }) {
         />
       ))}
     </Instances>
+  );
+}
+
+/**
+ * Real point lights on top of streetlights so they cast a warm pool of
+ * light at night (not just glow on the lamp itself). Capped to protect
+ * perf — a town with 100 lamps doesn't need 100 dynamic lights.
+ * Intensity tracks the live night factor; fully off during the day.
+ */
+const MAX_STREETLIGHTS = 14;
+function StreetlightLights({ blocks }: { blocks: readonly BlockData[] }) {
+  const lamps = useMemo(
+    () => blocks.filter((b) => b.type === 'streetlight').slice(0, MAX_STREETLIGHTS),
+    [blocks],
+  );
+  const refs = useRef<(THREE.PointLight | null)[]>([]);
+  useFrame(() => {
+    const n = sky.nightFactor;
+    const list = refs.current;
+    for (let i = 0; i < list.length; i++) {
+      const l = list[i];
+      if (l) l.intensity = n * 4.0;
+    }
+  });
+  if (lamps.length === 0) return null;
+  return (
+    <Fragment>
+      {lamps.map((b, i) => (
+        <pointLight
+          key={b.id + '-light'}
+          ref={(el) => { refs.current[i] = el; }}
+          position={[b.position[0], b.position[1] + 0.6, b.position[2]]}
+          color="#FFD27A"
+          distance={7}
+          decay={2}
+          intensity={0}
+        />
+      ))}
+    </Fragment>
   );
 }
 
@@ -456,21 +510,29 @@ function makeMaterial(type: BlockType, nightFactor: number): THREE.Material {
   const isLight = cat === 'light';
   const isFoliage = cat === 'foliage';
 
+  const dayBase = baseEmissiveFor(def, 0, {
+    isCrystal, isMetal, isMarble, isWater, isLight, isFoliage,
+  });
   const m = new THREE.MeshStandardMaterial({
     color: baseColor,
     emissive,
-    emissiveIntensity: baseEmissiveFor(def, nightFactor, {
-      isCrystal, isMetal, isMarble, isWater, isLight, isFoliage,
-    }),
+    emissiveIntensity: dayBase + (def.emitsAtNight ? nightFactor * NIGHT_EMISSIVE_BOOST : 0),
     metalness: isMetal ? 0.85 : isCrystal ? 0.1 : isMarble ? 0.05 : isWater ? 0.4 : 0.18,
     roughness: isMetal ? 0.3 : isMarble ? 0.55 : isCrystal ? 0.18 : isWater ? 0.15 : isFoliage ? 0.7 : 0.45,
     transparent: isWater,
     opacity: isWater ? 0.78 : 1,
   });
+  // Stash the daytime emissive baseline so the per-frame updater can add
+  // the live night boost on top without rebuilding the material.
+  m.userData.dayBase = dayBase;
+  m.userData.emitsAtNight = def.emitsAtNight ?? false;
   // Allow per-instance .color attribute to multiply
   m.vertexColors = true;
   return m;
 }
+
+/** How much emissive intensity an emitsAtNight block gains at full night. */
+const NIGHT_EMISSIVE_BOOST = 2.6;
 
 function baseEmissiveFor(
   def: { emitsAtNight?: boolean; color: string; category: string },

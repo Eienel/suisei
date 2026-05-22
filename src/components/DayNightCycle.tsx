@@ -7,9 +7,9 @@ const SUN_ORBIT_RADIUS = 22;
 const SUN_HEIGHT = 18;
 
 const COLOR_DAY_BG = new THREE.Color('#9DBBE5');     // muted daylight blue
-const COLOR_NIGHT_BG = new THREE.Color('#070A14');   // ink night
+const COLOR_NIGHT_BG = new THREE.Color('#111C3D');   // moody deep blue (cozy dusk, not pitch black)
 const COLOR_FOG_DAY = new THREE.Color('#A8C2DD');
-const COLOR_FOG_NIGHT = new THREE.Color('#070A14');
+const COLOR_FOG_NIGHT = new THREE.Color('#111C3D');
 const COLOR_SUN_DAY = new THREE.Color('#FFE3B3');
 const COLOR_SUN_NIGHT = new THREE.Color('#5B83FF');
 const COLOR_AMBIENT_DAY = new THREE.Color('#FFFFFF');
@@ -46,19 +46,20 @@ export function DayNightCycle({
         Math.sin(a) * SUN_HEIGHT,
         Math.sin(a + Math.PI / 4) * 8,
       );
-      sunRef.current.intensity = 0.15 + day * 1.4;
+      // Moonlight floor raised so night stays buildable (cozy dusk).
+      sunRef.current.intensity = 0.25 + day * 1.35;
       tmp.copy(COLOR_SUN_DAY).lerp(COLOR_SUN_NIGHT, n);
       sunRef.current.color.copy(tmp);
     }
 
     if (ambientRef.current) {
-      ambientRef.current.intensity = 0.15 + day * 0.3;
+      ambientRef.current.intensity = 0.34 + day * 0.12;
       tmp.copy(COLOR_AMBIENT_DAY).lerp(COLOR_AMBIENT_NIGHT, n);
       ambientRef.current.color.copy(tmp);
     }
 
     if (hemiRef.current) {
-      hemiRef.current.intensity = 0.25 + day * 0.6;
+      hemiRef.current.intensity = 0.45 + day * 0.42;
     }
 
     // Background + fog colour
