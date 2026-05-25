@@ -19,11 +19,14 @@ export function HowToModal() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-ink/85 backdrop-blur-sm flex items-center justify-center p-4 ${
+      className={`fixed inset-0 z-50 bg-ink/85 backdrop-blur-sm overflow-y-auto ${
         closing ? 'opacity-0' : 'opacity-100'
       } transition-opacity duration-200`}
     >
-      <div className="glass rounded-2xl p-7 max-w-lg w-full shadow-glass animate-rise-in">
+      {/* min-h-full + items-center keeps the card centred on tall screens but
+          lets it scroll instead of clipping the CTA on short/PC viewports. */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="glass rounded-2xl p-7 max-w-lg w-full shadow-glass animate-rise-in">
         <p className="font-mono text-xs uppercase tracking-widest text-accent-cyan mb-2">
           BlockBuilders · V1
         </p>
@@ -90,6 +93,7 @@ export function HowToModal() {
           <button type="button" onClick={close} className="btn-primary">
             Let's build
           </button>
+        </div>
         </div>
       </div>
     </div>

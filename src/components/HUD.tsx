@@ -61,7 +61,15 @@ export function HUD() {
           >
             <ArrowLeft size={14} />
           </button>
-          <Logomark />
+          <button
+            type="button"
+            onClick={() => setScreen('landing')}
+            aria-label="Home"
+            title="Home — visit other towns"
+            className="shrink-0 rounded-lg hover:opacity-80 transition-opacity"
+          >
+            <Logomark />
+          </button>
           {/* Wordmark + version hidden on narrow phones; back arrow + logomark carry the brand. */}
           <div className="hidden sm:block leading-tight min-w-0">
             <div className="font-semibold tracking-tight text-fg truncate">BlockBuilders</div>

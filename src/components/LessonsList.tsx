@@ -4,7 +4,7 @@ import { isLessonUnlocked, totalQuestions, builtinCompletedCount } from '@/data/
 import { BLOCK_BY_ID } from '@/world/blockTypes';
 import { useWorld } from '@/state/world';
 import { useCustomLessons } from '@/state/customLessons';
-import { Lock, Check, ArrowRight, Cuboid, Sparkles, RotateCcw, Wand2, Trash2 } from 'lucide-react';
+import { Lock, Check, ArrowRight, ArrowLeft, Cuboid, Sparkles, RotateCcw, Wand2, Trash2 } from 'lucide-react';
 import { AuthButton } from './AuthButton';
 import { SaveWorldButton } from './SaveWorldButton';
 import { ShareButton } from './ShareButton';
@@ -35,10 +35,20 @@ export function LessonsList() {
 
   return (
     <div className="fixed inset-0 overflow-y-auto bg-ink">
-      <header className="max-w-5xl mx-auto px-6 sm:px-10 pt-6 sm:pt-8 flex items-center justify-end gap-2 flex-wrap">
-        <ShareButton />
-        <SaveWorldButton />
-        <AuthButton />
+      <header className="max-w-5xl mx-auto px-6 sm:px-10 pt-6 sm:pt-8 flex items-center justify-between gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setScreen('landing')}
+          className="inline-flex items-center gap-1.5 text-fg-mute hover:text-fg transition-colors text-sm font-medium"
+        >
+          <ArrowLeft size={14} />
+          Home
+        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <ShareButton />
+          <SaveWorldButton />
+          <AuthButton />
+        </div>
       </header>
       <section className="max-w-5xl mx-auto px-6 sm:px-10 pt-4 pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
