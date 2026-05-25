@@ -124,8 +124,7 @@ export function PlacementGrid() {
     <>
       {/* Solid grass ground — sized well past the visible build grid so
           the edges fall off into fog rather than ending on a hard line.
-          A warm meadow green at noon, naturally cools into blue at night
-          because the day/night key-light tints everything. */}
+          Dark forest green reads as solid earth you're building ON. */}
       <mesh
         ref={planeRef}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -136,14 +135,14 @@ export function PlacementGrid() {
         onPointerDown={handleDown}
       >
         <planeGeometry args={[400, 400]} />
-        <meshStandardMaterial color="#3F5A2D" roughness={0.95} metalness={0.0} />
+        <meshStandardMaterial color="#2D4A1F" roughness={0.98} metalness={0.0} />
       </mesh>
 
-      {/* Subtle build grid — barely-there lines on the grass, just enough
-          for placement reference. Colors are tuned close to the ground so
-          the grid reads as terrain texture, not as a wireframe overlay. */}
+      {/* Grid shows a little — soft sage lines that sit gently above the
+          ground green so they read as a placement reference without
+          dominating the terrain. */}
       <gridHelper
-        args={[GRID_SIZE, GRID_SIZE, '#5C7745', '#4A6535']}
+        args={[GRID_SIZE, GRID_SIZE, '#5E7B43', '#436031']}
         position={[0, -0.499, 0]}
       />
 
