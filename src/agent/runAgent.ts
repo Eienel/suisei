@@ -2,7 +2,7 @@ import { AgentResponseSchema, geminiResponseSchema, type AgentResponse } from '.
 import { systemPrompt, describeWorld } from './prompt.js';
 import type { Block } from '../types.js';
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 export interface ChatTurn {

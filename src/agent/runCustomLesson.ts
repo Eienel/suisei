@@ -11,7 +11,7 @@ import { PIECE_KEYS } from '../world/pieces.js';
 import type { BlockType } from '../types.js';
 import type { PieceKey } from '../world/pieces.js';
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const BlockTypeZ = z.enum(
