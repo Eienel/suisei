@@ -1,64 +1,48 @@
 /**
- * Domain types shared across the app.
- * The "world" is a single immutable JSON object — list of blocks at
- * integer grid coordinates. AI actions and manual edits both flow
- * through the same reducers in src/state/world.ts.
+ * Domain types shared across Suisei.
+ *
+ * A quest is a 3-5 minute interactive lesson that teaches one Sui
+ * primitive and ends with the user minting a soulbound badge.
  */
 
-export type BlockType =
-  | 'zk_crystal'
-  | 'data_core'
-  | 'defi_vault'
-  | 'governance_marble'
-  | 'ai_neural'
-  | 'security_bunker'
-  | 'wallet_keystone'
-  | 'oracle_lens'
-  | 'token_prism'
-  | 'contract_obelisk'
-  // --- content pack (Phase 3) ---
-  | 'road'
-  | 'water'
-  | 'foliage'
-  | 'streetlight'
-  | 'timber'
-  | 'roof'
-  | 'door'
-  | 'window'
-  | 'grass';
+export type QuestId =
+  | 'zklogin'
+  | 'sponsored'
+  | 'abilities'
+  | 'capability'
+  | 'soulbound'
+  | 'ptb'
+  | 'walrus_seal'
+  | 'deepbook_grad';
 
-/** Geometry variants — turns voxels into architecture. */
-export type BlockShape = 'cube' | 'slab' | 'pole' | 'panel' | 'ramp' | 'tree';
+export type QuestPhase =
+  | 'intro'      // Suisei narrates the concept
+  | 'scaffold'   // user reads / edits the Move code
+  | 'deploy'    // compile + deploy in progress
+  | 'interact' // user interacts with the deployed contract
+  | 'badge'     // minting the soulbound completion badge
+  | 'done';     // wrap-up + next-quest CTA
 
-export type Vec3 = [number, number, number];
-
-export interface Block {
-  id: string;
-  type: BlockType;
-  /** Integer grid coordinates: x (right), y (up), z (forward). */
-  position: Vec3;
-  /** Euler rotation in radians. Snaps to 90° steps around Y. */
-  rotation: Vec3;
-  /** Geometry variant. Absent = 'cube' (back-compat with old saves). */
-  shape?: BlockShape;
-  /** Hex tint override. Absent = the block type's default colour. */
-  color?: string;
+export interface QuestDef {
+  id: QuestId;
+  number: number;
+  title: string;
+  concept: string;
+  /** One-line emotional hook for the quest tile. */
+  hook: string;
+  /** Approximate duration in minutes for the tile. */
+  minutes: number;
+  /** Bounty track this quest reinforces, for the pitch story. */
+  bounty?: 'agentic' | 'walrus' | 'deepbook';
 }
 
-export interface WorldSnapshot {
-  blocks: Block[];
-  /** Schema version, incremented on breaking changes. */
-  version: number;
-  /**
-   * Which kind of world this snapshot represents.
-   *  - 'sandbox': the user's creative land — anyone can visit.
-   *  - 'lessons': the commemorative town built through quiz answers,
-   *               minted once after all lessons are complete.
-   *  - 'defi':    the DeFi district — fixed blueprint plots; not minted
-   *               as an NFT, included here so snapshot() can echo the
-   *               active mode without coercion.
-   */
-  kind?: 'sandbox' | 'lessons' | 'defi';
+export interface BadgeRef {
+  /** Soulbound NFT object id minted on completion. */
+  objectId: string;
+  /** Quest the badge proves completion of. */
+  questId: QuestId;
+  /** Tx digest for the mint, for the leaderboard + share card. */
+  txDigest: string;
+  /** Unix ms timestamp of the mint, for the leaderboard ordering. */
+  mintedAt: number;
 }
-
-export type Tool = 'place' | 'select';
