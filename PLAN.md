@@ -132,8 +132,9 @@ Distribution:
 ### Sprint 0 — Foundation (May 27 → Jun 2)
 
 - [ ] Verify hackathon deadline (check overflow.sui.io)
-- [ ] Strip old components and 3D code
-- [ ] Set up clean app shell (router, providers, theme)
+- [x] Strip old components and 3D code
+- [x] Set up clean app shell (router, providers, theme)
+- [x] Brand design brief ready to feed Claude Design (`docs/design/SUISEI_BRIEF.md` + `BRAND_DESIGNER_PROMPT.txt`)
 - [ ] Apply for Enoki API access
 - [ ] Implement zkLogin sign-in flow (Quest 1 step 1)
 - [ ] Implement Sponsored Tx wrapper (Quest 1 step 2)
