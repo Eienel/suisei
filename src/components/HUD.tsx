@@ -16,8 +16,13 @@ export function HUD() {
   const rotateBlock = useWorld((s) => s.rotateBlock);
   const clearWorld = useWorld((s) => s.clearWorld);
   const setSelected = useWorld((s) => s.setSelected);
+  const mode = useWorld((s) => s.mode);
   const resetHowTo = useApp((s) => s.resetHowTo);
   const setScreen = useApp((s) => s.setScreen);
+  // DeFi district has no parent screen; back goes straight home. And Save
+  // World currently targets sandbox/lessons slices, so we hide it in defi.
+  const isDefi = mode === 'defi';
+  const backTarget: 'landing' | 'lessons' = isDefi ? 'landing' : 'lessons';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -54,9 +59,9 @@ export function HUD() {
         <div className="flex items-center gap-2 pointer-events-auto min-w-0">
           <button
             type="button"
-            onClick={() => setScreen('lessons')}
-            aria-label="Back to lessons"
-            title="Back to lessons"
+            onClick={() => setScreen(backTarget)}
+            aria-label={isDefi ? 'Back to home' : 'Back to lessons'}
+            title={isDefi ? 'Back to home' : 'Back to lessons'}
             className="w-8 h-8 rounded-lg bg-ink-soft/85 backdrop-blur border border-ink-line/80 flex items-center justify-center text-fg-mute hover:text-fg transition-colors shrink-0"
           >
             <ArrowLeft size={14} />
@@ -91,7 +96,7 @@ export function HUD() {
           </span>
           <TrackSelector />
           <MuteToggle />
-          <SaveWorldButton />
+          {!isDefi && <SaveWorldButton />}
           <AuthButton />
         </div>
       </header>

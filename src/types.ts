@@ -54,8 +54,11 @@ export interface WorldSnapshot {
    *  - 'sandbox': the user's creative land — anyone can visit.
    *  - 'lessons': the commemorative town built through quiz answers,
    *               minted once after all lessons are complete.
+   *  - 'defi':    the DeFi district — fixed blueprint plots; not minted
+   *               as an NFT, included here so snapshot() can echo the
+   *               active mode without coercion.
    */
-  kind?: 'sandbox' | 'lessons';
+  kind?: 'sandbox' | 'lessons' | 'defi';
 }
 
 export type Tool = 'place' | 'select';

@@ -25,7 +25,10 @@ export function SaveWorldButton({ kind: kindProp, labelOverride }: Props = {}) {
   const mode = useWorld((s) => s.mode);
   const lessonBlocks = useWorld((s) => s.lessonBlocks);
   const sandboxBlocks = useWorld((s) => s.sandboxBlocks);
-  const kind: 'sandbox' | 'lessons' = kindProp ?? mode;
+  // Defi mode has no NFT slot — fall back to sandbox so the button can
+  // render its idle state without throwing. The HUD already hides it in
+  // defi mode, so this is purely defensive.
+  const kind: 'sandbox' | 'lessons' = kindProp ?? (mode === 'lessons' ? 'lessons' : 'sandbox');
   const blockCount = kind === 'lessons' ? lessonBlocks.length : sandboxBlocks.length;
   const { phase, error, txDigest, kind: savedKind, save, hasSandbox, hasLessons } = useSaveWorld();
   const hasExisting = kind === 'lessons' ? hasLessons : hasSandbox;

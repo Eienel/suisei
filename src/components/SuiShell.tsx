@@ -3,6 +3,7 @@ import { useApp } from '@/state/app';
 import { LessonsList } from './LessonsList';
 import { LessonScreen } from './LessonScreen';
 import { Sandbox } from './Sandbox';
+import { DefiDistrict } from './DefiDistrict';
 import { Gallery } from './Gallery';
 import { Leaderboard } from './Leaderboard';
 
@@ -21,6 +22,7 @@ export default function SuiShell() {
       {screen === 'lessons' && <LessonsList />}
       {screen === 'lesson' && <LessonScreen />}
       {screen === 'sandbox' && <Sandbox />}
+      {screen === 'defi' && <DefiDistrict />}
       {screen === 'gallery' && <Gallery />}
       {screen === 'leaderboard' && <Leaderboard />}
     </SuiProviders>

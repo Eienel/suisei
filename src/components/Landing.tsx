@@ -73,6 +73,13 @@ export function Landing() {
               </button>
               <button
                 type="button"
+                onClick={() => setScreen('defi')}
+                className="text-fg-dim hover:text-fg px-3 py-3 font-medium transition-colors text-base"
+              >
+                DeFi District →
+              </button>
+              <button
+                type="button"
                 onClick={() => setScreen('leaderboard')}
                 className="text-fg-dim hover:text-fg px-3 py-3 font-medium transition-colors text-base"
               >

@@ -8,6 +8,7 @@ import { sfx } from '@/audio/sfx';
 import { BlockInstances } from './BlockInstances';
 import { PlacementGrid } from './PlacementGrid';
 import { DayNightCycle } from './DayNightCycle';
+import { BlueprintGhosts } from './BlueprintGhosts';
 
 const isMobile =
   typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -80,6 +81,8 @@ export function World() {
         <DayNightCycle />
 
         <PlacementGrid />
+
+        <BlueprintGhosts />
 
         <BlockInstances
           blocks={blocks}
