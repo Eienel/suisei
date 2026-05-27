@@ -41,6 +41,11 @@ export function PlacementGrid() {
   const cancelPiece = useWorld((s) => s.cancelPiece);
   const commitPiece = useWorld((s) => s.commitPiece);
 
+  const pendingTransfer = useWorld((s) => s.pendingTransfer);
+  const setTransferHover = useWorld((s) => s.setTransferHover);
+  const cancelTransfer = useWorld((s) => s.cancelTransfer);
+  const commitTransfer = useWorld((s) => s.commitTransfer);
+
   const { gl } = useThree();
 
   const def = BLOCK_BY_ID[activeBlockType];
@@ -51,19 +56,22 @@ export function PlacementGrid() {
   const ghostGeometry = useMemo(() => getShapeGeometry(activeShape), [activeShape]);
 
   useEffect(() => {
-    if (!pendingPiece) return;
+    if (!pendingPiece && !pendingTransfer) return;
     const onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (e.key === 'r' || e.key === 'R') {
-        e.preventDefault();
-        rotatePiece();
+        if (pendingPiece) {
+          e.preventDefault();
+          rotatePiece();
+        }
       } else if (e.key === 'Escape') {
-        cancelPiece();
+        if (pendingTransfer) cancelTransfer();
+        else cancelPiece();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [pendingPiece, rotatePiece, cancelPiece]);
+  }, [pendingPiece, pendingTransfer, rotatePiece, cancelPiece, cancelTransfer]);
 
   useFrame(() => {
     if (!ghostRef.current) return;
@@ -77,6 +85,11 @@ export function PlacementGrid() {
   const handleMove = (e: ThreeEvent<PointerEvent>) => {
     const p = e.point;
     const cell = snapToGrid([p.x, 0, p.z]);
+    if (pendingTransfer) {
+      setTransferHover(cell);
+      gl.domElement.style.cursor = 'pointer';
+      return;
+    }
     if (pendingPiece) {
       setPieceHover(cell);
       gl.domElement.style.cursor = 'pointer';
@@ -88,7 +101,9 @@ export function PlacementGrid() {
   };
 
   const handleLeave = () => {
-    if (pendingPiece) {
+    if (pendingTransfer) {
+      setTransferHover(null);
+    } else if (pendingPiece) {
       setPieceHover(null);
     } else {
       setHoveredCell(null);
@@ -100,6 +115,17 @@ export function PlacementGrid() {
     if (e.button !== 0) return;
     const p = e.point;
     const cell = snapToGrid([p.x, 0, p.z]);
+
+    if (pendingTransfer) {
+      const placed = commitTransfer(cell);
+      if (placed && placed.length > 0) {
+        sfx.snap(cell[1]);
+        sfx.sparkle();
+      } else {
+        sfx.error();
+      }
+      return;
+    }
 
     if (pendingPiece) {
       const placed = commitPiece(cell);

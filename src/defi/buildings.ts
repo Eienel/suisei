@@ -1,4 +1,4 @@
-import type { Block, BlockType, Vec3 } from '@/types';
+import type { Block, BlockShape, BlockType, Vec3 } from '@/types';
 import { positionKey } from '@/world/grid';
 
 /**
@@ -156,4 +156,31 @@ export function evaluateAll(blocks: Block[]): Record<string, BuildingProgress> {
   const out: Record<string, BuildingProgress> = {};
   for (const b of BUILDINGS) out[b.id] = evaluateBuilding(b, blocks);
   return out;
+}
+
+/**
+ * Snapshot the actual blocks the player placed for a (complete) building,
+ * preserving each cell's chosen type/shape/colour. Returns null if any cell
+ * is missing — used by the "move to your town" flow to copy the building
+ * verbatim into the sandbox.
+ */
+export function captureBuildingCells(
+  blueprint: BuildingBlueprint,
+  blocks: Block[],
+): Array<{ offset: Vec3; type: BlockType; shape?: BlockShape; color?: string }> | null {
+  const byCell = new Map<string, Block>();
+  for (const b of blocks) byCell.set(positionKey(b.position), b);
+
+  const captured: Array<{ offset: Vec3; type: BlockType; shape?: BlockShape; color?: string }> = [];
+  for (const cell of blueprint.cells) {
+    const pos: Vec3 = [
+      blueprint.anchor[0] + cell.offset[0],
+      blueprint.anchor[1] + cell.offset[1],
+      blueprint.anchor[2] + cell.offset[2],
+    ];
+    const b = byCell.get(positionKey(pos));
+    if (!b || !cell.accepts.includes(b.type)) return null;
+    captured.push({ offset: cell.offset, type: b.type, shape: b.shape, color: b.color });
+  }
+  return captured;
 }

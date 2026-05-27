@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
-import { Landmark, Store, Droplets, ExternalLink, Loader2, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { Landmark, Store, Droplets, ExternalLink, Loader2, Check, AlertCircle, Sparkles, ArrowRightCircle } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { World } from './World';
 import { HUD } from './HUD';
 import { Toolbar } from './Toolbar';
 import { useWorld } from '@/state/world';
+import { useApp } from '@/state/app';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import { music } from '@/audio/music';
-import { BUILDINGS, evaluateAll, type DefiAction, type BuildingProgress, type BuildingBlueprint } from '@/defi/buildings';
+import { BUILDINGS, evaluateAll, captureBuildingCells, type DefiAction, type BuildingProgress, type BuildingBlueprint } from '@/defi/buildings';
 import { useStake } from '@/defi/useStake';
 
 /**
@@ -150,7 +151,7 @@ function ActivateRow({
   }
 
   if (blueprint.action === 'stake') {
-    return <BankActivate progress={progress} walletConnected={walletConnected} />;
+    return <BankActivate blueprint={blueprint} progress={progress} walletConnected={walletConnected} />;
   }
 
   // Swap (Market) — placeholder until Cetus integration lands.
@@ -174,13 +175,32 @@ function ActivateRow({
 }
 
 function BankActivate({
+  blueprint,
   progress,
   walletConnected,
 }: {
+  blueprint: BuildingBlueprint;
   progress: BuildingProgress;
   walletConnected: boolean;
 }) {
   const { phase, error, txDigest, stakedSuiId, stake, canStake, reset } = useStake();
+  const startTransfer = useWorld((s) => s.startTransfer);
+  const setScreen = useApp((s) => s.setScreen);
+
+  const handleMove = () => {
+    const defiBlocks = useWorld.getState().defiBlocks;
+    const cells = captureBuildingCells(blueprint, defiBlocks);
+    if (!cells) return; // shouldn't happen — button only shows when complete
+    startTransfer({
+      blueprintId: blueprint.id,
+      sourceAnchor: blueprint.anchor,
+      cells,
+      stakedSuiId: stakedSuiId ?? undefined,
+      txDigest: txDigest ?? undefined,
+    });
+    setScreen('sandbox');
+    reset(); // clear stake state — fresh plot will be empty for the next build
+  };
 
   if (!progress.complete) {
     return (
@@ -200,7 +220,7 @@ function BankActivate({
 
   if (phase === 'success' && txDigest) {
     return (
-      <div className="space-y-1">
+      <div className="space-y-2">
         <div className="text-[11px] font-mono text-accent-cyan flex items-center gap-1.5">
           <Check size={11} /> Staked 1 SUI on testnet.
         </div>
@@ -209,23 +229,21 @@ function BankActivate({
             StakedSui · {short(stakedSuiId)}
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <a
-            href={`https://testnet.suivision.xyz/txblock/${txDigest}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-[11px] font-mono text-accent-cyan hover:text-accent-cyan/80 inline-flex items-center gap-1"
-          >
-            view tx <ExternalLink size={9} />
-          </a>
-          <button
-            type="button"
-            onClick={reset}
-            className="text-[10px] font-mono text-fg-mute hover:text-fg"
-          >
-            stake again
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleMove}
+          className="inline-flex items-center gap-1.5 text-[11px] font-semibold bg-accent-cyan text-ink px-3 py-1.5 rounded-md hover:bg-accent-cyan/90 transition-colors"
+        >
+          <ArrowRightCircle size={11} /> Move to your town
+        </button>
+        <a
+          href={`https://testnet.suivision.xyz/txblock/${txDigest}`}
+          target="_blank"
+          rel="noreferrer"
+          className="block text-[11px] font-mono text-fg-mute hover:text-fg inline-flex items-center gap-1"
+        >
+          view tx <ExternalLink size={9} />
+        </a>
       </div>
     );
   }

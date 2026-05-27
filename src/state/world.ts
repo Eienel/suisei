@@ -30,6 +30,23 @@ export interface PendingPiece {
   groupId: string;
 }
 
+/**
+ * A completed DeFi building (e.g. the Bank) staged for transfer from the
+ * district into the player's sandbox town. Carries the exact block types
+ * the player placed plus the onchain receipt (StakedSui id, tx digest) so
+ * the moved building keeps its provenance.
+ */
+export interface PendingTransfer {
+  blueprintId: string;
+  /** Plot anchor in the defi world — used to wipe the source after move. */
+  sourceAnchor: Vec3;
+  /** Captured cells: offset + the actual block the player placed there. */
+  cells: Array<{ offset: Vec3; type: BlockType; shape?: BlockShape; color?: string }>;
+  stakedSuiId?: string;
+  txDigest?: string;
+  hoverCell: Vec3 | null;
+}
+
 interface WorldState {
   mode: WorldMode;
   lessonBlocks: Block[];
@@ -48,6 +65,7 @@ interface WorldState {
   tool: Tool;
 
   pendingPiece: PendingPiece | null;
+  pendingTransfer: PendingTransfer | null;
 
   setMode: (m: WorldMode) => void;
   setActiveBlockType: (t: BlockType) => void;
@@ -75,6 +93,18 @@ interface WorldState {
   setPieceHover: (cell: Vec3 | null) => void;
   rotatePiece: () => void;
   commitPiece: (anchor: Vec3) => Block[] | null;
+
+  /** Stage a completed defi building for placement in the sandbox. */
+  startTransfer: (opts: Omit<PendingTransfer, 'hoverCell'>) => void;
+  setTransferHover: (cell: Vec3 | null) => void;
+  cancelTransfer: () => void;
+  /**
+   * Move the staged building to the sandbox at `anchor`. Validates bounds
+   * + non-collision; returns the new sandbox blocks on success, null on
+   * conflict. Also wipes the source cells from defiBlocks so the plot is
+   * ready to be rebuilt.
+   */
+  commitTransfer: (anchor: Vec3) => Block[] | null;
 }
 
 function blockIdAt(blocks: Block[], pos: Vec3): string | null {
@@ -123,6 +153,7 @@ export const useWorld = create<WorldState>()(
       activeColor: null,
       tool: 'place',
       pendingPiece: null,
+      pendingTransfer: null,
 
       setMode: (m) =>
         set((s) => ({
@@ -282,6 +313,76 @@ export const useWorld = create<WorldState>()(
         }));
         const next = [...current, ...newBlocks];
         set({ ...withMode(s, next), blocks: next, pendingPiece: null });
+        return newBlocks;
+      },
+
+      // --- Defi building → sandbox transfer ---
+
+      startTransfer: (opts) =>
+        set({ pendingTransfer: { ...opts, hoverCell: null } }),
+
+      setTransferHover: (cell) =>
+        set((s) =>
+          s.pendingTransfer
+            ? { pendingTransfer: { ...s.pendingTransfer, hoverCell: cell } }
+            : s
+        ),
+
+      cancelTransfer: () => set({ pendingTransfer: null }),
+
+      commitTransfer: (rawAnchor) => {
+        const s = get();
+        const { pendingTransfer } = s;
+        if (!pendingTransfer) return null;
+        const anchor = snapToGrid(rawAnchor);
+
+        // Validate every target cell before mutating anything.
+        const occupied = new Set(s.sandboxBlocks.map((b) => positionKey(b.position)));
+        const targets: Vec3[] = [];
+        for (const c of pendingTransfer.cells) {
+          const pos: Vec3 = [
+            anchor[0] + c.offset[0],
+            anchor[1] + c.offset[1],
+            anchor[2] + c.offset[2],
+          ];
+          if (!inBounds(pos)) return null;
+          const key = positionKey(pos);
+          if (occupied.has(key)) return null;
+          occupied.add(key);
+          targets.push(pos);
+        }
+
+        // Build the new sandbox blocks (fresh ids; preserve type/shape/color).
+        const newBlocks: Block[] = pendingTransfer.cells.map((c, i) => ({
+          id: newId(),
+          type: c.type,
+          position: targets[i],
+          rotation: [0, 0, 0],
+          shape: c.shape,
+          color: c.color,
+        }));
+
+        // Wipe the source cells from defiBlocks (matched by position) so the
+        // plot is ready to be rebuilt for another stake.
+        const sourceKeys = new Set(
+          pendingTransfer.cells.map((c) =>
+            positionKey([
+              pendingTransfer.sourceAnchor[0] + c.offset[0],
+              pendingTransfer.sourceAnchor[1] + c.offset[1],
+              pendingTransfer.sourceAnchor[2] + c.offset[2],
+            ])
+          )
+        );
+        const nextDefi = s.defiBlocks.filter((b) => !sourceKeys.has(positionKey(b.position)));
+        const nextSandbox = [...s.sandboxBlocks, ...newBlocks];
+
+        set({
+          defiBlocks: nextDefi,
+          sandboxBlocks: nextSandbox,
+          // If we're already in sandbox mode, mirror onto `blocks`.
+          blocks: s.mode === 'sandbox' ? nextSandbox : s.mode === 'defi' ? nextDefi : s.blocks,
+          pendingTransfer: null,
+        });
         return newBlocks;
       },
     }),

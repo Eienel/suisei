@@ -9,6 +9,7 @@ import { BlockInstances } from './BlockInstances';
 import { PlacementGrid } from './PlacementGrid';
 import { DayNightCycle } from './DayNightCycle';
 import { BlueprintGhosts } from './BlueprintGhosts';
+import { TransferGhost } from './TransferGhost';
 
 const isMobile =
   typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -20,11 +21,14 @@ export function World() {
   const mode = useWorld((s) => s.mode);
   const activeBlockType = useWorld((s) => s.activeBlockType);
   const pendingPiece = useWorld((s) => s.pendingPiece);
+  const pendingTransfer = useWorld((s) => s.pendingTransfer);
   const setSelected = useWorld((s) => s.setSelected);
   const setHoveredCell = useWorld((s) => s.setHoveredCell);
   const setPieceHover = useWorld((s) => s.setPieceHover);
+  const setTransferHover = useWorld((s) => s.setTransferHover);
   const placeBlock = useWorld((s) => s.placeBlock);
   const commitPiece = useWorld((s) => s.commitPiece);
+  const commitTransfer = useWorld((s) => s.commitTransfer);
 
   // In lessons mode the only legal placement is committing an earned
   // piece — freeform clicks should NOT drop blocks on top of the
@@ -33,14 +37,25 @@ export function World() {
 
   const handleFaceHover = useCallback(
     (cell: Vec3) => {
-      if (pendingPiece) setPieceHover(cell);
+      if (pendingTransfer) setTransferHover(cell);
+      else if (pendingPiece) setPieceHover(cell);
       else if (tool === 'place' && allowFreeformPlacement) setHoveredCell(cell);
     },
-    [pendingPiece, tool, allowFreeformPlacement, setPieceHover, setHoveredCell]
+    [pendingTransfer, pendingPiece, tool, allowFreeformPlacement, setTransferHover, setPieceHover, setHoveredCell]
   );
 
   const handleFaceClick = useCallback(
     (cell: Vec3, blockId: string) => {
+      if (pendingTransfer) {
+        const placed = commitTransfer(cell);
+        if (placed && placed.length) {
+          sfx.snap(cell[1]);
+          sfx.sparkle();
+        } else {
+          sfx.error();
+        }
+        return;
+      }
       if (pendingPiece) {
         const placed = commitPiece(cell);
         if (placed && placed.length) {
@@ -58,7 +73,7 @@ export function World() {
       }
       setSelected(blockId);
     },
-    [pendingPiece, tool, allowFreeformPlacement, activeBlockType, commitPiece, placeBlock, setSelected]
+    [pendingTransfer, pendingPiece, tool, allowFreeformPlacement, activeBlockType, commitTransfer, commitPiece, placeBlock, setSelected]
   );
 
   return (
@@ -83,6 +98,7 @@ export function World() {
         <PlacementGrid />
 
         <BlueprintGhosts />
+        <TransferGhost />
 
         <BlockInstances
           blocks={blocks}
