@@ -131,18 +131,21 @@ Distribution:
 
 ### Sprint 0 — Foundation (May 27 → Jun 2)
 
-- [ ] Verify hackathon deadline (check overflow.sui.io)
+- [x] Verify hackathon deadline (confirmed by user)
 - [x] Strip old components and 3D code
 - [x] Set up clean app shell (router, providers, theme)
 - [x] Brand design brief ready to feed Claude Design (`docs/design/SUISEI_BRIEF.md` + `BRAND_DESIGNER_PROMPT.txt`)
 - [ ] Apply for Enoki API access
-- [ ] Implement zkLogin sign-in flow (Quest 1 step 1)
-- [ ] Implement Sponsored Tx wrapper (Quest 1 step 2)
-- [ ] Build minimal Suisei chat panel (right side, persistent)
-- [ ] Deploy first Move module: `suisei_badge` (soulbound)
-- [ ] Mint badge on Quest 1 completion (Quest 1 step 3)
-- [ ] Landing page placeholder
-- [ ] Suisei agent system prompt v1 (Claude Haiku via proxy)
+- [x] Implement zkLogin sign-in flow (Quest 1 step 1) — `AuthButton` + EnokiRegistrar
+- [ ] Implement Sponsored Tx wrapper (Quest 1 step 2) — pending Enoki keys
+- [x] Build minimal Suisei chat panel (right side, persistent) — `SuiseiChat.tsx`
+- [x] Author first Move module: `suisei_badge` (soulbound) — `move/suisei_badge`
+- [ ] Publish `suisei_badge` to testnet + set `VITE_BADGE_PACKAGE_ID`
+- [x] Mint badge on Quest 1 completion (Quest 1 step 3) — real-when-configured, mocked when not
+- [x] Landing page placeholder
+- [x] Quest hub UI — `QuestHub.tsx`, linear unlock from `badges` count
+- [x] Quest 1 vertical slice — `quests/Quest1ZkLogin.tsx` (intro → interact → badge → done)
+- [ ] Suisei agent system prompt v1 (Claude Haiku via proxy) — scripted lines in place, LLM proxy still TBD
 
 ### Sprint 1 — Core Quests (Jun 3 → Jun 9)
 

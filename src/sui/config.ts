@@ -11,13 +11,13 @@ const NETWORK = (import.meta.env.VITE_SUI_NETWORK ?? 'testnet') as Network;
 export const SUI_NETWORK: Network = NETWORK;
 export const SUI_RPC_URL = getFullnodeUrl(NETWORK);
 
-/** Move package id with the `world` module. Required for save-world. */
-export const WORLD_PACKAGE_ID =
-  import.meta.env.VITE_WORLD_NFT_PACKAGE_ID ?? '';
+/** Move package id with the `badge` module. Required for badge mints. */
+export const BADGE_PACKAGE_ID =
+  import.meta.env.VITE_BADGE_PACKAGE_ID ?? '';
 
-/** Fully-qualified World struct type for queries / type filters. */
-export const WORLD_TYPE = WORLD_PACKAGE_ID
-  ? `${WORLD_PACKAGE_ID}::world::World`
+/** Fully-qualified Badge struct type for owned-object queries. */
+export const BADGE_TYPE = BADGE_PACKAGE_ID
+  ? `${BADGE_PACKAGE_ID}::badge::Badge`
   : '';
 
 /** Public Walrus testnet endpoints. Override via env if needed. */
@@ -35,4 +35,4 @@ export const ENOKI_GOOGLE_CLIENT_ID =
   import.meta.env.VITE_ENOKI_GOOGLE_CLIENT_ID ?? '';
 export const ENOKI_CONFIGURED = !!(ENOKI_API_KEY && ENOKI_GOOGLE_CLIENT_ID);
 
-export const PACKAGE_CONFIGURED = !!WORLD_PACKAGE_ID;
+export const BADGE_CONFIGURED = !!BADGE_PACKAGE_ID;

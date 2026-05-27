@@ -18,6 +18,7 @@ export default {
         accent: {
           blue: '#1E6BFF',
           cyan: '#00E5FF',
+          yellow: '#FFC83D',
           violet: '#8B5CF6',
           magenta: '#FF2D92',
           amber: '#FFB020',
