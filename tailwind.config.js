@@ -16,6 +16,7 @@ export default {
           mute: '#7B8298',
         },
         accent: {
+          blue: '#1E6BFF',
           cyan: '#00E5FF',
           violet: '#8B5CF6',
           magenta: '#FF2D92',
