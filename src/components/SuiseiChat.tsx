@@ -223,6 +223,26 @@ function scriptedLine(questId: string, phase: string): string | null {
       done:
         "This is why Sui devs reach for flash loans, batched DEX routes, multi-step claims with one signature. The transaction is the unit of atomicity.",
     },
+    walrus_seal: {
+      intro:
+        "Quest 7: Walrus and Seal. Walrus is decentralized blob storage on Sui. Seal is threshold encryption gated by an on-chain Move policy. Together they give you 'public ciphertext, conditional reads' — a primitive most chains can't express without a trusted off-chain server.",
+      interact:
+        "Write a short message, seal it, publish to Walrus. Then watch a badge-holder decrypt it cleanly while an empty wallet gets refused by the policy.",
+      badge:
+        "Storage layer is public, durable, content-addressed. Policy layer is on chain and Move-typed. Compose the two and you've got encrypted-but-permissionless data.",
+      done:
+        "This is the Walrus track bounty. Build something with it: gated lore for an NFT collection, paywalled JSON, private comments under a public post.",
+    },
+    deepbook_grad: {
+      intro:
+        "Quest 8: the graduate. DeepBook is Sui's fully on-chain central-limit orderbook. No AMM curve, no off-chain market maker, no relayer. Just Move, holding state, matching crosses on price-time priority.",
+      interact:
+        "Place a limit order against the SUI/USDC book. If it crosses, it fills. If not, it rests. Either outcome counts — orderbook semantics are the lesson.",
+      badge:
+        "Order routed. You're about to mint the graduate badge — eighth and last. The set is complete.",
+      done:
+        "You've shipped on the whole stack. Now plug @suisei/sui-skills-mcp into Claude Desktop or Cursor and let your own agent do this — and then anything else you want it to.",
+    },
   };
   return lines[questId]?.[phase] ?? null;
 }
