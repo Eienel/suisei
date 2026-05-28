@@ -203,6 +203,16 @@ function scriptedLine(questId: string, phase: string): string | null {
       done:
         "This pattern composes. A cap can be inside a wallet, a contract, a multisig, a timelock — and the mint function just keeps working. That's why Sui devs reach for it.",
     },
+    soulbound: {
+      intro:
+        "Quest 5: now feel what soulbound actually means. Quest 3 declared the abilities; this one runs three different attacks against your badge and shows them all being refused — at compile time.",
+      interact:
+        "Click each attack to see the Move compiler's error verbatim. The first tries to transfer, the second wraps it in a Bag, the third tries to silently drop it. None of them link.",
+      badge:
+        "All three blocked, structurally. Type system did the work — you didn't write a single `require`.",
+      done:
+        "Compare this to EVM SBTs, which are just ERC-721s with `_beforeTokenTransfer` reverting. That's a runtime guard you have to remember. Sui's is a binary that won't even produce.",
+    },
   };
   return lines[questId]?.[phase] ?? null;
 }
