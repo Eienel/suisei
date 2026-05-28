@@ -1,0 +1,42 @@
+{
+  "name": "@suisei/sui-skills-mcp",
+  "version": "0.1.0",
+  "description": "MCP server exposing the Sui Stack as one-line tools — the toolkit Suisei (suisei.dev) uses to teach Sui, available for any agent.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "sui-skills-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "sui",
+    "blockchain",
+    "claude",
+    "anthropic",
+    "agent",
+    "tools"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@mysten/sui": "^1.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}
