@@ -5,8 +5,14 @@
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server.js",
+    "./http": "./dist/http.js"
+  },
   "bin": {
-    "sui-skills-mcp": "dist/index.js"
+    "sui-skills-mcp": "dist/index.js",
+    "sui-skills-mcp-serve": "dist/serve.js"
   },
   "files": [
     "dist",
@@ -15,6 +21,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "serve": "node dist/serve.js",
     "prepublishOnly": "npm run build"
   },
   "engines": {

@@ -48,6 +48,41 @@ Restart Claude Desktop. You can now ask the agent things like:
 
 The agent picks the right tool. You see the result.
 
+## Use it remotely (Claude web + mobile)
+
+Stdio only works where the host can spawn a local process (Claude
+Desktop, Cursor). To use the toolkit from the **Claude web and mobile
+apps**, run it as a **remote MCP server** and add the URL as a Custom
+Connector (Settings → Connectors).
+
+Host it anywhere with the bundled HTTP server:
+
+```bash
+PORT=8787 SUI_SKILLS_MCP_TOKEN=your-secret npx sui-skills-mcp-serve
+# serves Streamable HTTP at http://localhost:8787/  (front with HTTPS in prod)
+```
+
+On serverless, import the runtime-agnostic Fetch handler directly — it
+runs on Vercel Edge, Cloudflare Workers, Deno, and Bun:
+
+```ts
+// api/mcp.ts (Vercel Edge)  — needs `@suisei/sui-skills-mcp` as a dependency
+export const config = { runtime: 'edge' };
+import { handleMcpRequest } from '@suisei/sui-skills-mcp/http';
+export default (req: Request) => handleMcpRequest(req);
+```
+
+Set `SUI_SKILLS_MCP_TOKEN` so the endpoint requires
+`Authorization: Bearer <token>` — a public MCP URL without a token is
+open to the world.
+
+**Signing caveat.** Reads (balances, coins, objects, transactions,
+dynamic fields, gas, Walrus) work over a remote connector immediately.
+The transaction-building tools still return *unsigned* bytes — signing
+happens host-side, and a remote host (mobile) has no local wallet, so it
+needs its own signing path (e.g. an Enoki-sponsored flow or a wallet
+deep-link) to submit.
+
 ## Tools
 
 **Read the chain**
