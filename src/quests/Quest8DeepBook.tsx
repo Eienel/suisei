@@ -4,7 +4,13 @@ import { useApp } from '@/state/app';
 import { questById } from '@/data/quests';
 import { AuthButton } from '@/components/AuthButton';
 import { buildBadgeMintTx, badgeFromTxResult, mockBadge } from '@/sui/badge';
-import { BADGE_CONFIGURED, SUI_NETWORK } from '@/sui/config';
+import { BADGE_CONFIGURED, DEEPBOOK_POOL, SUI_NETWORK } from '@/sui/config';
+import {
+  fetchOrderBook,
+  matchAgainstBook,
+  type OrderBook,
+  type MatchResult,
+} from '@/sui/deepbook';
 import {
   CheckCircle2,
   ExternalLink,
@@ -124,13 +130,12 @@ export function Quest8DeepBook() {
         )}
       </section>
 
-      {!BADGE_CONFIGURED && (
-        <p className="mt-4 text-xs text-cream-mute font-mono">
-          Dev mode: order routes against a frozen mock orderbook so the demo
-          runs without testnet SUI / USDC. Real DeepBook v3 plug-in lands in
-          Sprint 2.
-        </p>
-      )}
+      <p className="mt-4 text-xs text-cream-mute font-mono">
+        Live: the orderbook is fetched from the DeepBook {SUI_NETWORK} indexer.
+        Matching runs against that real state. Order placement is simulated —
+        a real post needs a funded BalanceManager, which a fresh zkLogin wallet
+        doesn't have.
+      </p>
     </div>
   );
 }
@@ -192,80 +197,6 @@ function IntroPanel({ onStart }: { onStart: () => void }) {
   );
 }
 
-interface OrderResult {
-  status: 'filled' | 'partial' | 'resting' | 'rejected';
-  side: 'buy' | 'sell';
-  price: number;
-  size: number;
-  filled: number;
-  notes: string;
-}
-
-const BOOK = {
-  bids: [
-    { price: 0.999, size: 1200 },
-    { price: 0.998, size: 800 },
-    { price: 0.997, size: 1500 },
-  ],
-  asks: [
-    { price: 1.001, size: 950 },
-    { price: 1.002, size: 1400 },
-    { price: 1.003, size: 2200 },
-  ],
-};
-
-function matchOrder(side: 'buy' | 'sell', price: number, size: number): OrderResult {
-  if (size <= 0 || price <= 0) {
-    return {
-      status: 'rejected',
-      side,
-      price,
-      size,
-      filled: 0,
-      notes: 'price and size must be > 0',
-    };
-  }
-  const opposing = side === 'buy' ? BOOK.asks : BOOK.bids;
-  let remaining = size;
-  let filled = 0;
-  for (const level of opposing) {
-    const crosses = side === 'buy' ? price >= level.price : price <= level.price;
-    if (!crosses) break;
-    const take = Math.min(remaining, level.size);
-    filled += take;
-    remaining -= take;
-    if (remaining <= 0) break;
-  }
-  if (filled === size) {
-    return {
-      status: 'filled',
-      side,
-      price,
-      size,
-      filled,
-      notes: 'fully filled against resting liquidity',
-    };
-  }
-  if (filled > 0) {
-    return {
-      status: 'partial',
-      side,
-      price,
-      size,
-      filled,
-      notes: `${filled} filled at top of book, ${remaining} resting on the book`,
-    };
-  }
-  return {
-    status: 'resting',
-    side,
-    price,
-    size,
-    filled: 0,
-    notes: 'order did not cross — resting on the book until matched',
-  };
-}
-
 function OrderPanel({
   address,
   onFilled,
@@ -276,10 +207,27 @@ function OrderPanel({
   minting: boolean;
 }) {
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
-  const [priceStr, setPriceStr] = useState('1.001');
-  const [sizeStr, setSizeStr] = useState('500');
-  const [result, setResult] = useState<OrderResult | null>(null);
+  const [priceStr, setPriceStr] = useState('');
+  const [sizeStr, setSizeStr] = useState('5');
+  const [result, setResult] = useState<MatchResult | null>(null);
   const [routing, setRouting] = useState(false);
+  const [book, setBook] = useState<OrderBook | null>(null);
+  const [loadingBook, setLoadingBook] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchOrderBook(6).then((b) => {
+      if (cancelled) return;
+      setBook(b);
+      setLoadingBook(false);
+      // Seed a price near the best ask so the first order is likely to cross.
+      const bestAsk = b.asks[0]?.price;
+      if (bestAsk) setPriceStr(String(bestAsk));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!address) {
     return (
@@ -295,40 +243,63 @@ function OrderPanel({
   }
 
   const route = async () => {
+    if (!book) return;
     setRouting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    const r = matchOrder(side, Number(priceStr), Number(sizeStr));
-    setResult(r);
+    await new Promise((r) => setTimeout(r, 600));
+    setResult(matchAgainstBook(book, side, Number(priceStr), Number(sizeStr)));
     setRouting(false);
   };
 
   const ok = result?.status === 'filled' || result?.status === 'partial' || result?.status === 'resting';
+  const topBids = book ? [...book.bids].sort((a, b) => b.price - a.price).slice(0, 5) : [];
+  const topAsks = book ? [...book.asks].sort((a, b) => a.price - b.price).slice(0, 5) : [];
 
   return (
     <div className="space-y-4">
       <div className="card-night p-0 overflow-hidden">
         <div className="px-5 py-2.5 border-b border-night-line/70 flex items-center justify-between">
-          <span className="eyebrow text-cream-mute">SUI / USDC · testnet</span>
-          <span className="font-mono text-[10px] text-cream-mute">price-time priority</span>
+          <span className="eyebrow text-cream-mute">
+            {DEEPBOOK_POOL.replace('_', ' / ')} · {SUI_NETWORK}
+          </span>
+          <span className="font-mono text-[10px] text-cream-mute flex items-center gap-1.5">
+            {loadingBook ? (
+              <>
+                <Loader2 size={10} className="animate-spin" />
+                loading book
+              </>
+            ) : book?.live ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse-soft" />
+                live indexer
+              </>
+            ) : (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-butter" />
+                cached book
+              </>
+            )}
+          </span>
         </div>
         <div className="grid grid-cols-2 divide-x divide-night-line/70 font-mono text-[12px]">
           <div className="p-4">
             <p className="eyebrow text-sage mb-2">bids</p>
-            {BOOK.bids.map((b) => (
+            {topBids.map((b) => (
               <div key={b.price} className="flex justify-between text-cream-dim">
-                <span>{b.price.toFixed(3)}</span>
+                <span>{b.price}</span>
                 <span>{b.size}</span>
               </div>
             ))}
+            {topBids.length === 0 && <p className="text-cream-mute">—</p>}
           </div>
           <div className="p-4">
             <p className="eyebrow text-terracotta mb-2">asks</p>
-            {BOOK.asks.map((a) => (
+            {topAsks.map((a) => (
               <div key={a.price} className="flex justify-between text-cream-dim">
-                <span>{a.price.toFixed(3)}</span>
+                <span>{a.price}</span>
                 <span>{a.size}</span>
               </div>
             ))}
+            {topAsks.length === 0 && <p className="text-cream-mute">—</p>}
           </div>
         </div>
       </div>
@@ -383,7 +354,7 @@ function OrderPanel({
         <button
           type="button"
           onClick={route}
-          disabled={routing || minting}
+          disabled={routing || minting || loadingBook || !book}
           className="btn-primary disabled:opacity-50"
         >
           {routing && <Loader2 size={14} className="animate-spin" />}
@@ -412,7 +383,7 @@ function OrderPanel({
           )}
           <div>
             <p className="opacity-70">
-              {result.side} {result.size} @ {result.price.toFixed(3)} · {result.status}
+              {result.side} {result.size} @ {result.price.toFixed(4)} · {result.status}
             </p>
             <p className="mt-0.5">{result.notes}</p>
           </div>
