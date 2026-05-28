@@ -92,8 +92,6 @@ export default {
         'fade-in': 'fadeIn 220ms ease-out',
         'rise-in': 'riseIn 320ms cubic-bezier(0.16, 1, 0.3, 1)',
         'pulse-soft': 'pulseSoft 2.4s ease-in-out infinite',
-        caret: 'caret 1s steps(1) infinite',
-        'grain-in': 'grainIn 170ms ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -107,19 +105,6 @@ export default {
         pulseSoft: {
           '0%, 100%': { opacity: '0.7' },
           '50%': { opacity: '1' },
-        },
-        caret: {
-          '0%, 50%': { opacity: '1' },
-          '50.01%, 100%': { opacity: '0' },
-        },
-        grainIn: {
-          '0%': {
-            opacity: '0',
-            filter: 'blur(3px)',
-            transform: 'translateY(-1px)',
-          },
-          '60%': { opacity: '1', filter: 'blur(0.4px)' },
-          '100%': { filter: 'blur(0)', transform: 'translateY(0)' },
         },
       },
     },
