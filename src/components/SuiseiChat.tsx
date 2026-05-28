@@ -193,6 +193,16 @@ function scriptedLine(questId: string, phase: string): string | null {
       done:
         "Every badge in your wallet from this quest forward is protected by exactly this declaration. Type-level safety, not vigilance.",
     },
+    capability: {
+      intro:
+        "Quest 4: the capability pattern. EVM's reflex is `require(msg.sender == owner)`. Sui's reflex is to make admin power an object you hold. Holding it is the authorization.",
+      interact:
+        "Three function signatures for an admin mint. Pick the one where the type system enforces the guard — not a runtime check, not a hardcoded address.",
+      badge:
+        "Signature accepted. That cap is now transferable, wrappable in a multisig, sendable to a DAO. The contract never has to know who the admin is.",
+      done:
+        "This pattern composes. A cap can be inside a wallet, a contract, a multisig, a timelock — and the mint function just keeps working. That's why Sui devs reach for it.",
+    },
   };
   return lines[questId]?.[phase] ?? null;
 }
