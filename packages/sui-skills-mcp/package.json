@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "@mysten/sui": "^1.18.0",
+    "@mysten/sui": "^1.45.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

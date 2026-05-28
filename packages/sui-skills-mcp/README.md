@@ -106,6 +106,23 @@ calling agent is expected to parse it.
 - **Structured output.** Every successful return is JSON. The agent
   reads structured data more accurately than prose.
 
+## Transport &amp; deprecation
+
+Sui is deprecating public JSON-RPC fullnode endpoints (~mid-2026) in
+favour of gRPC and GraphQL. Transport is chosen in one place —
+`src/sui-client.ts` — so the rest of the toolkit never imports a client
+directly.
+
+Today `clientFor()` returns the JSON-RPC client, because building a
+transaction (`tx.build({ client })`) needs *transaction resolution*,
+which `@mysten/sui` 1.45.x implements only for JSON-RPC. Verified against
+testnet: both the gRPC and GraphQL clients reject `tx.build` ("not
+supported"/"not supported yet"). Reads already work over gRPC via
+`grpcClientFor()`, also in that file.
+
+When the SDK ships transaction-building over gRPC, the cutover is a
+one-line change in `clientFor()` — no tool touches transport directly.
+
 ## Development
 
 ```bash
