@@ -5,7 +5,7 @@ Protocol. The same toolkit [Suisei](https://suisei.dev) — the Sui
 teaching agent — uses internally, available to any MCP-aware client
 (Claude Desktop, Cursor, Windsurf, your own agent).
 
-> **Status:** Alpha. Fifteen tools spanning the core build loop — read
+> **Status:** Alpha. Nineteen tools spanning the core build loop — read
 > chain state, build any transaction, simulate it, submit it — plus
 > Walrus storage. Next up: PTB composition, DeepBook, and Seal.
 
@@ -58,6 +58,10 @@ The agent picks the right tool. You see the result.
 | `sui_get_object`        | Any object's type, owner, fields, and Display               |
 | `sui_get_owned_objects` | List objects by owner, filterable by struct type, paginated |
 | `sui_get_owned_badges`  | List a wallet's Suisei completion badges                    |
+| `sui_get_coins`         | List coin objects of a type (the ids you spend), paginated  |
+| `sui_get_transaction`   | Look up a finalized tx by digest: status, gas, changes      |
+| `sui_get_reference_gas_price` | Current network reference gas price (MIST)            |
+| `sui_get_dynamic_fields` | List an object's dynamic fields (Tables, Bags), paginated  |
 
 **Build a transaction (never signed — bytes returned for the host)**
 

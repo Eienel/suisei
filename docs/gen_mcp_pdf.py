@@ -139,7 +139,7 @@ cover_inner = [
     [Paragraph("Sui Skills MCP", S["title"])],
     [Paragraph("The Sui Stack as one-job-per-tool primitives, over the "
                "Model Context Protocol.", S["sub"])],
-    [Paragraph("Capability Reference&nbsp;&nbsp;&middot;&nbsp;&nbsp;15 tools"
+    [Paragraph("Capability Reference&nbsp;&nbsp;&middot;&nbsp;&nbsp;19 tools"
                "&nbsp;&nbsp;&middot;&nbsp;&nbsp;Generated 2026-05-28", S["meta"])],
 ]
 cover = Table(cover_inner, colWidths=[W])
@@ -217,7 +217,7 @@ P("Restart the host. All tools are exposed under the <font name='Courier' size=9
 
 # ---- 5. Tool reference ----------------------------------------------------
 H2("5. Tool reference")
-P("Fifteen tools across four groups. Every tool accepts a "
+P("Nineteen tools across four groups. Every tool accepts a "
   "<font name='Courier' size=9>network</font> argument (testnet &middot; mainnet &middot; devnet, "
   "default testnet) except the two Walrus tools, which target Walrus endpoints directly.")
 
@@ -230,6 +230,10 @@ table([
     ["sui_get_object", "Any object's type, owner, version, fields, and Display"],
     ["sui_get_owned_objects", "List objects by owner, filter by struct type, paginated"],
     ["sui_get_owned_badges", "List a wallet's Suisei quest-completion badges"],
+    ["sui_get_coins", "List coin objects of a type (the ids you spend), paginated"],
+    ["sui_get_transaction", "Look up a finalized tx by digest: status, gas, changes"],
+    ["sui_get_reference_gas_price", "Current network reference gas price (MIST)"],
+    ["sui_get_dynamic_fields", "List an object's dynamic fields (Tables, Bags)"],
 ], [0.32 * W, 0.68 * W])
 
 P("sui_resolve_address", "h4")
@@ -273,6 +277,25 @@ P("Lists Suisei badges (soulbound quest-completion NFTs) owned by an address &md
   "SUISEI_BADGE_PACKAGE env var, or a built-in per-network default.")
 code(['&rarr; { "count": 3, "badges": [ { "object_id": "…",',
       '    "quest_id": "zklogin", "quest_number": 1, "minted_at_ms": "…" } ] }'])
+
+P("sui_get_coins", "h4")
+P("Unlike sui_get_balance (which sums), this returns the concrete coin_object_id values an agent "
+  "needs to spend or split in a transaction. Defaults to native SUI; pass coin_type for any other "
+  "coin. Paginated.")
+code(['&rarr; { "coin_type": "0x2::sui::SUI", "count": 4, "has_next_page": false,',
+      '    "coins": [ { "coin_object_id": "…", "balance": "1000000000" }, … ] }'])
+
+P("sui_get_transaction", "h4")
+P("Fetch a finalized transaction by digest &mdash; the same digest sui_execute_signed_tx returns. "
+  "Returns status, gas used, balance changes, timestamp, and event count.")
+code(['&rarr; { "digest": "…", "status": "success", "timestamp_ms": "…",',
+      '    "gas_used": {…}, "balance_changes": [...], "events_count": 1 }'])
+
+P("sui_get_reference_gas_price / sui_get_dynamic_fields", "h4")
+P("sui_get_reference_gas_price returns the current network gas price in MIST (takes only network). "
+  "sui_get_dynamic_fields lists the dynamic fields attached to a parent object &mdash; how Sui "
+  "stores Tables, Bags, and other on-chain collections &mdash; returning each field's name, type, "
+  "and child object id (paginated).")
 
 P("5.2 Build a transaction (returns unsigned bytes)", "h3")
 table([

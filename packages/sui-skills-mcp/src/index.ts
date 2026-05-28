@@ -30,6 +30,10 @@ import { suiGetAllBalances } from './tools/sui_get_all_balances.js';
 import { suiGetObject } from './tools/sui_get_object.js';
 import { suiGetOwnedObjects } from './tools/sui_get_owned_objects.js';
 import { suiGetOwnedBadges } from './tools/sui_get_owned_badges.js';
+import { suiGetCoins } from './tools/sui_get_coins.js';
+import { suiGetTransaction } from './tools/sui_get_transaction.js';
+import { suiGetReferenceGasPrice } from './tools/sui_get_reference_gas_price.js';
+import { suiGetDynamicFields } from './tools/sui_get_dynamic_fields.js';
 import { suiMintBadge } from './tools/sui_mint_badge.js';
 import { suiMoveCall } from './tools/sui_move_call.js';
 import { suiTransfer } from './tools/sui_transfer.js';
@@ -132,6 +136,53 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiGetOwnedBadges,
+  },
+  {
+    name: 'sui_get_coins',
+    description:
+      'List individual coin objects of one type held by an address (not a summed balance). Returns the concrete coin_object_id values an agent needs to spend or split in a transaction. Defaults to native SUI; pass coin_type for any other coin. Paginated.',
+    inputSchema: z.object({
+      address: z.string().describe('Wallet address whose coins to list.'),
+      coin_type: z
+        .string()
+        .optional()
+        .describe('Fully-qualified coin type, e.g. "0x2::sui::SUI". Defaults to SUI.'),
+      cursor: z.string().optional().describe('Pagination cursor from a previous call.'),
+      limit: z.number().int().min(1).max(50).default(50),
+      network: networkSchema,
+    }),
+    handler: suiGetCoins,
+  },
+  {
+    name: 'sui_get_transaction',
+    description:
+      'Fetch a finalized transaction by digest: execution status, gas used, balance changes, and event count. Use to inspect the result of a transaction submitted earlier (the digest sui_execute_signed_tx returns).',
+    inputSchema: z.object({
+      digest: z.string().describe('The transaction digest to look up.'),
+      network: networkSchema,
+    }),
+    handler: suiGetTransaction,
+  },
+  {
+    name: 'sui_get_reference_gas_price',
+    description:
+      'Get the current reference gas price (in MIST) for the network. Use to estimate fees or set a gas price before building a transaction.',
+    inputSchema: z.object({
+      network: networkSchema,
+    }),
+    handler: suiGetReferenceGasPrice,
+  },
+  {
+    name: 'sui_get_dynamic_fields',
+    description:
+      'List the dynamic fields attached to a parent object — how Sui stores Tables, Bags, and other on-chain collections. Returns each field name, type, and child object id. Paginated.',
+    inputSchema: z.object({
+      parent_id: z.string().describe('Object id whose dynamic fields to list.'),
+      cursor: z.string().optional().describe('Pagination cursor from a previous call.'),
+      limit: z.number().int().min(1).max(50).optional(),
+      network: networkSchema,
+    }),
+    handler: suiGetDynamicFields,
   },
   {
     name: 'sui_mint_badge',
