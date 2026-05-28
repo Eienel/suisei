@@ -29,20 +29,18 @@ export default function SuiShell() {
 
 function BootLoading() {
   return (
-    <div className="fixed inset-0 bg-ink flex items-center justify-center">
-      <span className="font-mono text-xs text-fg-mute">booting…</span>
+    <div className="fixed inset-0 bg-night flex items-center justify-center">
+      <span className="font-mono text-xs text-cream-mute">booting…</span>
     </div>
   );
 }
 
 function BootError({ message }: { message: string }) {
   return (
-    <div className="fixed inset-0 bg-ink flex items-center justify-center p-6">
+    <div className="fixed inset-0 bg-night flex items-center justify-center p-6">
       <div className="max-w-md text-center">
-        <p className="font-mono text-xs uppercase tracking-widest text-accent-magenta mb-2">
-          boot failed
-        </p>
-        <p className="text-sm text-fg-mute">{message}</p>
+        <p className="eyebrow text-terracotta mb-2">boot failed</p>
+        <p className="text-sm text-cream-mute">{message}</p>
       </div>
     </div>
   );

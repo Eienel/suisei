@@ -9,54 +9,128 @@
     height: 100%;
   }
   body {
-    @apply bg-ink text-fg font-sans antialiased;
+    /* Default to cream surface; warm-dark surfaces opt in with `.surface-night`. */
+    @apply bg-paper text-ink font-sans antialiased;
     font-feature-settings: 'cv11', 'ss01';
+    /* Apple-style optical adjustments */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
     overscroll-behavior: none;
   }
-  /* Cinematic dark scroll bars */
+
+  /* Scrollbars: warm + understated. Apple-ish. */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(123, 130, 152, 0.25);
+    background: rgba(26, 26, 31, 0.18);
     border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(123, 130, 152, 0.45);
+    background-color: rgba(26, 26, 31, 0.32);
+    background-clip: content-box;
+  }
+  .surface-night ::-webkit-scrollbar-thumb {
+    background-color: rgba(242, 237, 226, 0.18);
+    background-clip: content-box;
+  }
+  .surface-night ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(242, 237, 226, 0.32);
+    background-clip: content-box;
+  }
+
+  /* Apple-style selection: butter on cream, butter on night */
+  ::selection {
+    background: rgba(245, 201, 75, 0.45);
+    color: inherit;
   }
 }
 
 @layer components {
-  /* Glass panel — frosted dark surface */
-  .glass {
-    @apply bg-ink-soft/70 backdrop-blur-md border border-ink-line/80;
+  /* Surface roots: apply to top-level page wrappers. */
+  .surface-paper {
+    @apply bg-paper text-ink;
+    background-image: theme('backgroundImage.grain-paper');
+    background-size: 200px 200px;
   }
-  /* Subtle hover-glow for interactive panels */
-  .glow-hover {
-    transition: box-shadow 220ms ease, border-color 220ms ease;
+  .surface-night {
+    @apply bg-night text-cream;
+    background-image: theme('backgroundImage.grain-night');
+    background-size: 200px 200px;
   }
-  .glow-hover:hover {
-    @apply shadow-glow-soft border-accent-cyan/40;
+
+  /* Cards. No gradients. Soft layered shadow + warm border. */
+  .card-paper {
+    @apply bg-paper-soft border border-paper-line rounded-card shadow-paper-card;
   }
-  /* Primary CTA */
+  .card-paper-lift {
+    @apply bg-paper-soft border border-paper-line rounded-card shadow-paper-lift;
+  }
+  .card-night {
+    @apply bg-night-soft border border-night-line rounded-card shadow-night-card;
+  }
+  .card-night-lift {
+    @apply bg-night-soft border border-night-line rounded-card shadow-night-lift;
+  }
+
+  /* Buttons. Apple-style: pill shape, generous padding, no shadow on default. */
   .btn-primary {
-    @apply px-4 py-2 rounded-lg font-semibold text-ink bg-fg hover:bg-white transition-colors;
+    @apply inline-flex items-center justify-center gap-1.5 px-5 py-2.5
+           font-medium text-paper bg-ink rounded-pill
+           hover:bg-night-soft active:scale-[0.98]
+           transition-[transform,background-color] duration-100;
+  }
+  .surface-night .btn-primary {
+    @apply text-night bg-cream hover:bg-paper;
+  }
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-1.5 px-5 py-2.5
+           font-medium text-paper-soft bg-terracotta rounded-pill
+           hover:brightness-110 active:scale-[0.98]
+           transition-[transform,filter] duration-100;
   }
   .btn-ghost {
-    @apply px-3 py-1.5 rounded-md font-medium text-fg-dim hover:text-fg hover:bg-ink-line/60 transition-colors;
+    @apply inline-flex items-center justify-center gap-1.5 px-4 py-2
+           font-medium text-ink-dim hover:text-ink hover:bg-paper-deep
+           rounded-pill transition-colors duration-100;
   }
-  .kbd {
-    @apply font-mono text-[10px] px-1.5 py-0.5 rounded bg-ink-line/80 text-fg-dim border border-ink-mute/60;
+  .surface-night .btn-ghost {
+    @apply text-cream-dim hover:text-cream hover:bg-night-line;
   }
-}
 
-/* Force the R3F canvas to fill its container */
-canvas {
-  display: block;
-  outline: none;
-  touch-action: none;
+  /* Inline tag / chip */
+  .chip {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5
+           rounded-pill font-mono text-[10px] uppercase tracking-[0.14em];
+  }
+  .chip-paper {
+    @apply chip bg-paper-deep text-ink-dim border border-paper-line;
+  }
+  .chip-night {
+    @apply chip bg-night-soft text-cream-dim border border-night-line;
+  }
+
+  /* Eyebrow label above section headings (Apple-style mono caps) */
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.18em] text-ink-mute;
+  }
+  .surface-night .eyebrow {
+    @apply text-cream-mute;
+  }
+
+  /* Keyboard glyph */
+  .kbd {
+    @apply font-mono text-[10px] px-1.5 py-0.5 rounded-md
+           bg-paper-deep text-ink-dim border border-paper-line;
+  }
+  .surface-night .kbd {
+    @apply bg-night-soft text-cream-dim border-night-line;
+  }
 }

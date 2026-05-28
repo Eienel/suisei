@@ -36,3 +36,15 @@ export const ENOKI_GOOGLE_CLIENT_ID =
 export const ENOKI_CONFIGURED = !!(ENOKI_API_KEY && ENOKI_GOOGLE_CLIENT_ID);
 
 export const BADGE_CONFIGURED = !!BADGE_PACKAGE_ID;
+
+/**
+ * Sponsor service base URL. The sponsor signs the gas object so the
+ * user pays zero. Without this, sponsored mints fall back to a local
+ * mock so the demo still runs end-to-end.
+ *
+ * Expected shape (Enoki-style two-step):
+ *   POST {SPONSOR_URL}/sponsor   { sender, txKindBytes } → { txBytes, signature }
+ *   POST {SPONSOR_URL}/execute   { txBytes, signature }  → { digest }
+ */
+export const SPONSOR_URL = import.meta.env.VITE_SPONSOR_URL ?? '';
+export const SPONSOR_CONFIGURED = !!SPONSOR_URL;

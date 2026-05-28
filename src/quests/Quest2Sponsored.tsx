@@ -2,23 +2,28 @@ import { useEffect, useState } from 'react';
 import {
   useCurrentAccount,
   useSuiClient,
-  useSignAndExecuteTransaction,
+  useSignTransaction,
 } from '@mysten/dapp-kit';
 import { useApp } from '@/state/app';
 import { questById } from '@/data/quests';
 import { AuthButton } from '@/components/AuthButton';
-import { buildBadgeMintTx, badgeFromTxResult, mockBadge } from '@/sui/badge';
-import { BADGE_CONFIGURED, SUI_NETWORK } from '@/sui/config';
-import { CheckCircle2, ExternalLink, Loader2, Sparkles } from 'lucide-react';
+import { mintSponsoredBadge } from '@/sui/sponsored';
+import {
+  BADGE_CONFIGURED,
+  SPONSOR_CONFIGURED,
+  SUI_NETWORK,
+} from '@/sui/config';
+import { CheckCircle2, ExternalLink, Loader2, Zap } from 'lucide-react';
 
 /**
- * Quest 1: zkLogin + first soulbound badge.
+ * Quest 2: Sponsored Tx + Object Model.
  *
- * Phases: intro → interact (sign in, then mint) → badge (in flight)
- * → done (badge displayed, next-quest CTA).
+ * Same vertical-slice shape as Quest 1, but the badge mint is wrapped
+ * by a sponsor service so the user pays zero gas. When no sponsor is
+ * configured, the mint is mocked so the demo still completes.
  */
-export function Quest1ZkLogin() {
-  const quest = questById('zklogin')!;
+export function Quest2Sponsored() {
+  const quest = questById('sponsored')!;
   const account = useCurrentAccount();
   const phase = useApp((s) => s.questPhase);
   const setPhase = useApp((s) => s.setQuestPhase);
@@ -27,61 +32,44 @@ export function Quest1ZkLogin() {
   const badges = useApp((s) => s.badges);
 
   const suiClient = useSuiClient();
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutateAsync: signTransaction } = useSignTransaction();
   const [minting, setMinting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const existingBadge = badges.find((b) => b.questId === 'zklogin');
+  const existing = badges.find((b) => b.questId === 'sponsored');
 
   useEffect(() => {
-    if (existingBadge && phase !== 'done') setPhase('done');
-  }, [existingBadge, phase, setPhase]);
+    if (existing && phase !== 'done') setPhase('done');
+  }, [existing, phase, setPhase]);
 
-  const mintBadge = async () => {
+  const mint = async () => {
     if (!account) return;
     setError(null);
     setMinting(true);
     setPhase('badge');
-
     try {
-      if (!BADGE_CONFIGURED) {
-        await new Promise((r) => setTimeout(r, 1200));
-        const badge = mockBadge('zklogin', account.address);
-        awardBadge(badge);
-        setPhase('done');
-        return;
-      }
-      const tx = buildBadgeMintTx({ recipient: account.address, questId: 'zklogin' });
-      signAndExecute(
+      const badge = await mintSponsoredBadge({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        { transaction: tx as any },
-        {
-          onSuccess: async ({ digest }) => {
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const badge = await badgeFromTxResult(suiClient as any, digest, 'zklogin');
-              awardBadge(badge);
-              setPhase('done');
-            } catch (e) {
-              setError(e instanceof Error ? e.message : 'Mint indexing failed');
-              setPhase('interact');
-            } finally {
-              setMinting(false);
-            }
-          },
-          onError: (e) => {
-            setError(e instanceof Error ? e.message : 'Sign failed');
-            setPhase('interact');
-            setMinting(false);
-          },
+        client: suiClient as any,
+        recipient: account.address,
+        questId: 'sponsored',
+        signTxBytes: async (txBytes) => {
+          // dapp-kit accepts a base64-encoded tx string; that avoids the
+          // duplicated @mysten/sui Transaction type from wallet-standard.
+          let s = '';
+          for (let i = 0; i < txBytes.length; i++) s += String.fromCharCode(txBytes[i]);
+          const b64 = typeof btoa !== 'undefined' ? btoa(s) : Buffer.from(s, 'binary').toString('base64');
+          const res = await signTransaction({ transaction: b64 });
+          return { signature: res.signature };
         },
-      );
-      return;
+      });
+      awardBadge(badge);
+      setPhase('done');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error');
+      setError(e instanceof Error ? e.message : 'Sponsored mint failed');
       setPhase('interact');
     } finally {
-      if (!BADGE_CONFIGURED) setMinting(false);
+      setMinting(false);
     }
   };
 
@@ -104,23 +92,24 @@ export function Quest1ZkLogin() {
         {phase === 'interact' && (
           <InteractPanel
             address={account?.address ?? null}
-            onMint={mintBadge}
+            onMint={mint}
             minting={minting}
           />
         )}
-        {phase === 'badge' && <BadgePanel minting={minting} />}
-        {phase === 'done' && existingBadge && (
-          <DonePanel badge={existingBadge} onNext={() => closeQuest()} />
+        {phase === 'badge' && <BadgePanel />}
+        {phase === 'done' && existing && (
+          <DonePanel badge={existing} onNext={() => closeQuest()} />
         )}
         {error && (
           <p className="mt-4 text-sm text-terracotta font-mono">{error}</p>
         )}
       </section>
 
-      {!BADGE_CONFIGURED && (
+      {(!BADGE_CONFIGURED || !SPONSOR_CONFIGURED) && (
         <p className="mt-4 text-xs text-cream-mute font-mono">
-          Dev mode: VITE_BADGE_PACKAGE_ID not set, badge mints are mocked
-          locally.
+          Dev mode: {SPONSOR_CONFIGURED ? '' : 'VITE_SPONSOR_URL not set · '}
+          {BADGE_CONFIGURED ? '' : 'VITE_BADGE_PACKAGE_ID not set · '}
+          sponsored mint mocked locally.
         </p>
       )}
     </div>
@@ -130,8 +119,8 @@ export function Quest1ZkLogin() {
 function PhaseLadder({ phase }: { phase: string }) {
   const steps = [
     { id: 'intro', label: 'Intro' },
-    { id: 'interact', label: 'Sign in' },
-    { id: 'badge', label: 'Mint badge' },
+    { id: 'interact', label: 'Approve' },
+    { id: 'badge', label: 'Sponsored mint' },
     { id: 'done', label: 'Done' },
   ];
   const idx = steps.findIndex((s) => s.id === phase);
@@ -166,16 +155,17 @@ function IntroPanel({ onStart }: { onStart: () => void }) {
   return (
     <div>
       <p className="text-cream leading-relaxed mb-3 text-[15px]">
-        zkLogin uses a zero-knowledge proof to turn your Google account into a
-        normal Sui address. Your Google identity stays off chain.
+        On most chains, every action costs gas — and a brand-new wallet has none.
+        Sui solves this with <span className="font-semibold text-butter">sponsored transactions</span>:
+        the app you're using pays the gas while you sign the intent.
       </p>
       <p className="text-cream-dim leading-relaxed mb-7 text-[15px]">
-        You will sign in, get a fresh address, and immediately use it to mint
-        your first on-chain object: a soulbound proof you finished this quest.
+        You'll mint your second on-chain badge. The transaction will succeed, but
+        your wallet balance will not move. That's the sponsor doing its job.
       </p>
       <button type="button" onClick={onStart} className="btn-primary">
-        I'm ready
-        <Sparkles size={14} />
+        Show me
+        <Zap size={14} />
       </button>
     </div>
   );
@@ -194,8 +184,8 @@ function InteractPanel({
     return (
       <div>
         <p className="text-cream leading-relaxed mb-5 text-[15px]">
-          Sign in with Google to get your zkLogin address. The button is in the
-          top right of this page.
+          You'll need a wallet for this one. Sign in with Google to get a fresh
+          zkLogin address (Quest 1 walks through it).
         </p>
         <div className="flex justify-start">
           <AuthButton />
@@ -205,11 +195,12 @@ function InteractPanel({
   }
   return (
     <div>
-      <p className="eyebrow text-cream-mute mb-2">Your address</p>
+      <p className="eyebrow text-cream-mute mb-2">Signing as</p>
       <p className="font-mono text-sm text-cream break-all mb-6">{address}</p>
       <p className="text-cream-dim leading-relaxed mb-6 text-[15px]">
-        That is a real Sui address. You can paste it into any wallet or
-        explorer. Now mint your first object to it.
+        Sui transactions can be split: <span className="font-semibold text-cream">you</span> sign
+        the intent, the <span className="font-semibold text-cream">sponsor</span> pays the gas.
+        Two signatures, one transaction, zero balance change for you.
       </p>
       <button
         type="button"
@@ -218,17 +209,17 @@ function InteractPanel({
         className="btn-primary disabled:opacity-60"
       >
         {minting && <Loader2 size={14} className="animate-spin" />}
-        Mint my first badge
+        Mint, on the house
       </button>
     </div>
   );
 }
 
-function BadgePanel({ minting }: { minting: boolean }) {
+function BadgePanel() {
   return (
     <div className="flex items-center gap-3 text-cream-dim">
       <Loader2 size={16} className="animate-spin text-butter" />
-      <span>{minting ? 'Submitting mint to Sui testnet…' : 'Confirming on chain…'}</span>
+      <span>Sponsor signing gas, then asking the network…</span>
     </div>
   );
 }
@@ -249,16 +240,16 @@ function DonePanel({
       <div className="flex items-center gap-2 mb-4">
         <CheckCircle2 size={18} className="text-sage" />
         <p className="font-display font-semibold text-cream text-[17px]">
-          First quest complete.
+          You paid nothing.
         </p>
       </div>
       <p className="text-cream-dim leading-relaxed mb-5 text-[15px]">
-        Your soulbound badge is in your wallet. The object id below is a real,
-        verifiable Sui object
-        {isMock ? ' (mocked locally; set VITE_BADGE_PACKAGE_ID to mint for real)' : ''}.
+        That mint cost real gas — about 0.0008 SUI — and the sponsor covered it.
+        Your wallet balance is exactly what it was a minute ago.
+        {isMock ? ' (Locally mocked: set VITE_SPONSOR_URL to wire the real flow.)' : ''}
       </p>
       <div className="rounded-card bg-night border border-night-line p-4 mb-7">
-        <p className="eyebrow text-cream-mute mb-1.5">Badge object</p>
+        <p className="eyebrow text-cream-mute mb-1.5">Sponsored object</p>
         <p className="font-mono text-xs text-cream-dim break-all">{badge.objectId}</p>
       </div>
       <div className="flex flex-wrap gap-3">
@@ -280,3 +271,4 @@ function DonePanel({
     </div>
   );
 }
+

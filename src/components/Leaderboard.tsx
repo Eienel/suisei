@@ -8,21 +8,25 @@ export function Leaderboard() {
   const setScreen = useApp((s) => s.setScreen);
 
   return (
-    <div className="fixed inset-0 bg-ink text-fg overflow-y-auto">
-      <header className="border-b border-ink-line/40 px-6 py-3 flex items-center justify-between">
+    <div className="fixed inset-0 bg-night text-cream overflow-y-auto">
+      <header className="border-b border-night-line/70 px-6 py-3 flex items-center justify-between">
         <button
           type="button"
           onClick={() => setScreen('play')}
-          className="font-mono text-sm text-fg-dim hover:text-fg transition-colors"
+          className="font-mono text-sm text-cream-dim hover:text-cream transition-colors"
         >
           ← Quests
         </button>
-        <span className="font-mono text-xs text-fg-mute">Leaderboard</span>
+        <span className="eyebrow text-cream-mute">Leaderboard</span>
       </header>
       <main className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Sui Stack Graduates</h1>
-        <p className="text-fg-mute leading-relaxed">
-          On-chain badge-holder ranking lands in Sprint 3.
+        <p className="eyebrow text-butter mb-3">Public alpha</p>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-[-0.015em] font-semibold text-cream mb-4">
+          Sui Stack Graduates
+        </h1>
+        <p className="text-cream-dim leading-relaxed text-[17px] max-w-xl">
+          On-chain badge-holder ranking lands in Sprint 3. The leaderboard will
+          read badges directly off Sui — no off-chain database, no opt-in.
         </p>
       </main>
     </div>

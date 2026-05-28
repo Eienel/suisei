@@ -31,9 +31,9 @@ export default function App() {
 
 function LoadingShell() {
   return (
-    <div className="fixed inset-0 bg-ink flex items-center justify-center">
-      <div className="flex items-center gap-2 text-fg-mute text-sm font-mono">
-        <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse-soft" />
+    <div className="fixed inset-0 bg-night flex items-center justify-center">
+      <div className="flex items-center gap-2 text-cream-mute text-sm font-mono">
+        <span className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse-soft" />
         loading…
       </div>
     </div>

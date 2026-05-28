@@ -5,9 +5,8 @@ import { useApp } from '@/state/app';
 import { Lock, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 
 /**
- * Quest hub — the grid of 8 quests. Linear unlock (must finish #N
- * before #N+1) keeps the narrative tight and means the chat history
- * with Suisei stays coherent.
+ * Quest hub. Linear unlock (finish #N before #N+1) keeps the narrative
+ * with Suisei coherent and makes the leaderboard meaningful.
  */
 export function QuestHub() {
   const badges = useApp((s) => s.badges);
@@ -18,16 +17,15 @@ export function QuestHub() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <header className="mb-12">
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-fg-mute mb-3">
-          Curriculum · {badges.length} / 8 badges
-        </p>
-        <h1 className="text-4xl font-bold tracking-tight mb-3">
+      <header className="mb-10">
+        <p className="eyebrow mb-4">Curriculum · {badges.length} of 8 badges</p>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-[-0.015em] font-semibold text-cream mb-3">
           Eight quests. Real on-chain code.
         </h1>
-        <p className="text-fg-dim leading-relaxed max-w-2xl">
-          Each quest takes 3–5 minutes and ends with you deploying real Move on
-          Sui testnet, then minting a soulbound badge that proves you did it.
+        <p className="text-cream-dim leading-relaxed max-w-2xl text-[17px]">
+          Each one runs three to five minutes and finishes when you deploy a
+          real Move package on Sui testnet, then mint a soulbound badge that
+          proves you did it.
         </p>
       </header>
 
@@ -62,12 +60,12 @@ function QuestTile({
   onOpen: () => void;
 }) {
   const base =
-    'group text-left p-4 rounded-xl border transition-all relative overflow-hidden';
+    'group text-left p-5 rounded-card border transition-all relative overflow-hidden';
   const variant = earned
-    ? 'border-accent-cyan/40 bg-accent-cyan/[0.04] hover:bg-accent-cyan/[0.07]'
+    ? 'border-sage/40 bg-sage/10 hover:bg-sage/15 cursor-pointer'
     : unlocked
-      ? 'border-ink-line bg-ink-soft/60 hover:border-accent-blue/40 hover:bg-ink-soft cursor-pointer'
-      : 'border-ink-line/60 bg-ink-soft/30 opacity-50 cursor-not-allowed';
+      ? 'border-night-line bg-night-soft hover:border-butter/40 hover:bg-night-soft/80 cursor-pointer'
+      : 'border-night-line/60 bg-night-soft/40 opacity-50 cursor-not-allowed';
 
   return (
     <button
@@ -76,25 +74,27 @@ function QuestTile({
       disabled={!unlocked}
       className={`${base} ${variant}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-fg-mute">
+      <div className="flex items-start justify-between mb-3">
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-cream-mute">
           {String(quest.number).padStart(2, '0')} · {quest.minutes} min
         </span>
         {earned ? (
-          <CheckCircle2 size={14} className="text-accent-cyan" />
+          <CheckCircle2 size={15} className="text-sage" />
         ) : !unlocked ? (
-          <Lock size={14} className="text-fg-mute" />
+          <Lock size={14} className="text-cream-mute" />
         ) : (
           <ArrowRight
-            size={14}
-            className="text-fg-mute group-hover:text-fg group-hover:translate-x-0.5 transition-all"
+            size={15}
+            className="text-cream-mute group-hover:text-cream group-hover:translate-x-0.5 transition-all"
           />
         )}
       </div>
-      <p className="font-semibold text-fg leading-snug mb-1.5">{quest.title}</p>
-      <p className="text-xs text-fg-mute">{quest.concept}</p>
+      <p className="font-display font-semibold text-cream text-[17px] leading-snug mb-2">
+        {quest.title}
+      </p>
+      <p className="text-[13px] text-cream-dim">{quest.concept}</p>
       {quest.bounty && quest.bounty !== 'agentic' && (
-        <span className="mt-3 inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-accent-yellow">
+        <span className="mt-4 inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.16em] text-butter">
           <Sparkles size={9} />
           {quest.bounty} track
         </span>

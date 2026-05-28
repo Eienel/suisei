@@ -1,33 +1,81 @@
 import { useApp } from '@/state/app';
+import { questById } from '@/data/quests';
+import { SUI_NETWORK } from '@/sui/config';
+import { ExternalLink } from 'lucide-react';
 
 /**
- * Profile — public-shareable page of a wallet's badge collection. URL
- * shape: /u/0x… via the screen state. Sprint 3 builds the share card
- * (OG image + tweet button). For now: shell.
+ * Profile — your collected badges. Sprint 3 turns this into a public,
+ * shareable page (OG image + share-card). For now: local-only badge
+ * listing, since Quest 1 + 2 persist into localStorage.
  */
 export function Profile() {
   const setScreen = useApp((s) => s.setScreen);
   const badges = useApp((s) => s.badges);
 
   return (
-    <div className="fixed inset-0 bg-ink text-fg overflow-y-auto">
-      <header className="border-b border-ink-line/40 px-6 py-3 flex items-center justify-between">
+    <div className="fixed inset-0 bg-night text-cream overflow-y-auto">
+      <header className="border-b border-night-line/70 px-6 py-3 flex items-center justify-between">
         <button
           type="button"
           onClick={() => setScreen('play')}
-          className="font-mono text-sm text-fg-dim hover:text-fg transition-colors"
+          className="font-mono text-sm text-cream-dim hover:text-cream transition-colors"
         >
           ← Quests
         </button>
-        <span className="font-mono text-xs text-fg-mute">Profile</span>
+        <span className="eyebrow text-cream-mute">Profile</span>
       </header>
       <main className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Your badges</h1>
-        <p className="text-fg-mute leading-relaxed mb-6">
+        <p className="eyebrow text-butter mb-3">{badges.length} of 8 badges</p>
+        <h1 className="font-display text-4xl sm:text-5xl tracking-[-0.015em] font-semibold text-cream mb-4">
+          Your collection
+        </h1>
+        <p className="text-cream-dim leading-relaxed text-[17px] max-w-xl mb-10">
           {badges.length === 0
-            ? 'No badges yet. Complete a quest to earn your first soulbound NFT.'
-            : `You have ${badges.length} badge${badges.length === 1 ? '' : 's'}.`}
+            ? "No badges yet. Finish a quest and you'll get a soulbound NFT minted to your wallet."
+            : 'Each badge is a real on-chain object. Click through to view it on Suiscan.'}
         </p>
+
+        {badges.length > 0 && (
+          <ul className="space-y-3">
+            {badges.map((b) => {
+              const q = questById(b.questId);
+              const isMock = b.txDigest.startsWith('mock-');
+              const explorer = isMock
+                ? null
+                : `https://suiscan.xyz/${SUI_NETWORK}/tx/${b.txDigest}`;
+              return (
+                <li
+                  key={b.objectId}
+                  className="card-night p-5 flex items-start justify-between gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="eyebrow text-cream-mute mb-1.5">
+                      Quest {q ? String(q.number).padStart(2, '0') : '??'} ·{' '}
+                      {q?.concept}
+                    </p>
+                    <p className="font-display font-semibold text-cream text-[17px] mb-2">
+                      {q?.title ?? b.questId}
+                    </p>
+                    <p className="font-mono text-[11px] text-cream-dim break-all">
+                      {b.objectId}
+                    </p>
+                  </div>
+                  {explorer && (
+                    <a
+                      href={explorer}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-ghost text-sm shrink-0"
+                    >
+                      <ExternalLink size={13} />
+                      Suiscan
+                    </a>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </main>
     </div>
   );
