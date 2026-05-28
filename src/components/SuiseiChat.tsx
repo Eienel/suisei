@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import { useApp } from '@/state/app';
 import { questById } from '@/data/quests';
+import { callAgent } from '@/sui/agent';
 import { Send } from 'lucide-react';
 
 interface Msg {
@@ -16,6 +18,8 @@ interface Msg {
 export function SuiseiChat() {
   const currentQuest = useApp((s) => s.currentQuest);
   const phase = useApp((s) => s.questPhase);
+  const badges = useApp((s) => s.badges);
+  const account = useCurrentAccount();
   const quest = currentQuest ? questById(currentQuest) : undefined;
 
   const [messages, setMessages] = useState<Msg[]>([
@@ -26,6 +30,7 @@ export function SuiseiChat() {
     },
   ]);
   const [draft, setDraft] = useState('');
+  const [thinking, setThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -44,11 +49,29 @@ export function SuiseiChat() {
 
   const send = async () => {
     const text = draft.trim();
-    if (!text) return;
+    if (!text || thinking) return;
     setDraft('');
-    setMessages((m) => [...m, { who: 'you', text }]);
-    const reply = await agentReply(text, quest?.id ?? null);
+    const next = [...messages, { who: 'you' as const, text }];
+    setMessages(next);
+    setThinking(true);
+
+    const history = next.map((m) => ({
+      role: m.who === 'suisei' ? ('assistant' as const) : ('user' as const),
+      content: m.text,
+    }));
+
+    const result = await callAgent({
+      questId: quest?.id ?? null,
+      phase,
+      address: account?.address ?? null,
+      badgesEarned: badges.length,
+      messages: history,
+    });
+
+    const reply =
+      result?.reply ?? scriptedFallback(text, quest?.id ?? null, phase);
     setMessages((m) => [...m, { who: 'suisei', text: reply }]);
+    setThinking(false);
   };
 
   return (
@@ -71,6 +94,12 @@ export function SuiseiChat() {
         {messages.map((m, i) => (
           <Bubble key={i} m={m} />
         ))}
+        {thinking && (
+          <div className="text-[13px] text-cream-mute font-mono flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-butter animate-pulse-soft" />
+            Suisei is thinking…
+          </div>
+        )}
       </div>
 
       <form
@@ -84,11 +113,13 @@ export function SuiseiChat() {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Ask Suisei…"
-          className="flex-1 bg-night rounded-pill px-4 py-2 text-sm border border-night-line focus:border-butter/60 focus:outline-none placeholder:text-cream-mute text-cream"
+          disabled={thinking}
+          className="flex-1 bg-night rounded-pill px-4 py-2 text-sm border border-night-line focus:border-butter/60 focus:outline-none placeholder:text-cream-mute text-cream disabled:opacity-60"
         />
         <button
           type="submit"
-          className="px-3 rounded-pill bg-butter/20 border border-butter/40 text-butter hover:bg-butter/30 transition-colors"
+          disabled={thinking || !draft.trim()}
+          className="px-3 rounded-pill bg-butter/20 border border-butter/40 text-butter hover:bg-butter/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Send"
         >
           <Send size={14} />
@@ -156,7 +187,18 @@ function scriptedLine(questId: string, phase: string): string | null {
   return lines[questId]?.[phase] ?? null;
 }
 
-async function agentReply(_userText: string, _questId: string | null): Promise<string> {
-  await new Promise((r) => setTimeout(r, 350));
-  return "I'll wire myself to Claude Haiku next sprint. For now I'm scripted to the current quest.";
+/**
+ * Last-resort reply when the agent proxy is unreachable / not configured.
+ * Keeps Suisei coherent on local dev and lets the demo run without an
+ * Anthropic key in env.
+ */
+function scriptedFallback(
+  _userText: string,
+  questId: string | null,
+  _phase: string,
+): string {
+  if (!questId) {
+    return "I'm running scripted right now — set ANTHROPIC_API_KEY on the Vercel project and I'll come alive. Pick a quest from the hub and I'll narrate.";
+  }
+  return "I'm scripted to the current quest right now. The interactive me runs through /api/agent — once the host's ANTHROPIC_API_KEY is set, I'll answer freely.";
 }
