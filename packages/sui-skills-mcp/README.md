@@ -1,9 +1,11 @@
 # @suisei/sui-skills-mcp
 
 The Sui Stack as one-line tools, exposed over the Model Context
-Protocol. The same toolkit [Suisei](https://suisei.dev) — the Sui
-teaching agent — uses internally, available to any MCP-aware client
-(Claude Desktop, Cursor, Windsurf, your own agent).
+Protocol — so any MCP-aware client (Claude Desktop, Cursor, Windsurf,
+your own agent) can build on Sui. This package is the product.
+[Suisei](https://suisei.dev), the Sui teaching agent, is a showcase of
+it: a working app built entirely on these tools, demonstrating what you
+can do once an agent speaks Sui.
 
 > **Status:** Alpha. Nineteen tools spanning the core build loop — read
 > chain state, build any transaction, simulate it, submit it — plus

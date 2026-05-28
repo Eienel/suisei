@@ -17,38 +17,49 @@ from reportlab.platypus import (
 
 OUT = "docs/sui-skills-mcp.pdf"
 
-NAVY = colors.HexColor("#0b2740")
-BLUE = colors.HexColor("#4da2ff")
-INK = colors.HexColor("#1a2733")
-STEEL = colors.HexColor("#14507e")
-HEADER_BG = colors.HexColor("#e7f1fb")
-CODE_BG = colors.HexColor("#0b2740")
-GRID = colors.HexColor("#c5d6e6")
-MUTE = colors.HexColor("#6b7a89")
+# --- Suisei brand palette (from tailwind.config.js) --------------------------
+# The cream "paper" surface is the site's landing + MCP-docs surface.
+PAPER = colors.HexColor("#F2EBDC")       # page background (paper.DEFAULT)
+PAPER_SOFT = colors.HexColor("#F6F0E3")  # paper.soft
+PAPER_DEEP = colors.HexColor("#E8DFCB")  # table header bg (paper.deep)
+PAPER_LINE = colors.HexColor("#DCD1B7")  # grid lines (paper.line)
+NIGHT = colors.HexColor("#15171F")       # cover band (night.DEFAULT)
+NIGHT_DEEP = colors.HexColor("#0F1117")  # code blocks (night.deep)
+INK = colors.HexColor("#16171C")         # body text (ink.DEFAULT)
+INK_DIM = colors.HexColor("#5A5A66")     # ink.dim
+CREAM = colors.HexColor("#F2EBDC")       # foreground on night
+CREAM_DIM = colors.HexColor("#B5AD9D")   # cream.dim (subtext on night)
+TERRACOTTA = colors.HexColor("#D7552E")  # heading rules + pills
+BUTTER = colors.HexColor("#E6B23A")      # warning bar / cover pill
+SAGE = colors.HexColor("#7FA88E")        # security bar
+SAGE_TINT = colors.HexColor("#E6EEE9")   # pale sage callout bg
+BUTTER_TINT = colors.HexColor("#F6EBCC") # pale butter callout bg
+MUTE = INK_DIM
 
 styles = getSampleStyleSheet()
 S = {}
 S["title"] = ParagraphStyle("t", parent=styles["Title"], fontSize=26,
-                            textColor=colors.white, alignment=TA_LEFT,
+                            textColor=CREAM, alignment=TA_LEFT,
                             spaceAfter=2, leading=30)
-S["sub"] = ParagraphStyle("sub", fontSize=12, textColor=colors.HexColor("#9ec9f5"),
+S["sub"] = ParagraphStyle("sub", fontSize=12, textColor=colors.HexColor("#CFC6B3"),
                           leading=15, spaceBefore=2)
-S["meta"] = ParagraphStyle("meta", fontSize=8.5, textColor=colors.HexColor("#c7dcf0"),
+S["meta"] = ParagraphStyle("meta", fontSize=8.5, textColor=CREAM_DIM,
                            spaceBefore=8)
-S["lead"] = ParagraphStyle("lead", fontSize=11, textColor=colors.HexColor("#3a4a59"),
+S["lead"] = ParagraphStyle("lead", fontSize=11, textColor=colors.HexColor("#3F3E45"),
                            leading=15, spaceBefore=4, spaceAfter=4)
-S["h2"] = ParagraphStyle("h2", fontSize=15, textColor=NAVY, spaceBefore=16,
+S["h2"] = ParagraphStyle("h2", fontSize=15, textColor=INK, spaceBefore=16,
                          spaceAfter=4, leading=18, fontName="Helvetica-Bold")
-S["h3"] = ParagraphStyle("h3", fontSize=11.5, textColor=STEEL, spaceBefore=10,
+S["h3"] = ParagraphStyle("h3", fontSize=11.5, textColor=TERRACOTTA, spaceBefore=10,
                          spaceAfter=2, leading=14, fontName="Helvetica-Bold")
-S["h4"] = ParagraphStyle("h4", fontSize=10.5, textColor=STEEL, spaceBefore=7,
-                         spaceAfter=1, leading=13, fontName="Helvetica-Bold")
+S["h4"] = ParagraphStyle("h4", fontSize=10.5, textColor=colors.HexColor("#9A4423"),
+                         spaceBefore=7, spaceAfter=1, leading=13,
+                         fontName="Helvetica-Bold")
 S["body"] = ParagraphStyle("body", fontSize=10, textColor=INK, leading=14,
                            spaceAfter=3)
 S["cell"] = ParagraphStyle("cell", fontSize=8.8, textColor=INK, leading=11)
-S["cellh"] = ParagraphStyle("cellh", fontSize=8.8, textColor=NAVY, leading=11,
+S["cellh"] = ParagraphStyle("cellh", fontSize=8.8, textColor=INK, leading=11,
                             fontName="Helvetica-Bold")
-S["code"] = ParagraphStyle("code", fontSize=8.3, textColor=colors.HexColor("#e8f1fb"),
+S["code"] = ParagraphStyle("code", fontSize=8.3, textColor=colors.HexColor("#EDE6D6"),
                            fontName="Courier", leading=11.5, leftIndent=6,
                            rightIndent=6, spaceBefore=2, spaceAfter=2)
 S["small"] = ParagraphStyle("small", fontSize=8, textColor=MUTE, leading=10,
@@ -71,7 +82,7 @@ def H2(t):
 
 def _rule():
     tbl = Table([[""]], colWidths=[W], rowHeights=[2])
-    tbl.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -1), 1.4, BLUE)]))
+    tbl.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -1), 1.4, TERRACOTTA)]))
     return tbl
 
 
@@ -79,7 +90,7 @@ def code(lines):
     para = Paragraph("<br/>".join(lines), S["code"])
     t = Table([[para]], colWidths=[W])
     t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), CODE_BG),
+        ("BACKGROUND", (0, 0), (-1, -1), NIGHT_DEEP),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ("LEFTPADDING", (0, 0), (-1, -1), 8),
@@ -102,7 +113,7 @@ def table(rows, widths, header=True):
         data.append([Paragraph(str(c), S[st]) for c in row])
     t = Table(data, colWidths=widths, repeatRows=1 if header else 0)
     style = [
-        ("GRID", (0, 0), (-1, -1), 0.5, GRID),
+        ("GRID", (0, 0), (-1, -1), 0.5, PAPER_LINE),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("TOPPADDING", (0, 0), (-1, -1), 3.5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
@@ -110,7 +121,7 @@ def table(rows, widths, header=True):
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
     ]
     if header:
-        style.append(("BACKGROUND", (0, 0), (-1, 0), HEADER_BG))
+        style.append(("BACKGROUND", (0, 0), (-1, 0), PAPER_DEEP))
     t.setStyle(TableStyle(style))
     story.append(t)
     story.append(Spacer(1, 5))
@@ -133,7 +144,7 @@ def callout(text, bg, bar):
 
 
 # ---- Cover band -----------------------------------------------------------
-pill = ParagraphStyle("pill", fontSize=8, textColor=NAVY, fontName="Helvetica-Bold")
+pill = ParagraphStyle("pill", fontSize=8, textColor=BUTTER, fontName="Helvetica-Bold")
 cover_inner = [
     [Paragraph("@suisei/sui-skills-mcp&nbsp;&nbsp;&nbsp;v0.1.0", pill)],
     [Paragraph("Sui Skills MCP", S["title"])],
@@ -144,7 +155,7 @@ cover_inner = [
 ]
 cover = Table(cover_inner, colWidths=[W])
 cover.setStyle(TableStyle([
-    ("BACKGROUND", (0, 0), (-1, -1), NAVY),
+    ("BACKGROUND", (0, 0), (-1, -1), NIGHT),
     ("TOPPADDING", (0, 0), (-1, -1), 3),
     ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
     ("LEFTPADDING", (0, 0), (-1, -1), 14),
@@ -155,10 +166,11 @@ cover.setStyle(TableStyle([
 story.append(cover)
 story.append(Spacer(1, 8))
 
-P("The same toolkit <b>Suisei</b> &mdash; the Sui teaching agent &mdash; uses internally, "
-  "published as a standalone MCP server. Plug it into Claude Desktop, Cursor, Windsurf, or any "
+P("This MCP server is the product: plug it into Claude Desktop, Cursor, Windsurf, or any "
   "MCP-aware agent and you get one-line tools for reading chain state, building any Sui "
-  "transaction, simulating it, submitting it, and storing data on Walrus.", "lead")
+  "transaction, simulating it, submitting it, and storing data on Walrus. <b>Suisei</b> &mdash; "
+  "the Sui teaching agent &mdash; is a showcase of it: a working app built entirely on these "
+  "tools, demonstrating what an agent can do once it speaks Sui.", "lead")
 
 # ---- 1. What it is --------------------------------------------------------
 H2("1. What it is")
@@ -195,7 +207,7 @@ code([
 ])
 callout("<b>Security invariant:</b> every transaction-building tool ends by returning bytes, "
         "never by signing. The private key never enters the MCP process.",
-        colors.HexColor("#ecf7ee"), colors.HexColor("#2e9e4f"))
+        SAGE_TINT, SAGE)
 
 # ---- 4. Install -----------------------------------------------------------
 H2("4. Install &amp; connect")
@@ -318,7 +330,7 @@ bullets([
 callout("Vector and nested-struct arguments are intentionally out of scope for the generic tool. "
         "Use a purpose-built tool (e.g. sui_transfer) for those, so the generic schema stays "
         "unambiguous for the calling agent.",
-        colors.HexColor("#fff8e6"), colors.HexColor("#e0a800"))
+        BUTTER_TINT, BUTTER)
 table([
     ["Input", "Type", "Req", "Notes"],
     ["target", "string", "yes", "0xpkg::module::function"],
@@ -420,11 +432,14 @@ P("&copy; 2026 Suisei &middot; @suisei/sui-skills-mcp v0.1.0 &middot; MIT Licens
 
 def footer(canvas, doc):
     canvas.saveState()
+    # Cream "paper" surface across the whole page — the site's docs background.
+    canvas.setFillColor(PAPER)
+    canvas.rect(0, 0, A4[0], A4[1], stroke=0, fill=1)
     canvas.setFont("Helvetica", 7.5)
     canvas.setFillColor(MUTE)
     canvas.drawString(16 * mm, 10 * mm, "Sui Skills MCP · Capability Reference")
     canvas.drawRightString(A4[0] - 16 * mm, 10 * mm, "Page %d" % doc.page)
-    canvas.setStrokeColor(GRID)
+    canvas.setStrokeColor(PAPER_LINE)
     canvas.line(16 * mm, 13 * mm, A4[0] - 16 * mm, 13 * mm)
     canvas.restoreState()
 

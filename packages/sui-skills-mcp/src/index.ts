@@ -2,12 +2,12 @@
 /**
  * @suisei/sui-skills-mcp — Sui Stack as MCP tools.
  *
- * The same toolkit Suisei (the teaching agent at suisei.dev) uses
- * internally, published as a standalone MCP server. Plug into Claude
- * Desktop, Cursor, or any MCP-aware agent and you get one-line tools
- * for the Sui stack: read chain state, call any Move function, transfer
- * and stake SUI, mint Suisei badges, dry-run and submit transactions,
- * and publish to Walrus.
+ * The product: a standalone MCP server for the Sui stack. Plug into
+ * Claude Desktop, Cursor, or any MCP-aware agent and you get one-line
+ * tools to read chain state, call any Move function, transfer and stake
+ * SUI, mint badges, dry-run and submit transactions, and publish to
+ * Walrus. Suisei (the teaching agent at suisei.dev) is a showcase app
+ * built entirely on these tools.
  *
  * Write tools never hold keys — they return unsigned tx bytes for the
  * host to sign, then sui_execute_signed_tx submits the signed result.

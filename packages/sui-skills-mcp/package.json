@@ -1,7 +1,7 @@
 {
   "name": "@suisei/sui-skills-mcp",
   "version": "0.1.0",
-  "description": "MCP server exposing the Sui Stack as one-line tools — the toolkit Suisei (suisei.dev) uses to teach Sui, available for any agent.",
+  "description": "MCP server exposing the Sui Stack as one-line tools for any agent. Suisei (suisei.dev) is a showcase app built on it.",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
