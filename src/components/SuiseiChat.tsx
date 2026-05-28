@@ -213,6 +213,16 @@ function scriptedLine(questId: string, phase: string): string | null {
       done:
         "Compare this to EVM SBTs, which are just ERC-721s with `_beforeTokenTransfer` reverting. That's a runtime guard you have to remember. Sui's is a binary that won't even produce.",
     },
+    ptb: {
+      intro:
+        "Quest 6: programmable transaction blocks. EVM composability means writing a contract that orchestrates other contracts. Sui's transaction itself is the orchestrator — up to 1024 operations, atomic or not at all.",
+      interact:
+        "Run the same payment two ways. As one PTB, then as four separate transactions where step three throws. The state difference is the lesson.",
+      badge:
+        "PTB rolls back cleanly. Sequential leaves you reconciling a half-split coin and a stranded transfer. Atomicity is a transaction-level guarantee, not a contract-level pattern.",
+      done:
+        "This is why Sui devs reach for flash loans, batched DEX routes, multi-step claims with one signature. The transaction is the unit of atomicity.",
+    },
   };
   return lines[questId]?.[phase] ?? null;
 }
