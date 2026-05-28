@@ -5,8 +5,12 @@
  * The same toolkit Suisei (the teaching agent at suisei.dev) uses
  * internally, published as a standalone MCP server. Plug into Claude
  * Desktop, Cursor, or any MCP-aware agent and you get one-line tools
- * for the Sui stack: zkLogin, Sponsored Tx, Move PTBs, Walrus, Seal,
- * native staking, DeepBook.
+ * for the Sui stack: read chain state, call any Move function, transfer
+ * and stake SUI, mint Suisei badges, dry-run and submit transactions,
+ * and publish to Walrus.
+ *
+ * Write tools never hold keys — they return unsigned tx bytes for the
+ * host to sign, then sui_execute_signed_tx submits the signed result.
  *
  * Stdio transport. No network listener. The agent process spawns this
  * binary, talks JSON-RPC over its stdin/stdout, and supervises it.
@@ -50,6 +54,12 @@ interface ToolDef {
   handler: (args: unknown) => Promise<string>;
 }
 
+/** Shared network selector — every tool defaults to testnet. */
+const networkSchema = z
+  .enum(['testnet', 'mainnet', 'devnet'])
+  .default('testnet')
+  .describe('Sui network to query.');
+
 const tools: ToolDef[] = [
   {
     name: 'sui_resolve_address',
@@ -57,10 +67,7 @@ const tools: ToolDef[] = [
       'Resolve a Sui address from a SuiNS name (e.g. "alice.sui") or echo back a 0x address if already canonical. Use this whenever the user gives you a human-readable name.',
     inputSchema: z.object({
       name_or_address: z.string().describe('A SuiNS name or 0x… address.'),
-      network: z
-        .enum(['testnet', 'mainnet', 'devnet'])
-        .default('testnet')
-        .describe('Sui network to query.'),
+      network: networkSchema,
     }),
     handler: suiResolveAddress,
   },
@@ -70,7 +77,7 @@ const tools: ToolDef[] = [
       'Get the SUI balance of an address. Returns balance in MIST (1 SUI = 10^9 MIST) and a human-readable SUI value.',
     inputSchema: z.object({
       address: z.string().describe('A 0x Sui address.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiGetBalance,
   },
@@ -80,7 +87,7 @@ const tools: ToolDef[] = [
       'List every coin balance an address holds (not just SUI). Returns coin type, balance in MIST, and object count per coin. Use when a wallet may hold tokens beyond the native coin.',
     inputSchema: z.object({
       address: z.string().describe('A 0x Sui address.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiGetAllBalances,
   },
@@ -90,7 +97,7 @@ const tools: ToolDef[] = [
       "Read any on-chain object: its Move type, owner, version, content fields, and Display metadata. The general read primitive — use it to inspect any object id.",
     inputSchema: z.object({
       object_id: z.string().describe('The 0x object id to read.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiGetObject,
   },
@@ -106,7 +113,7 @@ const tools: ToolDef[] = [
         .describe('Fully-qualified Move struct type to filter by.'),
       cursor: z.string().optional().describe('Pagination cursor from a previous call.'),
       limit: z.number().int().min(1).max(50).default(50),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiGetOwnedObjects,
   },
@@ -122,7 +129,7 @@ const tools: ToolDef[] = [
         .describe(
           'Badge package id (the Move package with the badge module). Defaults to the canonical Suisei package on the chosen network.',
         ),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiGetOwnedBadges,
   },
@@ -137,7 +144,7 @@ const tools: ToolDef[] = [
         .describe('Quest identifier, e.g. "zklogin", "sponsored".'),
       quest_number: z.number().int().min(1).max(255),
       badge_package: z.string(),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiMintBadge,
   },
@@ -158,7 +165,7 @@ const tools: ToolDef[] = [
         .default([])
         .describe('Encoded call arguments, e.g. ["object:0xabc", "pure:u64:100"].'),
       sender: z.string().describe('0x address that will sign and pay for the tx.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiMoveCall,
   },
@@ -177,7 +184,7 @@ const tools: ToolDef[] = [
         .array(z.string())
         .optional()
         .describe('Object ids to transfer whole.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiTransfer,
   },
@@ -189,7 +196,7 @@ const tools: ToolDef[] = [
       sender: z.string().describe('0x address staking and paying for the tx.'),
       amount_mist: z.string().describe('Amount to stake, in MIST (as a string).'),
       validator: z.string().describe('0x address of the validator to delegate to.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiStake,
   },
@@ -200,7 +207,7 @@ const tools: ToolDef[] = [
     inputSchema: z.object({
       sender: z.string().describe('0x address that owns the StakedSui and pays for the tx.'),
       staked_sui_id: z.string().describe('Object id of the StakedSui to withdraw.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiUnstake,
   },
@@ -210,7 +217,7 @@ const tools: ToolDef[] = [
       'Simulate a built (unsigned) transaction without spending gas. Returns execution status, gas cost, and balance/object changes. Use to verify a tx-builder result before asking the host to sign it.',
     inputSchema: z.object({
       tx_bytes_base64: z.string().describe('Base64 tx bytes from a tx-builder tool.'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiDryRun,
   },
@@ -223,7 +230,7 @@ const tools: ToolDef[] = [
       signatures: z
         .array(z.string())
         .describe('One or more base64 signatures over the tx bytes (usually one).'),
-      network: z.enum(['testnet', 'mainnet', 'devnet']).default('testnet'),
+      network: networkSchema,
     }),
     handler: suiExecuteSignedTx,
   },
@@ -312,7 +319,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 /**
  * Minimal Zod → JSON-Schema converter for the inputs we actually use
  * here. Avoids pulling a 50KB schema library into a server that just
- * needs to describe six tools.
+ * needs to describe a handful of flat tool-input objects.
  */
 function zodToJsonSchema(schema: z.ZodObject<z.ZodRawShape>): Record<string, unknown> {
   const shape = schema.shape;
