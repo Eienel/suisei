@@ -1,5 +1,5 @@
 import { useApp } from '@/state/app';
-import { ArrowRight, BookOpen, Box, Terminal, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Box, Plus, Terminal, Sparkles } from 'lucide-react';
 
 /**
  * Landing — cream surface, editorial layout. Final mascot integration
@@ -57,6 +57,7 @@ export function Landing() {
       </main>
 
       <Outro />
+      <BuiltWith />
       <Footer />
     </div>
   );
@@ -163,6 +164,75 @@ function Outro() {
 { "mcpServers": { "sui": { "command": "npx",
     "args": ["@suisei/sui-skills-mcp"] } } }`}
           </pre>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BuiltWith() {
+  return (
+    <section className="border-t border-paper-line/60">
+      <div className="max-w-5xl mx-auto px-6 py-20">
+        <p className="eyebrow mb-4">Built with Sui Skills</p>
+        <h2 className="font-display text-4xl sm:text-5xl tracking-[-0.01em] font-semibold text-ink mb-4 max-w-2xl">
+          The reference build — and room for yours.
+        </h2>
+        <p className="text-ink-dim text-lg leading-[1.55] max-w-2xl mb-8">
+          The kit is brand new, so there's one project on it so far: this one.
+          Suisei runs entirely on the tools Sui Skills exposes. Build something
+          with it and we'll feature it here.
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <article className="card-paper p-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="inline-flex w-10 h-10 items-center justify-center rounded-[12px] bg-butter/30 text-ink">
+                <Sparkles size={18} />
+              </span>
+              <span className="chip-paper">Flagship</span>
+            </div>
+            <h3 className="font-display font-semibold text-ink text-lg mb-1.5">
+              Suisei
+            </h3>
+            <p className="text-ink-dim leading-relaxed text-[15px] mb-4">
+              This whole app. Every quest badge is a soulbound mint, saved
+              artifacts live on Walrus, and every wallet read goes through the
+              same calls the kit hands any agent.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {['Soulbound badges', 'Walrus storage', 'SuiNS + balances'].map(
+                (t) => (
+                  <span key={t} className="chip-paper">
+                    {t}
+                  </span>
+                ),
+              )}
+            </div>
+          </article>
+
+          <article className="card-paper border-dashed p-6">
+            <span className="inline-flex w-10 h-10 items-center justify-center rounded-[12px] bg-sage/25 text-ink mb-4">
+              <Plus size={18} />
+            </span>
+            <h3 className="font-display font-semibold text-ink text-lg mb-1.5">
+              Your project here
+            </h3>
+            <p className="text-ink-dim leading-relaxed text-[15px] mb-4">
+              Building an agent on Sui? Plug in the MCP, ship something, and open
+              a PR — first community builds get a spot on this page.
+            </p>
+            <a
+              href="https://github.com/eienel/blockbuilders"
+              target="_blank"
+              rel="noreferrer"
+              className="btn-ghost text-sm"
+            >
+              <Terminal size={14} />
+              See the repo
+              <ArrowRight size={14} />
+            </a>
+          </article>
         </div>
       </div>
     </section>

@@ -7,20 +7,25 @@ interface Args {
 }
 
 /**
- * Canonical Suisei badge packages per network. Populated as we publish
- * the badge module. Until then the user must pass `badge_package`.
+ * Canonical Suisei badge packages per network. Hardcode the published id
+ * here after running scripts/publish-badge.sh so the tool works with no
+ * arguments. Until then, callers can set the SUISEI_BADGE_PACKAGE env var
+ * or pass `badge_package` explicitly.
  */
 const DEFAULT_BADGE_PACKAGE: Partial<Record<Network, string>> = {
-  // testnet: '0x…',  // filled in by Sprint 1 publish
-  // mainnet: '0x…',  // filled in by Sprint 4 publish
+  // testnet: '0x…',  // paste published package id here
+  // mainnet: '0x…',
 };
 
 export async function suiGetOwnedBadges(raw: unknown): Promise<string> {
   const { address, badge_package, network } = raw as Args;
-  const pkg = badge_package ?? DEFAULT_BADGE_PACKAGE[network];
+  const pkg =
+    badge_package ??
+    process.env.SUISEI_BADGE_PACKAGE ??
+    DEFAULT_BADGE_PACKAGE[network];
   if (!pkg) {
     throw new Error(
-      `No badge_package configured for ${network}. Pass badge_package explicitly.`,
+      `No badge package for ${network}. Set SUISEI_BADGE_PACKAGE, pass badge_package, or hardcode DEFAULT_BADGE_PACKAGE.`,
     );
   }
 
