@@ -183,6 +183,16 @@ function scriptedLine(questId: string, phase: string): string | null {
       done:
         "Notice your wallet balance: unchanged. The sponsor ate the gas. This is how Sui apps onboard a non-crypto user without a seed phrase, a faucet, or a credit card.",
     },
+    abilities: {
+      intro:
+        "Quest 3: Move abilities. Solidity has no equivalent. The compiler refuses to let you write unsafe code — that refusal is the safety, not a runtime check.",
+      interact:
+        "Look at the badge struct. Pick the abilities that make it soulbound. Add `store` and you've just made it tradable. Add `drop` and someone can delete your proof. Add `copy` and there's no scarcity. The right answer is `has key` and nothing else.",
+      badge:
+        "Compiler accepted it. That's the lesson: you didn't have to remember any rules, the type system enforced them.",
+      done:
+        "Every badge in your wallet from this quest forward is protected by exactly this declaration. Type-level safety, not vigilance.",
+    },
   };
   return lines[questId]?.[phase] ?? null;
 }

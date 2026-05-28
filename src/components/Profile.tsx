@@ -1,16 +1,44 @@
+import { useEffect, useState } from 'react';
+import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit';
 import { useApp } from '@/state/app';
 import { questById } from '@/data/quests';
-import { SUI_NETWORK } from '@/sui/config';
-import { ExternalLink } from 'lucide-react';
+import { BADGE_CONFIGURED, SUI_NETWORK } from '@/sui/config';
+import { fetchOwnedBadges } from '@/sui/queries';
+import { ExternalLink, RefreshCw } from 'lucide-react';
 
 /**
- * Profile — your collected badges. Sprint 3 turns this into a public,
- * shareable page (OG image + share-card). For now: local-only badge
- * listing, since Quest 1 + 2 persist into localStorage.
+ * Profile — your collected badges. When signed in + badge package is
+ * configured, hydrates from on-chain owned-objects so the page reflects
+ * the wallet's actual state, not just locally-persisted mocks.
  */
 export function Profile() {
   const setScreen = useApp((s) => s.setScreen);
   const badges = useApp((s) => s.badges);
+  const mergeOnChainBadges = useApp((s) => s.mergeOnChainBadges);
+  const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refresh = async () => {
+    if (!account || !BADGE_CONFIGURED) return;
+    setRefreshing(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fetched = await fetchOwnedBadges(suiClient as any, account.address);
+      mergeOnChainBadges(fetched);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[profile] fetchOwnedBadges failed:', e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+    // intentional one-shot on mount; the "Refresh" button is for re-fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.address]);
 
   return (
     <div className="fixed inset-0 bg-night text-cream overflow-y-auto">
@@ -25,7 +53,20 @@ export function Profile() {
         <span className="eyebrow text-cream-mute">Profile</span>
       </header>
       <main className="max-w-3xl mx-auto px-6 py-16">
-        <p className="eyebrow text-butter mb-3">{badges.length} of 8 badges</p>
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <p className="eyebrow text-butter">{badges.length} of 8 badges</p>
+          {account && BADGE_CONFIGURED && (
+            <button
+              type="button"
+              onClick={refresh}
+              disabled={refreshing}
+              className="btn-ghost text-xs disabled:opacity-50"
+            >
+              <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
+              {refreshing ? 'syncing…' : 'sync from chain'}
+            </button>
+          )}
+        </div>
         <h1 className="font-display text-4xl sm:text-5xl tracking-[-0.015em] font-semibold text-cream mb-4">
           Your collection
         </h1>

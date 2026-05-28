@@ -41,10 +41,15 @@ export function Play() {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="chip-night hidden sm:inline-flex">
+          <button
+            type="button"
+            onClick={() => setScreen('profile')}
+            className="chip-night hidden sm:inline-flex hover:border-butter/40 transition-colors"
+            title="View your badge collection"
+          >
             <span className="w-1.5 h-1.5 rounded-full bg-butter" />
             {badges.length} / 8 badges
-          </span>
+          </button>
           <button
             type="button"
             onClick={() => setScreen('leaderboard')}

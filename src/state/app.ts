@@ -22,6 +22,11 @@ interface AppState {
   closeQuest: () => void;
   setQuestPhase: (p: QuestPhase) => void;
   awardBadge: (b: BadgeRef) => void;
+  /**
+   * Merge on-chain badge query results into the local set. Real
+   * on-chain entries replace locally-mocked ones for the same quest.
+   */
+  mergeOnChainBadges: (fetched: BadgeRef[]) => void;
   resetProgress: () => void;
 }
 
@@ -43,6 +48,18 @@ export const useApp = create<AppState>()(
             ? s
             : { badges: [...s.badges, b] }
         ),
+      mergeOnChainBadges: (fetched) =>
+        set((s) => {
+          const byQuest = new Map(s.badges.map((b) => [b.questId, b]));
+          for (const b of fetched) {
+            const existing = byQuest.get(b.questId);
+            // Real on-chain entries always win over locally-mocked ones.
+            if (!existing || existing.txDigest.startsWith('mock-')) {
+              byQuest.set(b.questId, b);
+            }
+          }
+          return { badges: Array.from(byQuest.values()) };
+        }),
       resetProgress: () =>
         set({ badges: [], currentQuest: null, questPhase: 'intro', screen: 'landing' }),
     }),
