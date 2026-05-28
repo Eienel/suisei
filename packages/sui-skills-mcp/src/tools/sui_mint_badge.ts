@@ -1,5 +1,6 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { clientFor, type Network } from '../sui-client.js';
+import { buildToB64 } from '../tx.js';
 
 interface Args {
   recipient: string;
@@ -31,21 +32,15 @@ export async function suiMintBadge(raw: unknown): Promise<string> {
   });
   tx.setSender(recipient);
 
-  const bytes = await tx.build({ client });
+  const tx_bytes_base64 = await buildToB64(tx, client);
   return JSON.stringify({
-    tx_bytes_base64: bytesToB64(bytes),
+    tx_bytes_base64,
     target: `${badge_package}::badge::mint`,
     recipient,
     quest_id,
     quest_number,
     network,
     next_step:
-      'Sign tx_bytes_base64 with the recipient key, then submit via SuiClient.executeTransactionBlock.',
+      'Dry-run with sui_dry_run, then sign and submit with sui_execute_signed_tx.',
   });
-}
-
-function bytesToB64(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-  return Buffer.from(s, 'binary').toString('base64');
 }

@@ -5,8 +5,9 @@ Protocol. The same toolkit [Suisei](https://suisei.dev) — the Sui
 teaching agent — uses internally, available to any MCP-aware client
 (Claude Desktop, Cursor, Windsurf, your own agent).
 
-> **Status:** Sprint 0 alpha. Six tools covering Quests 1, 2, 5, 7.
-> Sprints 1–3 add native staking, PTB composition, DeepBook, Seal.
+> **Status:** Alpha. Fifteen tools spanning the core build loop — read
+> chain state, build any transaction, simulate it, submit it — plus
+> Walrus storage. Next up: PTB composition, DeepBook, and Seal.
 
 ## Why
 
@@ -47,14 +48,44 @@ The agent picks the right tool. You see the result.
 
 ## Tools
 
+**Read the chain**
+
 | Tool                    | What it does                                                 |
 | ----------------------- | ------------------------------------------------------------ |
 | `sui_resolve_address`   | SuiNS name → 0x address (idempotent on 0x inputs)            |
 | `sui_get_balance`       | SUI balance (in MIST + human-readable SUI)                   |
-| `sui_get_owned_badges`  | List a wallet's Suisei completion badges                     |
-| `sui_mint_badge`        | Build (don't execute) a PTB to mint a badge                  |
+| `sui_get_all_balances`  | Every coin balance a wallet holds, not just SUI             |
+| `sui_get_object`        | Any object's type, owner, fields, and Display               |
+| `sui_get_owned_objects` | List objects by owner, filterable by struct type, paginated |
+| `sui_get_owned_badges`  | List a wallet's Suisei completion badges                    |
+
+**Build a transaction (never signed — bytes returned for the host)**
+
+| Tool                    | What it does                                                 |
+| ----------------------- | ------------------------------------------------------------ |
+| `sui_move_call`         | Build a call to ANY Move entry function — the universal write |
+| `sui_transfer`          | Build a transfer of SUI and/or whole objects                |
+| `sui_stake`             | Build a native staking delegation to a validator            |
+| `sui_unstake`           | Build a withdraw-stake for a StakedSui object               |
+| `sui_mint_badge`        | Build a Suisei completion-badge mint                         |
+
+**Simulate & submit**
+
+| Tool                    | What it does                                                 |
+| ----------------------- | ------------------------------------------------------------ |
+| `sui_dry_run`           | Simulate built tx bytes (status + gas, no spend)            |
+| `sui_execute_signed_tx` | Submit host-signed tx bytes, return digest + effects        |
+
+**Walrus storage**
+
+| Tool                    | What it does                                                 |
+| ----------------------- | ------------------------------------------------------------ |
 | `walrus_publish`        | Publish a blob to Walrus testnet/mainnet                     |
 | `walrus_fetch`          | Fetch a blob from Walrus by id                               |
+
+The build loop is: a `*_build`-style tool returns base64 tx bytes →
+`sui_dry_run` to verify → the host signs → `sui_execute_signed_tx` to
+submit. The toolkit never holds keys.
 
 All tools return structured JSON in the `text` content block. The
 calling agent is expected to parse it.
