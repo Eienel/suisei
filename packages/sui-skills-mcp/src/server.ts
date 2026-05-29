@@ -38,6 +38,9 @@ import { suiStake } from './tools/sui_stake.js';
 import { suiUnstake } from './tools/sui_unstake.js';
 import { suiDeepbookQuote } from './tools/sui_deepbook_quote.js';
 import { suiDeepbookSwap } from './tools/sui_deepbook_swap.js';
+import { agentWalletFund } from './tools/agent_wallet_fund.js';
+import { agentWalletSweep } from './tools/agent_wallet_sweep.js';
+import { agentWalletStatus } from './tools/agent_wallet_status.js';
 import { suiDryRun } from './tools/sui_dry_run.js';
 import { suiExecuteSignedTx } from './tools/sui_execute_signed_tx.js';
 import { walrusPublish } from './tools/walrus_publish.js';
@@ -339,6 +342,43 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiDeepbookSwap,
+  },
+  {
+    name: 'agent_wallet_status',
+    description:
+      "Read an agent wallet's spendable state: native SUI balance, coin object count, and whether it's funded. Read-only. Check this before asking the agent to spend, to confirm the allowance isn't empty. The agent wallet is a normal Sui address the agent controls; its spending power is bounded by this balance.",
+    inputSchema: z.object({
+      agent: z.string().describe('The agent wallet 0x address.'),
+      network: networkSchema,
+    }),
+    handler: agentWalletStatus,
+  },
+  {
+    name: 'agent_wallet_fund',
+    description:
+      "Build (do not sign) a tx that funds an agent wallet: split amount_mist from the OWNER's gas and send it to the agent address. The owner signs this with their own wallet — the agent never touches the owner's key. This sets the agent's allowance: its spending power is bounded by what's funded here. Returns base64 tx bytes.",
+    inputSchema: z.object({
+      owner: z.string().describe("0x address of the owner funding (signs and pays)."),
+      agent: z.string().describe('0x address of the agent wallet to fund.'),
+      amount_mist: z.string().describe('Amount to fund, in MIST (as a string).'),
+      network: networkSchema,
+    }),
+    handler: agentWalletFund,
+  },
+  {
+    name: 'agent_wallet_sweep',
+    description:
+      "Build (do not sign) the agent-wallet kill switch: send the agent's entire native SUI balance back to the owner (via the gas-coin leftover), optionally plus specific object_ids. The agent signs this with its own key. Sweeping + not refunding is how an owner revokes a Tier-1 allowance wallet. Returns base64 tx bytes.",
+    inputSchema: z.object({
+      agent: z.string().describe('0x address of the agent wallet (signs and pays).'),
+      owner: z.string().describe('0x address to return funds to.'),
+      object_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Optional non-SUI object ids to also return to the owner.'),
+      network: networkSchema,
+    }),
+    handler: agentWalletSweep,
   },
   {
     name: 'sui_dry_run',

@@ -45,21 +45,34 @@ to a human user — just with a small wallet.
   - **Browser**: WebCrypto non-extractable key in IndexedDB.
   - **Server-side agents**: env var or a KMS reference; never logged.
 
-### Tier-1 MCP surface (proposed)
+### Tier-1 MCP surface (shipped)
 
 These wrap the existing tools to make the "agent wallet" abstraction
-explicit. **All still return unsigned bytes — no keys in the MCP.**
+explicit. **All return unsigned bytes — no keys in the MCP.**
 
 | Tool | What it does |
 | --- | --- |
-| `agent_wallet_create` | Generate an agent keypair, return address + encrypted key blob for the host to store |
-| `agent_wallet_fund` | Build a tx sending SUI from owner → agent wallet |
-| `agent_wallet_sweep` | Build a tx returning everything to the owner (the kill switch) |
-| `agent_wallet_status` | Read balance, recent activity, last tx |
+| `agent_wallet_fund` | Build an owner-signed tx sending SUI → agent wallet (sets the allowance) |
+| `agent_wallet_sweep` | Build an agent-signed tx returning everything to the owner (the kill switch) |
+| `agent_wallet_status` | Read the agent wallet's balance + whether it's funded |
 
-The actual *signing* happens in a thin sibling package, `agent-signer`,
-that loads the encrypted agent key and exposes a single `sign(txBytes)`
-call. Strict separation: signer holds a key, MCP doesn't.
+**Key generation is *not* an MCP tool — on purpose.** A `create` tool
+would have to return the private key *through the MCP response*, which
+means it lands in the agent's / LLM's context and logs. That's the exact
+leak we're avoiding. So creation and signing live in a separate package,
+`@suisei/agent-signer`, run locally:
+
+- `agent-signer create` — generate an Ed25519 keypair, seal it with
+  AES-256-GCM under a scrypt-derived passphrase key, write it `0600` to
+  `~/.suisei/agent-wallet.json` (override via `AGENT_WALLET_PATH`). Prints
+  **only the address**.
+- `agent-signer address` — print the agent wallet address.
+- `agent-signer sign <txBytesBase64>` — decrypt in-process, sign builder
+  bytes, print the base64 signature for `sui_execute_signed_tx`.
+
+Strict separation: the signer is the only thing that ever holds a
+plaintext key, and that key never crosses a process boundary into the
+MCP or the model.
 
 ## Tier 2 — Policy Vault (opt-in, on-chain limits)
 
@@ -130,9 +143,11 @@ damage is still capped and revocable.
 
 ## Build order
 
-1. **Tier 1 MCP tools + `agent-signer` package** — closes the signing
-   gap immediately. Pair with a "create agent wallet" UI flow in the
-   Suisei app. End-to-end testnet stake demo from chat.
+1. ~~**Tier 1 MCP tools + `agent-signer` package**~~ — **DONE.**
+   `agent_wallet_fund` / `agent_wallet_sweep` / `agent_wallet_status` (keyless
+   builders in the MCP) + `@suisei/agent-signer` (encrypted local keystore,
+   create / address / sign CLI). Next: a "create agent wallet" UI flow in the
+   Suisei app and an end-to-end testnet stake demo from chat.
 2. **Move `agent_wallet` module** — `Vault`, `OwnerCap`, `Policy`, grants,
    spends. Move tests.
 3. **Tier 2 MCP wrappers** — keyless builders for grant/revoke/spend.
