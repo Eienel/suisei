@@ -33,6 +33,7 @@ import { suiMoveCall } from './tools/sui_move_call.js';
 import { suiTransfer } from './tools/sui_transfer.js';
 import { suiStake } from './tools/sui_stake.js';
 import { suiUnstake } from './tools/sui_unstake.js';
+import { suiDeepbookSwap } from './tools/sui_deepbook_swap.js';
 import { suiDryRun } from './tools/sui_dry_run.js';
 import { suiExecuteSignedTx } from './tools/sui_execute_signed_tx.js';
 import { walrusPublish } from './tools/walrus_publish.js';
@@ -250,6 +251,37 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiUnstake,
+  },
+  {
+    name: 'sui_deepbook_swap',
+    description:
+      'Build (do not sign) a DeepBook v3 market swap — the universal liquidity primitive. Pass a known pool key (e.g. "SUI_DBUSDC" on testnet, "SUI_USDC" on mainnet) or explicit pool_id + base_type + quote_type. amount and min_out are raw smallest-unit strings (caller handles decimals and slippage). DeepBook charges fees in DEEP: whitelisted pools take deep_amount "0", others require the sender to hold DEEP. Returns base64 tx bytes.',
+    inputSchema: z.object({
+      sender: z.string().describe('0x address that will sign, pay, and receive the output.'),
+      direction: z
+        .enum(['base_to_quote', 'quote_to_base'])
+        .describe('Swap the base coin for the quote coin, or vice versa.'),
+      amount: z.string().describe('Input amount in the coin\'s smallest unit (as a string).'),
+      min_out: z
+        .string()
+        .default('0')
+        .describe('Minimum acceptable output in smallest units (slippage floor). 0 = no floor.'),
+      deep_amount: z
+        .string()
+        .default('0')
+        .describe('DEEP to spend on fees, smallest units. 0 works for whitelisted pools.'),
+      pool: z
+        .string()
+        .optional()
+        .describe('Known pool key for the network (e.g. SUI_DBUSDC). Or pass pool_id below.'),
+      pool_id: z.string().optional().describe('Pool object id (overrides the pool key).'),
+      base_type: z.string().optional().describe('Base coin type (required with pool_id).'),
+      quote_type: z.string().optional().describe('Quote coin type (required with pool_id).'),
+      deepbook_package: z.string().optional().describe('Override the DeepBook package id.'),
+      deep_type: z.string().optional().describe('Override the DEEP coin type.'),
+      network: networkSchema,
+    }),
+    handler: suiDeepbookSwap,
   },
   {
     name: 'sui_dry_run',

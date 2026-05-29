@@ -7,9 +7,9 @@ your own agent) can build on Sui. This package is the product.
 it: a working app built entirely on these tools, demonstrating what you
 can do once an agent speaks Sui.
 
-> **Status:** Alpha. Nineteen tools spanning the core build loop — read
+> **Status:** Alpha. Twenty tools spanning the core build loop — read
 > chain state, build any transaction, simulate it, submit it — plus
-> Walrus storage. Next up: PTB composition, DeepBook, and Seal.
+> DeepBook swaps and Walrus storage. Next up: PTB composition and Seal.
 
 ## Why
 
@@ -109,6 +109,7 @@ deep-link) to submit.
 | `sui_stake`             | Build a native staking delegation to a validator            |
 | `sui_unstake`           | Build a withdraw-stake for a StakedSui object               |
 | `sui_mint_badge`        | Build a Suisei completion-badge mint                         |
+| `sui_deepbook_swap`     | Build a DeepBook v3 market swap (CLOB liquidity)            |
 
 **Simulate & submit**
 
