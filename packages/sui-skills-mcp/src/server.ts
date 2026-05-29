@@ -33,6 +33,7 @@ import { suiMoveCall } from './tools/sui_move_call.js';
 import { suiTransfer } from './tools/sui_transfer.js';
 import { suiStake } from './tools/sui_stake.js';
 import { suiUnstake } from './tools/sui_unstake.js';
+import { suiDeepbookQuote } from './tools/sui_deepbook_quote.js';
 import { suiDeepbookSwap } from './tools/sui_deepbook_swap.js';
 import { suiDryRun } from './tools/sui_dry_run.js';
 import { suiExecuteSignedTx } from './tools/sui_execute_signed_tx.js';
@@ -251,6 +252,24 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiUnstake,
+  },
+  {
+    name: 'sui_deepbook_quote',
+    description:
+      'Read-only DeepBook v3 quote (no gas, no signing). Given an input amount and direction, returns the expected output and the DEEP fee required, so you can size min_out before calling sui_deepbook_swap. Pass a known pool key (e.g. "SUI_DBUSDC" testnet, "SUI_USDC" mainnet) or explicit pool_id + base_type + quote_type. amount is raw smallest-units; all outputs are raw smallest-units too.',
+    inputSchema: z.object({
+      direction: z
+        .enum(['base_to_quote', 'quote_to_base'])
+        .describe('Quote selling the base coin for quote, or quote for base.'),
+      amount: z.string().describe('Input amount in the coin\'s smallest unit (as a string).'),
+      pool: z.string().optional().describe('Known pool key for the network (e.g. SUI_DBUSDC).'),
+      pool_id: z.string().optional().describe('Pool object id (overrides the pool key).'),
+      base_type: z.string().optional().describe('Base coin type (required with pool_id).'),
+      quote_type: z.string().optional().describe('Quote coin type (required with pool_id).'),
+      deepbook_package: z.string().optional().describe('Override the DeepBook package id.'),
+      network: networkSchema,
+    }),
+    handler: suiDeepbookQuote,
   },
   {
     name: 'sui_deepbook_swap',

@@ -150,7 +150,7 @@ cover_inner = [
     [Paragraph("Sui Skills MCP", S["title"])],
     [Paragraph("The Sui Stack as one-job-per-tool primitives, over the "
                "Model Context Protocol.", S["sub"])],
-    [Paragraph("Capability Reference&nbsp;&nbsp;&middot;&nbsp;&nbsp;20 tools"
+    [Paragraph("Capability Reference&nbsp;&nbsp;&middot;&nbsp;&nbsp;21 tools"
                "&nbsp;&nbsp;&middot;&nbsp;&nbsp;Generated 2026-05-29", S["meta"])],
 ]
 cover = Table(cover_inner, colWidths=[W])
@@ -229,7 +229,7 @@ P("Restart the host. All tools are exposed under the <font name='Courier' size=9
 
 # ---- 5. Tool reference ----------------------------------------------------
 H2("5. Tool reference")
-P("Twenty tools across four groups. Every tool accepts a "
+P("Twenty-one tools across four groups. Every tool accepts a "
   "<font name='Courier' size=9>network</font> argument (testnet &middot; mainnet &middot; devnet, "
   "default testnet) except the two Walrus tools, which target Walrus endpoints directly.")
 
@@ -246,6 +246,7 @@ table([
     ["sui_get_transaction", "Look up a finalized tx by digest: status, gas, changes"],
     ["sui_get_reference_gas_price", "Current network reference gas price (MIST)"],
     ["sui_get_dynamic_fields", "List an object's dynamic fields (Tables, Bags)"],
+    ["sui_deepbook_quote", "Read-only DeepBook v3 quote: expected out + DEEP fee"],
 ], [0.32 * W, 0.68 * W])
 
 P("sui_resolve_address", "h4")
@@ -376,6 +377,15 @@ table([
     ["quest_number", "number", "yes", "1&ndash;255"],
     ["badge_package", "string", "yes", "Move package with the badge module"],
 ], [0.26 * W, 0.16 * W, 0.10 * W, 0.48 * W])
+
+P("sui_deepbook_quote", "h4")
+P("Read-only DeepBook v3 quote via devInspect — no gas, no signing, no funds. Given an input "
+  "amount and direction, returns the expected output and the DEEP fee required, so an agent can "
+  "size min_out before building a swap. Same pool selection as the swap (known key, or explicit "
+  "pool_id + base_type + quote_type). All values are raw smallest-units, so expected_out feeds "
+  "straight into the swap's min_out.")
+code(['&rarr; { "expected_out": "900000", "deep_required": "27770",',
+      '    "base_out": "0", "quote_out": "900000", "direction": "base_to_quote" }'])
 
 P("sui_deepbook_swap", "h4")
 P("Builds the exact market-swap PTB the official DeepBook v3 SDK emits "
