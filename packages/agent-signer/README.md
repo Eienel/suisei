@@ -49,6 +49,32 @@ Then the loop with Claude + the MCP:
 To revoke, ask the agent for `agent_wallet_sweep` (drains the wallet back to
 you), sign it, submit, and stop funding.
 
+## You own the key — back it up or move it
+
+The wallet isn't locked inside this tool. The private key is yours,
+encrypted under your passphrase, and you can take it out anytime:
+
+```bash
+agent-signer export
+# -> { "address": "0x…", "secret_key": "suiprivkey1…", "warning": "…" }
+```
+
+That `suiprivkey1…` is a standard Sui secret. Import it into **Sui Wallet**,
+**Suiet**, or the CLI (`sui keytool import "<suiprivkey1…>" ed25519`) and
+you have the same wallet there. Back it up offline — anyone holding it
+controls the wallet.
+
+Bring your own key instead of generating one:
+
+```bash
+agent-signer import "suiprivkey1…"
+```
+
+Because the key is exportable, losing the keystore file isn't fatal **if
+you backed up the export**. If you didn't and you lose the file or
+passphrase, the agent wallet is gone — but it only ever holds an allowance,
+so create a fresh one and refund. Your owner wallet is untouched.
+
 ## Configuration
 
 | Env / flag | Default | Meaning |
@@ -61,8 +87,9 @@ you), sign it, submit, and stop funding.
 - **Ed25519** key, sealed with **AES-256-GCM** under a **scrypt**-derived
   key (N=32768). Keystore written `0600`.
 - Wrong passphrase → decryption fails closed (GCM auth tag).
-- The signer never prints the secret. `create`/`address` emit only the
-  public address; `sign` emits only a signature.
+- `create`/`address` emit only the public address; `sign` emits only a
+  signature. The raw secret is revealed only by an explicit `export` (with
+  a warning) — never incidentally, and never to the MCP or an agent.
 - Lose the keystore or passphrase and the agent wallet is gone — by design
   it holds only an allowance, so create a fresh one and refund. Your owner
   wallet (in your real wallet app) is unaffected.

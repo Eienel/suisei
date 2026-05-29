@@ -1,10 +1,19 @@
 #!/usr/bin/env node
-import { createWallet, walletAddress, signTxBytes, defaultPath } from './index.js';
+import {
+  createWallet,
+  walletAddress,
+  signTxBytes,
+  exportSecret,
+  importWallet,
+  defaultPath,
+} from './index.js';
 
 /**
  * agent-signer CLI — the manual signing path for a Tier-1 agent wallet.
  *
  *   agent-signer create [--overwrite]      generate + encrypt a new agent key
+ *   agent-signer import <suiprivkey>       seal an existing key as the wallet
+ *   agent-signer export                    reveal the raw key (backup / import elsewhere)
  *   agent-signer address                   print the agent wallet address
  *   agent-signer sign <txBytesBase64>      sign builder bytes -> base64 signature
  *
@@ -68,6 +77,33 @@ async function main(): Promise<void> {
       });
       break;
     }
+    case 'import': {
+      const secret = process.argv[3];
+      if (!secret || secret.startsWith('--')) {
+        fail('Usage: agent-signer import <suiprivkey1...>');
+      }
+      const res = importWallet({
+        passphrase: getPassphrase(),
+        secret,
+        path: getPath(),
+        overwrite: has('overwrite'),
+      });
+      out({ imported: true, address: res.address, path: res.path });
+      break;
+    }
+    case 'export': {
+      const { address, secretBech32 } = exportSecret({
+        passphrase: getPassphrase(),
+        path: getPath(),
+      });
+      out({
+        address,
+        secret_key: secretBech32,
+        warning:
+          'This is the full private key. Anyone with it controls the wallet. Back it up offline; import into Sui Wallet / Suiet / `sui keytool import` to use it elsewhere.',
+      });
+      break;
+    }
     case 'address': {
       out({ address: walletAddress({ passphrase: getPassphrase(), path: getPath() }) });
       break;
@@ -97,6 +133,8 @@ async function main(): Promise<void> {
           '',
           'Commands:',
           '  create [--overwrite]     generate + encrypt a new agent key',
+          '  import <suiprivkey>      seal an existing key as the wallet',
+          '  export                   reveal the raw key (backup / import elsewhere)',
           '  address                  print the agent wallet address',
           '  sign <txBytesBase64>     sign builder bytes -> base64 signature',
           '',

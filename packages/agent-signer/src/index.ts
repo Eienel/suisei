@@ -52,6 +52,50 @@ export function walletAddress(opts: { passphrase: string; path?: string }): stri
 }
 
 /**
+ * Reveal the raw bech32 `suiprivkey...` secret so the user can back it up
+ * or import the agent wallet into a standard wallet (Sui Wallet, Suiet,
+ * `sui keytool import`). This is the user's escape hatch — it proves they,
+ * not us, own the key. Handle the output carefully: anyone with this string
+ * controls the wallet.
+ */
+export function exportSecret(opts: { passphrase: string; path?: string }): {
+  address: string;
+  secretBech32: string;
+} {
+  const path = opts.path ?? defaultPath();
+  return loadSecret({ path, passphrase: opts.passphrase });
+}
+
+/**
+ * Import an existing key as the agent wallet: seal a bech32 `suiprivkey...`
+ * (or raw 32-byte) secret into the keystore. Lets a user bring their own
+ * key instead of generating one.
+ */
+export function importWallet(opts: {
+  passphrase: string;
+  secret: string;
+  path?: string;
+  overwrite?: boolean;
+}): CreateResult {
+  const path = opts.path ?? defaultPath();
+  if (keystoreExists(path) && !opts.overwrite) {
+    throw new Error(
+      `An agent wallet already exists at ${path}. Pass overwrite to replace it (you will lose the old key).`,
+    );
+  }
+  let kp: Ed25519Keypair;
+  try {
+    kp = Ed25519Keypair.fromSecretKey(opts.secret.trim());
+  } catch {
+    throw new Error('Invalid secret key. Expected a bech32 "suiprivkey1..." string.');
+  }
+  const address = kp.getPublicKey().toSuiAddress();
+  // Re-serialize through getSecretKey() so storage is always canonical bech32.
+  saveSecret({ path, passphrase: opts.passphrase, address, secretBech32: kp.getSecretKey() });
+  return { address, path };
+}
+
+/**
  * Sign base64 tx bytes (from any sui-skills-mcp builder tool) with the
  * agent key. Returns the base64 Sui signature to pass to
  * sui_execute_signed_tx.
