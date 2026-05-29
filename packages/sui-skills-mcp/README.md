@@ -7,9 +7,10 @@ your own agent) can build on Sui. This package is the product.
 it: a working app built entirely on these tools, demonstrating what you
 can do once an agent speaks Sui.
 
-> **Status:** Alpha. Twenty-one tools spanning the core build loop — read
-> chain state, build any transaction, simulate it, submit it — plus
-> DeepBook quotes & swaps and Walrus storage. Next up: PTB composition and Seal.
+> **Status:** Alpha. Twenty-four tools spanning the core build loop — read
+> chain state, build any transaction, simulate it, submit it — plus native
+> staking (stake, unstake, live APY, validator set, position tracking),
+> DeepBook quotes & swaps, and Walrus storage. Next up: PTB composition and Seal.
 
 ## Why
 
@@ -99,6 +100,9 @@ deep-link) to submit.
 | `sui_get_transaction`   | Look up a finalized tx by digest: status, gas, changes      |
 | `sui_get_reference_gas_price` | Current network reference gas price (MIST)            |
 | `sui_get_dynamic_fields` | List an object's dynamic fields (Tables, Bags), paginated  |
+| `sui_get_stakes`        | A wallet's active stakes: principal, accrued rewards, ids   |
+| `sui_get_validators_apy` | Live APY per validator (the APR feed for staking)          |
+| `sui_get_validators`    | Active validator set: name, address, commission, total stake |
 | `sui_deepbook_quote`    | Read-only DeepBook v3 quote: expected out + DEEP fee        |
 
 **Build a transaction (never signed — bytes returned for the host)**

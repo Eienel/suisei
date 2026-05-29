@@ -4,6 +4,18 @@
   "description": "MCP server exposing the Sui Stack as one-line tools for any agent. Suisei (suisei.dev) is a showcase app built on it.",
   "license": "MIT",
   "type": "module",
+  "homepage": "https://suisei.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eienel/blockbuilders.git",
+    "directory": "packages/sui-skills-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/eienel/blockbuilders/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "exports": {
     ".": "./dist/index.js",

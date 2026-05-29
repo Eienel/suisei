@@ -28,6 +28,9 @@ import { suiGetCoins } from './tools/sui_get_coins.js';
 import { suiGetTransaction } from './tools/sui_get_transaction.js';
 import { suiGetReferenceGasPrice } from './tools/sui_get_reference_gas_price.js';
 import { suiGetDynamicFields } from './tools/sui_get_dynamic_fields.js';
+import { suiGetStakes } from './tools/sui_get_stakes.js';
+import { suiGetValidatorsApy } from './tools/sui_get_validators_apy.js';
+import { suiGetValidators } from './tools/sui_get_validators.js';
 import { suiMintBadge } from './tools/sui_mint_badge.js';
 import { suiMoveCall } from './tools/sui_move_call.js';
 import { suiTransfer } from './tools/sui_transfer.js';
@@ -174,6 +177,41 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiGetDynamicFields,
+  },
+  {
+    name: 'sui_get_stakes',
+    description:
+      "List an address's active native stakes, grouped by validator. For each StakedSui returns the principal, the rewards accrued so far (estimated), the activation epoch, and the staked_sui_id you pass to sui_unstake. Read-only. Use this to show a wallet's staking positions and earned rewards.",
+    inputSchema: z.object({
+      address: z.string().describe('Wallet address whose stakes to list.'),
+      network: networkSchema,
+    }),
+    handler: suiGetStakes,
+  },
+  {
+    name: 'sui_get_validators_apy',
+    description:
+      'Current APY for active validators, as the network computes it from recent epoch rewards. Read-only. apy is a fraction (0.041 = 4.1%), with apy_percent for display. Pass validator for one, sort=true to rank highest-first, limit to cap. This is the APR feed for picking a validator before sui_stake.',
+    inputSchema: z.object({
+      validator: z
+        .string()
+        .optional()
+        .describe('Filter to a single validator 0x address.'),
+      sort: z.boolean().optional().describe('Sort highest APY first.'),
+      limit: z.number().int().min(1).max(150).optional().describe('Cap the number returned.'),
+      network: networkSchema,
+    }),
+    handler: suiGetValidatorsApy,
+  },
+  {
+    name: 'sui_get_validators',
+    description:
+      'The active validator set plus epoch context (epoch number, duration, total stake). For each validator: name, staking address (what sui_stake expects), commission rate, and total stake. Read-only, sorted largest-first. Match validator_address against sui_get_validators_apy to render a full validator picker.',
+    inputSchema: z.object({
+      limit: z.number().int().min(1).max(150).optional().describe('Cap the number returned.'),
+      network: networkSchema,
+    }),
+    handler: suiGetValidators,
   },
   {
     name: 'sui_mint_badge',
