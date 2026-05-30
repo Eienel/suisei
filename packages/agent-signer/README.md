@@ -1,8 +1,8 @@
-# @suisei/agent-signer
+# @suisei-mcp/agent-signer
 
 The non-custodial signer for a **Tier-1 Sui agent wallet**.
 
-[`@suisei/mcp`](../mcp) builds *unsigned* transaction
+[`@suisei-mcp/mcp`](../mcp) builds *unsigned* transaction
 bytes and never holds a key. This package is the one piece that does: it
 generates the agent's keypair, stores it **encrypted on your machine**, and
 signs builder bytes. The plaintext key is created here, used here, and
@@ -20,7 +20,7 @@ key, and your owner key stays in your real wallet.
 ## Install
 
 ```bash
-npm install -g @suisei/agent-signer
+npm install -g @suisei-mcp/agent-signer
 ```
 
 ## Use

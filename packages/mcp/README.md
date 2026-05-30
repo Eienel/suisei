@@ -1,4 +1,4 @@
-# @suisei/mcp — Suisei MCP
+# @suisei-mcp/mcp — Suisei MCP
 
 The Sui Stack as one-line tools, exposed over the Model Context Protocol
 — so any MCP-aware client (Claude Desktop, Cursor, Windsurf, your own
@@ -26,7 +26,7 @@ to do; the tool does it.
 ## Install
 
 ```bash
-npm install -g @suisei/mcp
+npm install -g @suisei-mcp/mcp
 ```
 
 ## Use with Claude Desktop
@@ -39,7 +39,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`
   "mcpServers": {
     "suisei": {
       "command": "npx",
-      "args": ["-y", "@suisei/mcp"]
+      "args": ["-y", "@suisei-mcp/mcp"]
     }
   }
 }
@@ -71,9 +71,9 @@ On serverless, import the runtime-agnostic Fetch handler directly — it
 runs on Vercel Edge, Cloudflare Workers, Deno, and Bun:
 
 ```ts
-// api/mcp.ts (Vercel Edge)  — needs `@suisei/mcp` as a dependency
+// api/mcp.ts (Vercel Edge)  — needs `@suisei-mcp/mcp` as a dependency
 export const config = { runtime: 'edge' };
-import { handleMcpRequest } from '@suisei/mcp/http';
+import { handleMcpRequest } from '@suisei-mcp/mcp/http';
 export default (req: Request) => handleMcpRequest(req);
 ```
 

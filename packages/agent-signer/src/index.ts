@@ -2,7 +2,7 @@ import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { defaultPath, saveSecret, loadSecret, keystoreExists } from './keystore.js';
 
 /**
- * @suisei/agent-signer — the non-custodial signer for a Tier-1 Sui agent
+ * @suisei-mcp/agent-signer — the non-custodial signer for a Tier-1 Sui agent
  * wallet.
  *
  * The MCP toolkit builds unsigned tx bytes and never holds a key. This is
@@ -96,7 +96,7 @@ export function importWallet(opts: {
 }
 
 /**
- * Sign base64 tx bytes (from any @suisei/mcp builder tool) with the agent
+ * Sign base64 tx bytes (from any @suisei-mcp/mcp builder tool) with the agent
  * key. Returns the base64 Sui signature to pass to sui_execute_signed_tx.
  */
 export async function signTxBytes(opts: {

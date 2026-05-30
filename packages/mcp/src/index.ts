@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @suisei/mcp — stdio entrypoint.
+ * @suisei-mcp/mcp — stdio entrypoint.
  *
  * The product: the Suisei MCP server for the Sui stack. Plug into Claude
  * Desktop, Cursor, or any MCP-aware agent and you get one-line tools to

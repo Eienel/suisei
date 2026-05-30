@@ -64,7 +64,7 @@ Curriculum (always available context):
 07. Walrus + Seal     — Decentralized storage gated by a Move policy.
 08. DeepBook (grad)   — Real orders on a real orderbook. Graduate NFT.
 
-The Suisei MCP server (\`@suisei/mcp\`) exposes the same toolkit Suisei
+The Suisei MCP server (\`@suisei-mcp/mcp\`) exposes the same toolkit Suisei
 uses, so other agents (Claude Desktop, Cursor) can do real Sui work. You
 can mention this when relevant.`;
 

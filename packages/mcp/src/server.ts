@@ -1,5 +1,5 @@
 /**
- * @suisei/mcp — server factory.
+ * @suisei-mcp/mcp — server factory.
  *
  * Builds the Suisei MCP server with the full Sui-stack tool registry.
  * Transport is chosen by the entrypoint: `index.ts` (stdio) for local

@@ -60,7 +60,7 @@ explicit. **All return unsigned bytes — no keys in the MCP.**
 would have to return the private key *through the MCP response*, which
 means it lands in the agent's / LLM's context and logs. That's the exact
 leak we're avoiding. So creation and signing live in a separate package,
-`@suisei/agent-signer`, run locally:
+`@suisei-mcp/agent-signer`, run locally:
 
 - `agent-signer create` — generate an Ed25519 keypair, seal it with
   AES-256-GCM under a scrypt-derived passphrase key, write it `0600` to
@@ -145,7 +145,7 @@ damage is still capped and revocable.
 
 1. ~~**Tier 1 MCP tools + `agent-signer` package**~~ — **DONE.**
    `agent_wallet_fund` / `agent_wallet_sweep` / `agent_wallet_status` (keyless
-   builders in the MCP) + `@suisei/agent-signer` (encrypted local keystore,
+   builders in the MCP) + `@suisei-mcp/agent-signer` (encrypted local keystore,
    create / address / sign CLI). Next: a "create agent wallet" UI flow in the
    Suisei app and an end-to-end testnet stake demo from chat.
 2. **Move `agent_wallet` module** — `Vault`, `OwnerCap`, `Policy`, grants,

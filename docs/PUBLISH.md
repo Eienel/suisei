@@ -43,15 +43,15 @@ npm publish
 That's it — within a minute the world can:
 
 ```bash
-npx -y @suisei/mcp        # spin up the MCP server
-npm install -g @suisei/agent-signer  # install the Tier-1 signer
+npx -y @suisei-mcp/mcp        # spin up the MCP server
+npm install -g @suisei-mcp/agent-signer  # install the Tier-1 signer
 ```
 
 ## Verify it landed
 
 ```bash
-npm view @suisei/mcp
-npm view @suisei/agent-signer
+npm view @suisei-mcp/mcp
+npm view @suisei-mcp/agent-signer
 ```
 
 ## Bumping versions for the next release

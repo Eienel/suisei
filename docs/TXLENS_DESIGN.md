@@ -1,6 +1,6 @@
 # TxLens — "look before you sign" wallet guard
 
-A showcase app for `@suisei/mcp`. The pitch: half of Web3
+A showcase app for `@suisei-mcp/mcp`. The pitch: half of Web3
 hacks happen because users sign transactions they don't understand —
 wallet UIs show "Approve transaction" with a hash, and people click
 through. TxLens is a chat-native (and later browser-extension) pre-flight

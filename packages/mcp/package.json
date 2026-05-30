@@ -1,5 +1,5 @@
 {
-  "name": "@suisei/mcp",
+  "name": "@suisei-mcp/mcp",
   "version": "0.1.0",
   "description": "Suisei — the Sui Stack as one-line tools, exposed over the Model Context Protocol so any agent can build on Sui.",
   "license": "MIT",
