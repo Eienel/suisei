@@ -7,11 +7,13 @@ your own agent) can build on Sui. This package is the product.
 it: a working app built entirely on these tools, demonstrating what you
 can do once an agent speaks Sui.
 
-> **Status:** Alpha. Twenty-seven tools spanning the core build loop — read
-> chain state, build any transaction, simulate it, submit it — plus native
-> staking (stake, unstake, live APY, validator set, position tracking),
-> DeepBook quotes & swaps, Tier-1 agent-wallet lifecycle (fund / sweep /
-> status), and Walrus storage. Next up: the on-chain policy vault and Seal.
+> **Status:** Alpha. Thirty-three tools spanning the core build loop —
+> read chain state, build any transaction, simulate it, decode it,
+> submit it — plus native staking (stake, unstake, live APY, validator
+> set, position tracking), DeepBook quotes & swaps, batch payouts,
+> historical events, coin metadata + symbol registry, Tier-1
+> agent-wallet lifecycle, and Walrus storage. Next up: the on-chain
+> policy vault and Seal.
 
 ## Why
 
@@ -104,6 +106,10 @@ deep-link) to submit.
 | `sui_get_stakes`        | A wallet's active stakes: principal, accrued rewards, ids   |
 | `sui_get_validators_apy` | Live APY per validator (the APR feed for staking)          |
 | `sui_get_validators`    | Active validator set: name, address, commission, total stake |
+| `sui_get_validator`     | One validator, with APY + commission + stake merged         |
+| `sui_query_events`      | Historical events: filter by type / module / sender / tx    |
+| `sui_get_coin_metadata` | Live coin metadata (symbol, decimals, name, icon URL)       |
+| `sui_resolve_coin`      | Symbol → coin type from a built-in registry (USDC, DEEP, …) |
 | `sui_deepbook_quote`    | Read-only DeepBook v3 quote: expected out + DEEP fee        |
 | `agent_wallet_status`   | An agent wallet's SUI balance + whether it's funded         |
 
@@ -113,6 +119,7 @@ deep-link) to submit.
 | ----------------------- | ------------------------------------------------------------ |
 | `sui_move_call`         | Build a call to ANY Move entry function — the universal write |
 | `sui_transfer`          | Build a transfer of SUI and/or whole objects                |
+| `sui_pay_many`          | Build a batch payout: N recipients, N amounts, one atomic tx |
 | `sui_stake`             | Build a native staking delegation to a validator            |
 | `sui_unstake`           | Build a withdraw-stake for a StakedSui object               |
 | `sui_mint_badge`        | Build a Suisei completion-badge mint                         |
@@ -125,6 +132,7 @@ deep-link) to submit.
 | Tool                    | What it does                                                 |
 | ----------------------- | ------------------------------------------------------------ |
 | `sui_dry_run`           | Simulate built tx bytes (status + gas, no spend)            |
+| `sui_decode_tx_bytes`   | Offline decode: turn unsigned bytes into a human-readable plan |
 | `sui_execute_signed_tx` | Submit host-signed tx bytes, return digest + effects        |
 
 **Walrus storage**

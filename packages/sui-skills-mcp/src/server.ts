@@ -38,6 +38,12 @@ import { suiStake } from './tools/sui_stake.js';
 import { suiUnstake } from './tools/sui_unstake.js';
 import { suiDeepbookQuote } from './tools/sui_deepbook_quote.js';
 import { suiDeepbookSwap } from './tools/sui_deepbook_swap.js';
+import { suiQueryEvents } from './tools/sui_query_events.js';
+import { suiGetCoinMetadata } from './tools/sui_get_coin_metadata.js';
+import { suiResolveCoin } from './tools/sui_resolve_coin.js';
+import { suiGetValidator } from './tools/sui_get_validator.js';
+import { suiPayMany } from './tools/sui_pay_many.js';
+import { suiDecodeTxBytes } from './tools/sui_decode_tx_bytes.js';
 import { agentWalletFund } from './tools/agent_wallet_fund.js';
 import { agentWalletSweep } from './tools/agent_wallet_sweep.js';
 import { agentWalletStatus } from './tools/agent_wallet_status.js';
@@ -217,6 +223,55 @@ const tools: ToolDef[] = [
     handler: suiGetValidators,
   },
   {
+    name: 'sui_get_validator',
+    description:
+      'One validator with APY merged: name, address, commission, total stake, voting power, project URL, and the live APY the chain computes from recent rewards. Fuses sui_get_validators + sui_get_validators_apy into a single read so a staking app doesn’t join them by hand.',
+    inputSchema: z.object({
+      validator_address: z.string().describe('Validator 0x address.'),
+      network: networkSchema,
+    }),
+    handler: suiGetValidator,
+  },
+  {
+    name: 'sui_query_events',
+    description:
+      'Query historical Move events. Powers reactive agents — react to swaps, mints, transfers, anything that emits an event. Filter by event_type (full type), package+module (both required together), sender, or transaction. Paginated; pass back next_cursor_tx_digest + next_cursor_event_seq to continue. At least one filter is required.',
+    inputSchema: z.object({
+      event_type: z.string().optional().describe('Full Move event type, e.g. "0x2::coin::CurrencyCreated<0x2::sui::SUI>".'),
+      package: z.string().optional().describe('Package id to filter by.'),
+      module: z.string().optional().describe('Module name (must accompany package).'),
+      sender: z.string().optional().describe('Address that emitted the event.'),
+      transaction: z.string().optional().describe('Transaction digest to filter to.'),
+      cursor_tx_digest: z.string().optional().describe('Pagination cursor from a previous call.'),
+      cursor_event_seq: z.string().optional().describe('Pagination cursor from a previous call.'),
+      limit: z.number().int().min(1).max(50).optional(),
+      descending: z.boolean().optional().describe('Default true (newest first).'),
+      network: networkSchema,
+    }),
+    handler: suiQueryEvents,
+  },
+  {
+    name: 'sui_get_coin_metadata',
+    description:
+      "Live coin metadata: symbol, name, decimals, description, icon URL. Pass coin_type ('0x…') or symbol ('USDC'); a symbol resolves via the local registry first. Decimals are critical for every DeFi flow — '5 USDC' = 5e6 smallest units (6 decimals), not 5e9.",
+    inputSchema: z.object({
+      coin_type: z.string().optional().describe('Fully-qualified coin type.'),
+      symbol: z.string().optional().describe('Symbol to look up in the local registry (e.g. "USDC").'),
+      network: networkSchema,
+    }),
+    handler: suiGetCoinMetadata,
+  },
+  {
+    name: 'sui_resolve_coin',
+    description:
+      'Resolve a coin symbol (e.g. "USDC", "DEEP", "SUI") to its fully-qualified coin type on the chosen network, or — with no symbol — list every known symbol. Stops agents from hallucinating coin types.',
+    inputSchema: z.object({
+      symbol: z.string().optional().describe('Symbol to resolve. Omit to list known symbols.'),
+      network: networkSchema,
+    }),
+    handler: suiResolveCoin,
+  },
+  {
     name: 'sui_mint_badge',
     description:
       'Build (do not execute) a PTB that mints a Suisei completion badge to a recipient. Returns base64 tx bytes; the caller signs and submits separately. Use this when an agent wants to issue its own badges through the canonical badge module.',
@@ -270,6 +325,20 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiTransfer,
+  },
+  {
+    name: 'sui_pay_many',
+    description:
+      'Build (do not sign) a batch SUI payout in one PTB: split N coins from gas and send each to its matching recipient. Powers airdrops, payroll, refunds, splitters. recipients and amounts_mist must be the same length and order. All payouts settle atomically.',
+    inputSchema: z.object({
+      sender: z.string().describe('0x address sending and paying for the tx.'),
+      recipients: z.array(z.string()).describe('Recipient 0x addresses, one per amount.'),
+      amounts_mist: z
+        .array(z.string())
+        .describe('Amounts in MIST (as strings), same length and order as recipients.'),
+      network: networkSchema,
+    }),
+    handler: suiPayMany,
   },
   {
     name: 'sui_stake',
@@ -389,6 +458,15 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiDryRun,
+  },
+  {
+    name: 'sui_decode_tx_bytes',
+    description:
+      'Decode unsigned tx bytes (from any builder tool) into a structured, human-readable summary: sender, gas data, inputs, and a step-by-step list of commands ("split N MIST from gas", "transfer to 0x…", "call pkg::module::fn(…)"). The "look before you sign" tool — verifies a built tx matches its stated intent. Pure offline decode, no RPC.',
+    inputSchema: z.object({
+      tx_bytes_base64: z.string().describe('Base64 tx bytes from a builder tool.'),
+    }),
+    handler: suiDecodeTxBytes,
   },
   {
     name: 'sui_execute_signed_tx',
