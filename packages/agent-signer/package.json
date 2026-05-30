@@ -1,0 +1,53 @@
+{
+  "name": "@suisei-mcp/agent-signer",
+  "version": "0.1.1",
+  "description": "Local, non-custodial signer for a Tier-1 Sui agent wallet. Generates and encrypts an agent keypair on the user's machine and signs tx bytes from @suisei-mcp/mcp. The key never leaves the host and never enters an agent's context.",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/eienel/blockbuilders/tree/main/packages/agent-signer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eienel/blockbuilders.git",
+    "directory": "packages/agent-signer"
+  },
+  "bugs": {
+    "url": "https://github.com/eienel/blockbuilders/issues"
+  },
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "bin": {
+    "agent-signer": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "sui",
+    "agent",
+    "wallet",
+    "signer",
+    "non-custodial",
+    "mcp"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}
