@@ -1,6 +1,6 @@
 # MnemoSui — a permanent, portable brain for AI agents
 
-A showcase app for `@suisei/sui-skills-mcp`. The pitch: every AI agent
+A showcase app for `@suisei/mcp`. The pitch: every AI agent
 forgets, and the memory they do have is locked inside one vendor's app.
 MnemoSui gives an agent a brain it actually owns — conversation history,
 knowledge, embeddings, files — stored on **Walrus**, indexed on **Sui** as

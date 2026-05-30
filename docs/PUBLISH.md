@@ -16,7 +16,7 @@ Two packages, both scoped under `@suisei`, both publish-ready.
 From your local clone, in PowerShell (Windows) or any shell:
 
 ```bash
-cd <repo>/packages/sui-skills-mcp
+cd <repo>/packages/mcp
 
 # 1. pull latest + clean build
 git pull origin claude/v1-sui-ai
@@ -43,14 +43,14 @@ npm publish
 That's it — within a minute the world can:
 
 ```bash
-npx -y @suisei/sui-skills-mcp        # spin up the MCP server
+npx -y @suisei/mcp        # spin up the MCP server
 npm install -g @suisei/agent-signer  # install the Tier-1 signer
 ```
 
 ## Verify it landed
 
 ```bash
-npm view @suisei/sui-skills-mcp
+npm view @suisei/mcp
 npm view @suisei/agent-signer
 ```
 

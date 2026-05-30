@@ -13,7 +13,7 @@ graduate quest. Each quest ends with the user deploying a real Move
 package on testnet and earning a soulbound badge. Completing all 8
 mints a "Sui Stack Graduate" NFT.
 
-The agent runs on an open MCP server (`@suisei/sui-skills-mcp`) so
+The agent runs on an open MCP server (`@suisei/mcp`) so
 *any* AI agent — Claude Desktop, Cursor, custom Python bots — can plug
 into the same toolkit and do real Sui work. Suisei is the showcase.
 The MCP server is the gift to the ecosystem.

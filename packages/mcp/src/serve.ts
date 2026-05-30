@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Standalone HTTP entrypoint — host the Sui Skills MCP anywhere.
+ * Standalone HTTP entrypoint — host the Suisei MCP anywhere.
  *
- *   PORT=8787 SUI_SKILLS_MCP_TOKEN=secret npx sui-skills-mcp-serve
+ *   PORT=8787 SUISEI_MCP_TOKEN=secret npx suisei-mcp-serve
  *
  * Spins up a Node HTTP server and serves the Streamable HTTP transport via
  * the shared node bridge. Point a Claude Custom Connector at
@@ -25,5 +25,5 @@ const httpServer = createHttpServer((req, res) => {
 });
 
 httpServer.listen(PORT, () => {
-  process.stderr.write(`sui-skills-mcp HTTP server on http://localhost:${PORT}\n`);
+  process.stderr.write(`suisei-mcp HTTP server on http://localhost:${PORT}\n`);
 });

@@ -4,7 +4,7 @@
  * `handleMcpRequest(request)` is a runtime-agnostic Fetch handler: it runs
  * on Vercel Edge, Cloudflare Workers, Deno, Bun, and Node 18+. Wire it to
  * an HTTPS route and add that URL to Claude as a Custom Connector to use
- * the Sui Skills MCP from the Claude web and mobile apps.
+ * the Suisei MCP from the Claude web and mobile apps.
  *
  * Stateless: a fresh server + transport per request (no session store),
  * which is what serverless wants. Reads work great over a remote
@@ -18,15 +18,16 @@ import { createServer } from './server.js';
 export interface McpHttpOptions {
   /**
    * If set, requests must carry `Authorization: Bearer <token>`. Falls
-   * back to the SUI_SKILLS_MCP_TOKEN env var. Leave unset only for local
-   * testing — a public endpoint without a token is open to the world.
+   * back to the SUISEI_MCP_TOKEN env var (with SUI_SKILLS_MCP_TOKEN kept
+   * as a compatibility alias). Leave unset only for local testing — a
+   * public endpoint without a token is open to the world.
    */
   authToken?: string;
 }
 
 function envToken(): string | undefined {
   const env = (globalThis as { process?: { env?: Record<string, string> } }).process?.env;
-  return env?.SUI_SKILLS_MCP_TOKEN;
+  return env?.SUISEI_MCP_TOKEN ?? env?.SUI_SKILLS_MCP_TOKEN;
 }
 
 function unauthorized(): Response {

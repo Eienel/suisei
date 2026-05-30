@@ -56,7 +56,7 @@ But the agent is just the showcase. The real product is the **MCP server (Sui Sk
 
 ## Sui Skills (MCP Server)
 
-Open-source. MIT. Separate npm package: `@suisei/sui-skills-mcp`.
+Open-source. MIT. Separate npm package: `@suisei/mcp`.
 
 **Tools exposed:**
 
@@ -162,7 +162,7 @@ Distribution:
 - [ ] Quest 5: Soulbound NFT (mint, try to transfer, fail)
 - [ ] Quest 6: PTBs (drag-build atomic 5-op tx)
 - [ ] Quest 7: Walrus + Seal (encrypt, NFT-gated decrypt)
-- [ ] MCP server scaffolding (`@suisei/sui-skills-mcp`)
+- [ ] MCP server scaffolding (`@suisei/mcp`)
 - [ ] All Sui skills tools implemented
 - [ ] npm publish + Claude Desktop config snippet
 - [ ] README + docs
@@ -204,7 +204,7 @@ A judge can:
 2. Complete the first quest (mint their first object) in under 5 minutes
 3. See the deployed Move package on Sui Explorer
 4. Talk to Suisei via the chat panel
-5. Plug `@suisei/sui-skills-mcp` into Claude Desktop and ask Claude to mint them an NFT
+5. Plug `@suisei/mcp` into Claude Desktop and ask Claude to mint them an NFT
 6. See themselves on the leaderboard with their badges
 
 If all 6 work end-to-end on testnet, we ship.

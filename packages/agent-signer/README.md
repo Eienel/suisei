@@ -2,7 +2,7 @@
 
 The non-custodial signer for a **Tier-1 Sui agent wallet**.
 
-[`@suisei/sui-skills-mcp`](../sui-skills-mcp) builds *unsigned* transaction
+[`@suisei/mcp`](../mcp) builds *unsigned* transaction
 bytes and never holds a key. This package is the one piece that does: it
 generates the agent's keypair, stores it **encrypted on your machine**, and
 signs builder bytes. The plaintext key is created here, used here, and

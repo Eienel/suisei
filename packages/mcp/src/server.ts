@@ -1,14 +1,18 @@
 /**
- * @suisei/sui-skills-mcp — server factory.
+ * @suisei/mcp — server factory.
  *
- * Builds the MCP server with the full Sui-stack tool registry. Transport
- * is chosen by the entrypoint: `index.ts` (stdio) for local hosts like
- * Claude Desktop and Cursor; `http.ts` (Streamable HTTP) for remote hosts
- * like Claude's Custom Connectors (web + mobile). Both call createServer()
- * so there is exactly one tool registry.
+ * Builds the Suisei MCP server with the full Sui-stack tool registry.
+ * Transport is chosen by the entrypoint: `index.ts` (stdio) for local
+ * hosts like Claude Desktop and Cursor; `http.ts` (Streamable HTTP) for
+ * remote hosts like Claude's Custom Connectors (web + mobile). Both call
+ * createServer() so there is exactly one tool registry.
  *
  * Write tools never hold keys — they return unsigned tx bytes for the
  * host to sign, then sui_execute_signed_tx submits the signed result.
+ *
+ * The server identifies itself as "suisei" over the MCP protocol; tool
+ * names keep the sui_ prefix because they wrap the Sui chain, not the
+ * Suisei brand. Suisei is the agent toolkit; Sui is the chain it speaks.
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -522,7 +526,7 @@ const tools: ToolDef[] = [
 /** Build a fresh MCP server with every Sui-stack tool registered. */
 export function createServer(): Server {
   const server = new Server(
-    { name: 'sui-skills', version: PKG_VERSION },
+    { name: 'suisei', version: PKG_VERSION },
     { capabilities: { tools: {} } },
   );
 

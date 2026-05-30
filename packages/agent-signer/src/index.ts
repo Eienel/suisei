@@ -96,9 +96,8 @@ export function importWallet(opts: {
 }
 
 /**
- * Sign base64 tx bytes (from any sui-skills-mcp builder tool) with the
- * agent key. Returns the base64 Sui signature to pass to
- * sui_execute_signed_tx.
+ * Sign base64 tx bytes (from any @suisei/mcp builder tool) with the agent
+ * key. Returns the base64 Sui signature to pass to sui_execute_signed_tx.
  */
 export async function signTxBytes(opts: {
   passphrase: string;

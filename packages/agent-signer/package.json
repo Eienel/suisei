@@ -1,7 +1,7 @@
 {
   "name": "@suisei/agent-signer",
   "version": "0.1.0",
-  "description": "Local, non-custodial signer for a Tier-1 Sui agent wallet. Generates and encrypts an agent keypair on the user's machine and signs tx bytes from @suisei/sui-skills-mcp. The key never leaves the host and never enters an agent's context.",
+  "description": "Local, non-custodial signer for a Tier-1 Sui agent wallet. Generates and encrypts an agent keypair on the user's machine and signs tx bytes from @suisei/mcp. The key never leaves the host and never enters an agent's context.",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",

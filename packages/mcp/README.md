@@ -1,11 +1,12 @@
-# @suisei/sui-skills-mcp
+# @suisei/mcp — Suisei MCP
 
-The Sui Stack as one-line tools, exposed over the Model Context
-Protocol — so any MCP-aware client (Claude Desktop, Cursor, Windsurf,
-your own agent) can build on Sui. This package is the product.
-[Suisei](https://suisei.dev), the Sui teaching agent, is a showcase of
-it: a working app built entirely on these tools, demonstrating what you
-can do once an agent speaks Sui.
+The Sui Stack as one-line tools, exposed over the Model Context Protocol
+— so any MCP-aware client (Claude Desktop, Cursor, Windsurf, your own
+agent) can build on Sui. The server identifies itself as **Suisei** to
+the agent. Tool names keep the `sui_` prefix because they wrap the Sui
+chain — Suisei is the agent toolkit; Sui is the chain it speaks.
+[Suisei the teaching agent](https://suisei.dev) is a showcase built
+entirely on these tools.
 
 > **Status:** Alpha. Thirty-three tools spanning the core build loop —
 > read chain state, build any transaction, simulate it, decode it,
@@ -25,7 +26,7 @@ to do; the tool does it.
 ## Install
 
 ```bash
-npm install -g @suisei/sui-skills-mcp
+npm install -g @suisei/mcp
 ```
 
 ## Use with Claude Desktop
@@ -36,9 +37,9 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`
 ```jsonc
 {
   "mcpServers": {
-    "sui": {
+    "suisei": {
       "command": "npx",
-      "args": ["-y", "@suisei/sui-skills-mcp"]
+      "args": ["-y", "@suisei/mcp"]
     }
   }
 }
@@ -62,7 +63,7 @@ Connector (Settings → Connectors).
 Host it anywhere with the bundled HTTP server:
 
 ```bash
-PORT=8787 SUI_SKILLS_MCP_TOKEN=your-secret npx sui-skills-mcp-serve
+PORT=8787 SUISEI_MCP_TOKEN=your-secret npx suisei-mcp-serve
 # serves Streamable HTTP at http://localhost:8787/  (front with HTTPS in prod)
 ```
 
@@ -70,13 +71,13 @@ On serverless, import the runtime-agnostic Fetch handler directly — it
 runs on Vercel Edge, Cloudflare Workers, Deno, and Bun:
 
 ```ts
-// api/mcp.ts (Vercel Edge)  — needs `@suisei/sui-skills-mcp` as a dependency
+// api/mcp.ts (Vercel Edge)  — needs `@suisei/mcp` as a dependency
 export const config = { runtime: 'edge' };
-import { handleMcpRequest } from '@suisei/sui-skills-mcp/http';
+import { handleMcpRequest } from '@suisei/mcp/http';
 export default (req: Request) => handleMcpRequest(req);
 ```
 
-Set `SUI_SKILLS_MCP_TOKEN` so the endpoint requires
+Set `SUISEI_MCP_TOKEN` so the endpoint requires
 `Authorization: Bearer <token>` — a public MCP URL without a token is
 open to the world.
 
@@ -180,7 +181,7 @@ one-line change in `clientFor()` — no tool touches transport directly.
 
 ```bash
 git clone https://github.com/eienel/blockbuilders
-cd blockbuilders/packages/sui-skills-mcp
+cd blockbuilders/packages/mcp
 npm install
 npm run build
 node dist/index.js

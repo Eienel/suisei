@@ -1,14 +1,14 @@
 {
-  "name": "@suisei/sui-skills-mcp",
+  "name": "@suisei/mcp",
   "version": "0.1.0",
-  "description": "MCP server exposing the Sui Stack as one-line tools for any agent. Suisei (suisei.dev) is a showcase app built on it.",
+  "description": "Suisei — the Sui Stack as one-line tools, exposed over the Model Context Protocol so any agent can build on Sui.",
   "license": "MIT",
   "type": "module",
   "homepage": "https://suisei.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eienel/blockbuilders.git",
-    "directory": "packages/sui-skills-mcp"
+    "directory": "packages/mcp"
   },
   "bugs": {
     "url": "https://github.com/eienel/blockbuilders/issues"
@@ -24,8 +24,8 @@
     "./node": "./dist/node.js"
   },
   "bin": {
-    "sui-skills-mcp": "dist/index.js",
-    "sui-skills-mcp-serve": "dist/serve.js"
+    "suisei-mcp": "dist/index.js",
+    "suisei-mcp-serve": "dist/serve.js"
   },
   "files": [
     "dist",
@@ -41,6 +41,7 @@
     "node": ">=18"
   },
   "keywords": [
+    "suisei",
     "mcp",
     "model-context-protocol",
     "sui",
