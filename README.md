@@ -71,7 +71,7 @@ Both live in the same Move package (`0x888787d0…56daf`), distinguished by an `
 ## Run
 
 ```bash
-cp .env.example .env   # fill in GEMINI_API_KEY at minimum
+cp .env.example .env   # all keys optional — the app degrades gracefully
 npm install
 npm run dev            # http://localhost:5173
 npm run build
@@ -79,15 +79,29 @@ npm run preview
 npm run typecheck
 ```
 
+Everything runs with an empty `.env`: badges mint as local mocks, Suisei
+falls back to scripted dialog, and Quest 8 reads the live DeepBook
+indexer. Fill in keys to make each piece real.
+
 ## Environment
 
 ```
 # Server-side (Vercel Function only — never bundled to client)
-GEMINI_API_KEY=                # required. aistudio.google.com → free key
+ANTHROPIC_API_KEY=             # makes Suisei's chat live (Claude Haiku)
 
 # Client-side (Vite inlines at build time)
 VITE_SUI_NETWORK=testnet
-VITE_WORLD_NFT_PACKAGE_ID=0x888787d0d2848499ba22fa09afdcbc593c3ba637d04807345abab501a1f56daf
+
+# Badge Move package. Publish with scripts/publish-badge.sh, paste here.
+# Blank → quest badge mints are mocked locally.
+VITE_BADGE_PACKAGE_ID=
+
+# Sponsor service for Quest 2 (blank → sponsored mint mocked)
+VITE_SPONSOR_URL=
+
+# DeepBook (Quest 8). Blank → public indexer for the active network.
+VITE_DEEPBOOK_INDEXER_URL=
+VITE_DEEPBOOK_POOL=
 
 # Optional — enables "Sign in with Google" via Sui zkLogin
 VITE_ENOKI_API_KEY=

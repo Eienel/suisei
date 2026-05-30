@@ -1,96 +1,74 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { LESSONS, SANDBOX_UNLOCK_COUNT, questionId, builtinCompletedCount } from '@/data/lessons';
+import type { BadgeRef, QuestId, QuestPhase } from '@/types';
 
-export type Screen = 'landing' | 'lessons' | 'lesson' | 'sandbox' | 'gallery' | 'leaderboard';
-export type LessonStage = 'read' | 'check' | 'done';
+/**
+ * App-level screen routing + persisted quest progress. Keeps the
+ * surface intentionally small: which screen is showing, which quest
+ * the player is in, and the soulbound badges they've collected. Per-
+ * quest state (Move code drafts, deploy attempts, etc.) lives in the
+ * quest components themselves.
+ */
+export type Screen = 'landing' | 'play' | 'leaderboard' | 'profile';
 
 interface AppState {
   screen: Screen;
-  currentLessonId: string | null;
-  lessonStage: LessonStage;
-  completedLessons: string[];
-  /** Stable ids of questions answered correctly — prevents double-placing blocks on revisit. */
-  correctlyAnswered: string[];
-  seenHowTo: boolean;
+  currentQuest: QuestId | null;
+  questPhase: QuestPhase;
+  badges: BadgeRef[];
 
   setScreen: (s: Screen) => void;
-  openLesson: (id: string) => void;
-  closeLesson: () => void;
-  setLessonStage: (s: LessonStage) => void;
-  completeLesson: (id: string) => void;
-  recordCorrect: (lessonId: string, idx: number) => boolean; // returns true if newly correct
-  hasAnsweredCorrect: (lessonId: string, idx: number) => boolean;
-  markHowToSeen: () => void;
-  resetHowTo: () => void;
+  openQuest: (id: QuestId) => void;
+  closeQuest: () => void;
+  setQuestPhase: (p: QuestPhase) => void;
+  awardBadge: (b: BadgeRef) => void;
+  /**
+   * Merge on-chain badge query results into the local set. Real
+   * on-chain entries replace locally-mocked ones for the same quest.
+   */
+  mergeOnChainBadges: (fetched: BadgeRef[]) => void;
   resetProgress: () => void;
-
-  isSandboxUnlocked: () => boolean;
 }
 
 export const useApp = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       screen: 'landing',
-      currentLessonId: null,
-      lessonStage: 'read',
-      completedLessons: [],
-      correctlyAnswered: [],
-      seenHowTo: false,
+      currentQuest: null,
+      questPhase: 'intro',
+      badges: [],
 
       setScreen: (s) => set({ screen: s }),
-      openLesson: (id) =>
-        set({
-          screen: 'lesson',
-          currentLessonId: id,
-          lessonStage: 'read',
-        }),
-      closeLesson: () =>
-        set({
-          screen: 'lessons',
-          currentLessonId: null,
-          lessonStage: 'read',
-        }),
-      setLessonStage: (lessonStage) => set({ lessonStage }),
-      completeLesson: (id) =>
-        set((state) =>
-          state.completedLessons.includes(id)
-            ? state
-            : { completedLessons: [...state.completedLessons, id] }
+      openQuest: (id) => set({ screen: 'play', currentQuest: id, questPhase: 'intro' }),
+      closeQuest: () => set({ currentQuest: null, questPhase: 'intro' }),
+      setQuestPhase: (p) => set({ questPhase: p }),
+      awardBadge: (b) =>
+        set((s) =>
+          s.badges.some((x) => x.questId === b.questId)
+            ? s
+            : { badges: [...s.badges, b] }
         ),
-      recordCorrect: (lessonId, idx) => {
-        const key = questionId(lessonId, idx);
-        const { correctlyAnswered } = get();
-        if (correctlyAnswered.includes(key)) return false;
-        set({ correctlyAnswered: [...correctlyAnswered, key] });
-        return true;
-      },
-      hasAnsweredCorrect: (lessonId, idx) =>
-        get().correctlyAnswered.includes(questionId(lessonId, idx)),
-      markHowToSeen: () => set({ seenHowTo: true }),
-      resetHowTo: () => set({ seenHowTo: false }),
-      resetProgress: () =>
-        set({
-          completedLessons: [],
-          correctlyAnswered: [],
-          currentLessonId: null,
-          lessonStage: 'read',
-          screen: 'landing',
+      mergeOnChainBadges: (fetched) =>
+        set((s) => {
+          const byQuest = new Map(s.badges.map((b) => [b.questId, b]));
+          for (const b of fetched) {
+            const existing = byQuest.get(b.questId);
+            // Real on-chain entries always win over locally-mocked ones.
+            if (!existing || existing.txDigest.startsWith('mock-')) {
+              byQuest.set(b.questId, b);
+            }
+          }
+          return { badges: Array.from(byQuest.values()) };
         }),
-
-      isSandboxUnlocked: () =>
-        builtinCompletedCount(get().completedLessons) >= SANDBOX_UNLOCK_COUNT,
+      resetProgress: () =>
+        set({ badges: [], currentQuest: null, questPhase: 'intro', screen: 'landing' }),
     }),
     {
-      name: 'blockbuilders-app',
+      name: 'suisei-app',
       partialize: (s) => ({
-        completedLessons: s.completedLessons,
-        correctlyAnswered: s.correctlyAnswered,
-        seenHowTo: s.seenHowTo,
         screen: s.screen,
+        badges: s.badges,
       }),
     }
   )
 );
-
-export { LESSONS, SANDBOX_UNLOCK_COUNT };

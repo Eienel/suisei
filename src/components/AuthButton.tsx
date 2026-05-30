@@ -41,15 +41,15 @@ export function AuthButton() {
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          className="glass rounded-lg px-3 py-1.5 flex items-center gap-2 text-sm font-mono text-fg-dim hover:text-fg transition-colors"
+          className="rounded-pill px-3 py-1.5 flex items-center gap-2 text-sm font-mono bg-night-soft border border-night-line text-cream-dim hover:text-cream transition-colors"
         >
-          <span className="w-2 h-2 rounded-full bg-accent-cyan" />
+          <span className="w-2 h-2 rounded-full bg-sage" />
           {short}
           <ChevronDown size={12} className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
         </button>
         {menuOpen && (
           <div
-            className="absolute right-0 top-full mt-1 glass rounded-xl py-1.5 min-w-44 shadow-glass animate-fade-in"
+            className="absolute right-0 top-full mt-1 bg-night-soft border border-night-line rounded-card py-1.5 min-w-44 shadow-night-card animate-fade-in"
             onMouseLeave={() => setMenuOpen(false)}
           >
             <button
@@ -58,7 +58,7 @@ export function AuthButton() {
                 disconnect();
                 setMenuOpen(false);
               }}
-              className="w-full text-left px-3 py-1.5 text-sm text-fg-dim hover:text-accent-magenta hover:bg-ink-line/60 flex items-center gap-2"
+              className="w-full text-left px-3 py-1.5 text-sm text-cream-dim hover:text-terracotta hover:bg-night-line/60 flex items-center gap-2"
             >
               <LogOut size={14} />
               Disconnect
@@ -75,7 +75,7 @@ export function AuthButton() {
         <button
           type="button"
           onClick={handleGoogle}
-          className="bg-fg text-ink font-semibold text-sm px-3 py-1.5 rounded-lg hover:bg-white transition-colors flex items-center gap-1.5"
+          className="bg-cream text-ink font-semibold text-sm px-3 py-1.5 rounded-pill hover:bg-paper transition-colors flex items-center gap-1.5"
         >
           <GoogleG />
           Sign in

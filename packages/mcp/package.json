@@ -1,0 +1,63 @@
+{
+  "name": "@suisei-mcp/mcp",
+  "version": "0.1.2",
+  "description": "Suisei — the Sui Stack as one-line tools, exposed over the Model Context Protocol so any agent can build on Sui.",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/eienel/suisei/tree/main/packages/mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eienel/suisei.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/eienel/suisei/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./server": "./dist/server.js",
+    "./http": "./dist/http.js",
+    "./node": "./dist/node.js"
+  },
+  "bin": {
+    "suisei-mcp": "dist/index.js",
+    "suisei-mcp-serve": "dist/serve.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "node dist/serve.js",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "suisei",
+    "mcp",
+    "model-context-protocol",
+    "sui",
+    "blockchain",
+    "claude",
+    "anthropic",
+    "agent",
+    "tools"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@mysten/sui": "^1.45.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3"
+  }
+}
