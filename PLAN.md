@@ -50,30 +50,9 @@ toolkit is enough to build real products:
 
 ---
 
-## Why this wins (Agentic Web track)
+## Context
 
-Sui's Agentic Web vision asks for shared verifiable state, portable
-permissions, atomic execution, and cryptographic proof. The toolkit
-demonstrates all four:
-
-| Sui's ask | How the toolkit delivers |
-|---|---|
-| Shared verifiable state | Every tool reads/writes real testnet objects, verifiable on Sui Explorer |
-| Portable permissions | The Tier-1 agent wallet: a bounded allowance you fund and sweep |
-| Atomic execution | PTBs via `sui_pay_many` / `sui_move_call` - N ops, all-or-nothing |
-| Cryptographic proof | Non-custodial signing; keys never touch the MCP or the LLM context |
-
-Four reasons judges reward this specifically:
-
-- **It is ecosystem infra, not one more dApp.** It makes Sui easier for
-  every agent project, not just ours.
-- **It already ships.** Two packages on npm, 33 working tools, green
-  builds. `npm i -g` and it works.
-- **The two non-negotiables are a real security thesis** most teams
-  will not have thought through.
-- **It stacks bounties** - Walrus (`walrus_publish`/`fetch`), DeepBook
-  (`sui_deepbook_swap`/`quote`), Agentic Web (the agent wallet), and
-  Community (badge + leaderboard) all touch the same toolkit.
+Built for the Sui Overflow 2026 hackathon.
 
 ---
 

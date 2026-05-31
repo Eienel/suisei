@@ -1,7 +1,38 @@
-import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
+import { SuiClient, SuiHTTPTransport, getFullnodeUrl } from '@mysten/sui/client';
 import { SuiGrpcClient } from '@mysten/sui/grpc';
 
 export type Network = 'testnet' | 'mainnet' | 'devnet';
+
+/**
+ * Resolve the JSON-RPC URL for a network. Defaults to the public Sui
+ * fullnode, but a `SUI_RPC_URL_<NETWORK>` env var overrides it so the
+ * toolkit can run against any standard Sui JSON-RPC provider - a Tatum
+ * gateway, QuickNode, your own node, etc. This is also the hedge for the
+ * ~mid-2026 deprecation of the public JSON-RPC endpoints: point at a
+ * managed provider and nothing else changes.
+ */
+function rpcUrlFor(network: Network): string {
+  return (
+    process.env[`SUI_RPC_URL_${network.toUpperCase()}`] ?? getFullnodeUrl(network)
+  );
+}
+
+/**
+ * Optional auth header for a custom provider. Tatum and most gateways
+ * gate access behind an API key:
+ *   - `SUI_RPC_API_KEY`        the key value (e.g. a Tatum testnet key)
+ *   - `SUI_RPC_API_KEY_HEADER` the header name, defaults to `x-api-key`
+ *     (Tatum's recommended header; set to `Authorization` for Bearer-style
+ *     providers and prefix the value yourself, e.g. `Bearer abc`).
+ * Returns undefined when no key is set, so the public endpoint stays
+ * header-free.
+ */
+function rpcHeaders(): Record<string, string> | undefined {
+  const key = process.env.SUI_RPC_API_KEY;
+  if (!key) return undefined;
+  const header = process.env.SUI_RPC_API_KEY_HEADER ?? 'x-api-key';
+  return { [header]: key };
+}
 
 /**
  * Transport seam for the Sui Stack.
@@ -47,7 +78,14 @@ const grpcCache = new Map<Network, SuiGrpcClient>();
 export function clientFor(network: Network): SuiClient {
   let c = jsonRpcCache.get(network);
   if (!c) {
-    c = new SuiClient({ url: getFullnodeUrl(network) });
+    const url = rpcUrlFor(network);
+    const headers = rpcHeaders();
+    // Only reach for a custom transport when an auth header is needed;
+    // otherwise the plain { url } form keeps the public-endpoint path
+    // unchanged.
+    c = headers
+      ? new SuiClient({ transport: new SuiHTTPTransport({ url, rpc: { headers } }) })
+      : new SuiClient({ url });
     jsonRpcCache.set(network, c);
   }
   return c;

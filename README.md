@@ -121,6 +121,21 @@ Two ways to host it:
   Node function. Set `SUISEI_MCP_TOKEN` in the project env; callers must
   then send `Authorization: Bearer <token>`.
 
+## Custom RPC provider (optional)
+
+By default the toolkit talks to the public Sui fullnode. To run against a
+managed provider for reliability - or to stay working past the ~mid-2026
+deprecation of public JSON-RPC endpoints - point it at any standard Sui
+JSON-RPC gateway (Tatum, QuickNode, your own node) with env vars:
+
+```bash
+export SUI_RPC_URL_TESTNET="https://sui-testnet.gateway.tatum.io"
+export SUI_RPC_API_KEY="<your-key>"          # sent as x-api-key by default
+```
+
+No tools change - it's the same JSON-RPC interface, just a different
+endpoint. See [`.env.example`](.env.example) for all options.
+
 ## What's in this repo
 
 ```
