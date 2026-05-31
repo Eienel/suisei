@@ -1,0 +1,56 @@
+name: Showcase submission
+description: Built something with the Suisei MCP? Add it to the showcase gallery.
+title: "[Showcase] <your project name>"
+labels: ["showcase"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for building with Suisei. Fill this in and we will add your
+        project to the showcase on the landing page. No code needed, just
+        these few fields.
+  - type: input
+    id: name
+    attributes:
+      label: Project name
+      placeholder: e.g. TxLens
+    validations:
+      required: true
+  - type: textarea
+    id: tagline
+    attributes:
+      label: One-line description
+      description: A single sentence on what it does.
+      placeholder: e.g. A plain-language risk check for any Sui transaction.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Link
+      description: A link to your project, repo, or live app.
+      placeholder: https://github.com/you/your-project
+    validations:
+      required: true
+  - type: input
+    id: author
+    attributes:
+      label: Who built it
+      placeholder: Your name, team, or handle
+    validations:
+      required: false
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      description: A few short labels, comma separated.
+      placeholder: walrus, deepbook, agent
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirm
+      options:
+        - label: This project uses the Suisei MCP (@suisei-mcp/mcp).
+          required: true

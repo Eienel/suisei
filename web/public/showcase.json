@@ -1,0 +1,26 @@
+{
+  "$schema": "./showcase.schema.json",
+  "projects": [
+    {
+      "name": "TxLens",
+      "tagline": "Look before you sign. Paste raw transaction bytes, get a plain-language plan, a simulation, and a risk verdict before anything is signed.",
+      "url": "https://github.com/eienel/suisei/blob/main/docs/TXLENS_DESIGN.md",
+      "author": "Suisei team",
+      "tags": ["safety", "agent"]
+    },
+    {
+      "name": "MnemoSui",
+      "tagline": "An agent's memory as a transferable object. History and embeddings on Walrus, indexed on Sui, portable between any client.",
+      "url": "https://github.com/eienel/suisei/blob/main/docs/MNEMOSUI_DESIGN.md",
+      "author": "Suisei team",
+      "tags": ["walrus", "nft", "agent"]
+    },
+    {
+      "name": "Suisei Tutor",
+      "tagline": "An AI agent that uses the Sui Stack to teach the Sui Stack. Each quest ends in a real testnet deploy and a soulbound badge.",
+      "url": "https://github.com/eienel/suisei",
+      "author": "Suisei team",
+      "tags": ["education", "agent"]
+    }
+  ]
+}
