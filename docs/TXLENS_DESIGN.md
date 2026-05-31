@@ -9,15 +9,8 @@ into plain English, simulates them, cross-references the objects and
 contracts touched, and gives a verdict before you sign.
 
 This document is the scope sketch we keep so the idea doesn't evaporate.
-Implementation lives in `apps/txlens/` whenever we build it.
-
-## Why this is a strong demo for the MCP
-
-It is the *defensive* agent - the use case crypto-curious normies
-immediately understand. It also flexes the new `sui_decode_tx_bytes`
-tool, which no other Sui MCP has. And it requires **zero new Move code**
-to ship a v1: it's pure MCP composition. That's the best kind of demo -
-"look what the existing toolkit can already do."
+Implementation lives in `apps/txlens/` whenever we build it. It requires
+**zero new Move code** for a v1: it's pure MCP composition.
 
 ## The user model
 
@@ -129,17 +122,3 @@ contracts" element. Not v1.
 3. **Tier-2 agent wallet integration** (later) for *auto-block mode*:
    if TxLens runs as a co-signer in a multisig flow, it can refuse to
    co-sign txs that fail its rules, not just warn.
-
-## Why not start now
-
-We're publishing the MCP to npm first. TxLens is the strongest
-demonstration that the published toolkit is enough to build a real
-product on - so it makes more sense as the post-publish showcase
-alongside MnemoSui. Two showcases:
-
-- **MnemoSui** - what an agent can *do* with Sui (storage, ownership,
-  transfer).
-- **TxLens** - what an agent can *protect you from* on Sui.
-
-Together they cover the two arcs every hackathon judge cares about:
-new capability and safety.

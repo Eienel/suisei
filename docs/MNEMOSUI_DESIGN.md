@@ -9,14 +9,9 @@ client. Sell, gift, or revoke memories on-chain. Mint a "I remember this
 conversation" badge as proof.
 
 This document is the scope sketch we keep so the idea doesn't evaporate.
-Implementation lives in `apps/mnemosui/` whenever we build it.
-
-## Why this is a strong demo for the MCP
-
-Hits three Sui primitives at once: **Walrus** (storage), **owned objects /
-dynamic fields** (the index), **NFT-style transfer** (portability). And it
-gives a clear answer to the "what's the agent × crypto story" question
-every Sui hackathon judge will ask.
+Implementation lives in `apps/mnemosui/` whenever we build it. It hits
+three Sui primitives at once: **Walrus** (storage), **owned objects /
+dynamic fields** (the index), and **NFT-style transfer** (portability).
 
 ## The user model
 
@@ -108,12 +103,3 @@ content-addressed `Table<vector<u8>, Memory>` so dedupe is free.
    (timeline + tags + search), and a transfer flow.
 4. **Seal** - encrypt memory content before `walrus_publish`, decrypt on
    `walrus_fetch`. Per-memory access policies (owner-only by default).
-5. **Demo script** - record a 2-minute video: chat with the agent -> walk
-   over to a second machine -> transfer the MemoryBook -> agent recognises
-   you and continues the conversation.
-
-## Why not start now
-
-We're publishing the MCP to npm first. MnemoSui needs the MCP we're
-publishing, so we want the public version stable before building on it.
-After publish: this is the showcase that proves the toolkit is real.

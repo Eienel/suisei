@@ -103,12 +103,11 @@ Built for the Sui Overflow 2026 hackathon.
 
 ## Open questions
 
-- **TxLens hosting for v1:** chat-command-only (just the prompt) for the
-  demo, or a thin hosted page? Prompt-only is enough to record.
+- **TxLens hosting for v1:** chat-command-only (just the prompt), or a
+  thin hosted page.
 - **MnemoSui Move strategy:** one package with `memory_book`, vs. folding
   into a broader showcase package.
-- **Seal:** ship MnemoSui plaintext for the demo and add Seal after, or
-  block MnemoSui on Seal? (Recommend: demo plaintext, label it clearly.)
-- **memory_* helper tools:** worth adding for DX, or keep MnemoSui on raw
-  `sui_move_call` for the demo? (Recommend: raw `sui_move_call` for the
-  demo; wrappers later.)
+- **Seal:** ship MnemoSui plaintext first and add Seal after, or block
+  MnemoSui on Seal.
+- **memory_* helper tools:** add DX wrappers, or keep MnemoSui on raw
+  `sui_move_call`.
