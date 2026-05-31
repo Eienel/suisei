@@ -1,210 +1,202 @@
 # Suisei - Build Plan
 
-> Sui's agent toolkit. Showcase by Suisei.
-> Built for Sui Overflow 2026 / Agentic Web track / Deadline TBD (target June 20)
+> Sui's agent toolkit. The MCP server is the product; the apps are showcases.
+> Built for Sui Overflow 2026 / Agentic Web track / target June 20.
+
+---
+
+## What this repo is now
+
+The BlockBuilders teaching game that used to live here has been stripped
+out (preserved in a separate backup). This repo is now the **Suisei MCP
+toolkit** and nothing else:
+
+- `packages/mcp` - `@suisei-mcp/mcp`, the MCP server (33 tools).
+- `packages/agent-signer` - `@suisei-mcp/agent-signer`, the non-custodial
+  local signer.
+- `api/mcp.ts` - the same server as a Vercel Node serverless function.
+- `move/suisei_badge` - the soulbound completion badge module.
+- `docs/` - design docs for the showcase apps.
+
+There is no frontend in this repo. The showcase apps, when built, live in
+their own `apps/*` directories.
 
 ---
 
 ## Vision
 
-A **niche AI agent** that lives on Sui, **uses the full Sui Stack** (zkLogin, Sponsored Tx, Move, PTBs, Walrus, Seal, randomness, native staking) to teach the Sui Stack - through 7-8 quests, each ending in a real testnet deployment.
+The product is the **MCP toolkit**: the Sui Stack as one-line tools, so
+any AI agent (Claude Desktop, Claude web/mobile, Cursor, a custom bot)
+can read, build, simulate, sign, and submit on Sui. Two packages on npm,
+built on two non-negotiables:
 
-But the agent is just the showcase. The real product is the **MCP server (Sui Skills)** - an open toolkit that any AI agent can plug into to do real Sui work: deploy Move modules, compose PTBs, mint NFTs, query objects, stake SUI, swap on DeepBook, store on Walrus, encrypt with Seal.
+1. **The toolkit never holds private keys.** Every transaction-building
+   tool returns unsigned `tx_bytes_base64`. The host signs; the MCP
+   submits.
+2. **Key material never enters an agent's context.** Key generation is
+   not an MCP tool - it would land the secret in the LLM's prompt and
+   logs. Signing lives in `agent-signer`, a separate local process.
 
-**Three-layer architecture:**
+On top of the toolkit sit **showcases** - proof that the published
+toolkit is enough to build real products:
 
-1. **Sui Skills (MCP server)** - open-source toolkit. Any agent (Claude Desktop, Cursor, ChatGPT custom GPT, custom Python/TS agents) can plug in.
-2. **Suisei (web product)** - the first agent built on Sui Skills. Teaches users by guided quests.
-3. **Leaderboard (community layer)** - onchain badge holders ranked, social proof, viral mechanics.
-
----
-
-## Why this wins
-
-- **Agentic Web track ($30K)** - Suisei IS an agent that transacts onchain. Sui's own Agentic Web vision asks for: shared verifiable state, portable permissions, atomic execution, cryptographic proof. We demonstrate all four.
-- **Walrus track stacking ($70K pool)** - agent memory + lesson progress stored via MemWal; Quest 7 uses Walrus + Seal directly.
-- **DeepBook track stacking ($70K pool)** - Graduate quest builds a real DeepBook trading bot.
-- **Community Award ($25K)** - leaderboard + viral "I'm now a Sui Stack Graduate" mechanic.
-- **Not a wrapper** - every quest deploys real Move code via embedded WASM compiler (PlayMove). Real on-chain package IDs verifiable on Sui Explorer.
-- **MCP server is ecosystem infra** - judges love things that make Sui easier for everyone, not just one app.
-
----
-
-## Quest Design (7 + 1 graduate; ~30-35 min total)
-
-| # | Concept | Duration | Wow Moment | Bounty Tag |
-|---|---|---|---|---|
-| 1 | **zkLogin** | 3 min | "I signed in with Google. I have a wallet." | Agentic Web |
-| 2 | **Sponsored Tx + Object Model** | 4 min | "My first tx cost $0. The app paid. My NFT is a real object." | Agentic Web |
-| 3 | **Move Abilities** | 5 min | "The compiler refused to let me lose someone's NFT." | Agentic Web |
-| 4 | **Capability Pattern** | 5 min | "Admin power is an object I hold." | Agentic Web |
-| 5 | **Soulbound Badge** | 4 min | "This achievement physically cannot leave my wallet." | Agentic Web |
-| 6 | **PTBs** | 4 min | "I chained 5 ops in one atomic transaction." | Agentic Web |
-| 7 | **Walrus + Seal** | 5 min | "I encrypted a secret only NFT holders can read." | **Walrus** |
-| GRAD | **DeepBook Trading Bot** | 5 min | "I deployed a bot that places real orders on a real orderbook." | **DeepBook** |
-
-**Quest mechanic loop** (each one):
-1. Suisei narrates the concept (~20 sec, animated text)
-2. Suisei scaffolds Move code (fill-in-the-blanks, ~15 lines visible)
-3. User completes the scaffold (or just clicks "use Suisei's suggestion")
-4. Suisei compiles + deploys via embedded PlayMove
-5. User interacts with the deployed contract (built-in PTB)
-6. Soulbound badge minted as proof of completion
-7. Progress saved to Walrus via MemWal
+- **Suisei (teaching agent)** - an AI agent that uses the Sui Stack to
+  teach the Sui Stack. The original concept; brought back as a showcase,
+  not as the submitted product.
+- **TxLens** - "look before you sign" tx guard. Pure MCP composition,
+  zero new Move code.
+- **MnemoSui** - an agent's memory as a transferable NFT (Walrus + Sui).
+  Needs its own Move module deployed first.
 
 ---
 
-## Sui Skills (MCP Server)
+## Why this wins (Agentic Web track)
 
-Open-source. MIT. Separate npm package: `@suisei-mcp/mcp`.
+Sui's Agentic Web vision asks for shared verifiable state, portable
+permissions, atomic execution, and cryptographic proof. The toolkit
+demonstrates all four:
 
-**Tools exposed:**
-
-| Tool | What it does |
+| Sui's ask | How the toolkit delivers |
 |---|---|
-| `sui.connect_zklogin(provider)` | Initiate zkLogin flow, return wallet address |
-| `sui.sponsor_tx(tx)` | Wrap a transaction in Enoki sponsorship |
-| `sui.deploy_move(source)` | Compile Move source (via WASM) + deploy package |
-| `sui.compose_ptb(ops)` | Build + execute a Programmable Transaction Block |
-| `sui.query_object(id)` | Return an object's full content + history |
-| `sui.mint_nft(template, recipient)` | Mint NFT via Display V2 standard |
-| `sui.mint_soulbound(badge, recipient)` | Mint a non-transferable badge |
-| `sui.stake(amount, validator)` | Native staking via 0x3::sui_system |
-| `sui.unstake(staked_id)` | Withdraw stake |
-| `sui.swap_deepbook(pool, side, amount)` | Place order on DeepBook |
-| `walrus.store(blob)` | Store blob on Walrus, return blob ID |
-| `walrus.retrieve(blob_id)` | Fetch blob from Walrus |
-| `seal.encrypt(data, policy)` | Encrypt data with a Move-gated decrypt policy |
-| `seal.decrypt(ciphertext)` | Decrypt if policy permits |
-| `random.roll(min, max)` | Use Sui's on-chain random beacon |
-| `clock.now()` | Get on-chain timestamp |
+| Shared verifiable state | Every tool reads/writes real testnet objects, verifiable on Sui Explorer |
+| Portable permissions | The Tier-1 agent wallet: a bounded allowance you fund and sweep |
+| Atomic execution | PTBs via `sui_pay_many` / `sui_move_call` - N ops, all-or-nothing |
+| Cryptographic proof | Non-custodial signing; keys never touch the MCP or the LLM context |
 
-Distribution:
-- npm package + GitHub repo
-- Claude Desktop config snippet (one-liner to install)
-- Cursor IDE snippet
-- Python SDK wrapper (`pip install sui-skills`) - bonus
+Four reasons judges reward this specifically:
+
+- **It is ecosystem infra, not one more dApp.** It makes Sui easier for
+  every agent project, not just ours.
+- **It already ships.** Two packages on npm, 33 working tools, green
+  builds. `npm i -g` and it works.
+- **The two non-negotiables are a real security thesis** most teams
+  will not have thought through.
+- **It stacks bounties** - Walrus (`walrus_publish`/`fetch`), DeepBook
+  (`sui_deepbook_swap`/`quote`), Agentic Web (the agent wallet), and
+  Community (badge + leaderboard) all touch the same toolkit.
 
 ---
 
-## Leaderboard
+## The 33 tools (shipped today)
 
-- **What it tracks:** soulbound badge holders per quest + graduate NFT holders
-- **Views:** Top 100 all-time, This week, This month
-- **Profile pages:** /u/0x... shows collected badges, completion timestamp, public stats
-- **Source of truth:** onchain query for badge object holders + Suisei's package registry
-- **Social hooks:** "I just became a Sui Stack Graduate" share-card (auto-generated PNG via Vercel OG image)
+**Read - balances & coins:** `sui_get_balance`, `sui_get_all_balances`,
+`sui_get_coins`, `sui_get_coin_metadata`, `sui_resolve_coin`.
 
----
+**Read - objects & chain state:** `sui_get_object`,
+`sui_get_owned_objects`, `sui_get_dynamic_fields`, `sui_get_transaction`,
+`sui_query_events`, `sui_get_reference_gas_price`, `sui_resolve_address`.
 
-## Stack
+**Read - staking / validators:** `sui_get_validators`,
+`sui_get_validator`, `sui_get_validators_apy`, `sui_get_stakes`.
 
-- **Frontend:** Vite + React + TS + Tailwind + Zustand + @mysten/dapp-kit
-- **AI agent:** Claude Haiku (default) via Vercel serverless proxy; BYO API key fallback
-- **Auth/UX:** Enoki SDK (zkLogin + Sponsored Tx)
-- **Move compilation:** PlayMove WASM (embedded iframe v1, forked direct integration v2)
-- **Storage:** Walrus via MemWal SDK
-- **Access control:** Seal SDK
-- **Backend:** Vercel serverless (Enoki proxy, agent call proxy, leaderboard query cache)
-- **MCP server:** Separate Node package using `@modelcontextprotocol/sdk`
+**Build (returns unsigned bytes):** `sui_transfer`, `sui_pay_many`,
+`sui_move_call`, `sui_stake`, `sui_unstake`, `sui_mint_badge`.
 
----
+**DeepBook:** `sui_deepbook_quote`, `sui_deepbook_swap`.
 
-## Timeline (assumes June 20 deadline; verify before sprint)
+**Simulate / submit / inspect:** `sui_dry_run`, `sui_decode_tx_bytes`,
+`sui_execute_signed_tx`.
 
-| Window | Deliverable |
-|---|---|
-| **May 27 -> Jun 2** | Foundation: strip repo, set up clean shell, Enoki zkLogin + Sponsored Tx working, Quest 1 vertical slice (sign-in -> first object -> first badge) |
-| **Jun 3 -> Jun 9** | Quests 2-4 (object model, Move abilities, capability pattern). PlayMove embedded. Suisei chat panel + agent integration |
-| **Jun 10 -> Jun 14** | Quests 5-7 (soulbound, PTBs, Walrus+Seal). MCP server v1 published to npm |
-| **Jun 15 -> Jun 18** | Graduate quest (DeepBook). Leaderboard. Landing page redesign with Suisei mascot |
-| **Jun 19 -> Jun 20** | Demo video, submission package, polish |
+**Walrus:** `walrus_publish`, `walrus_fetch`.
 
-**Hard cuts if behind:**
-- Drop Graduate quest (DeepBook) -> forfeit DeepBook bounty stack but ship 7 core quests
-- Ship MCP server as "concept + repo" not as polished npm release
-- Skip leaderboard, ship just badge collection page
+**Agent wallet (Tier 1):** `agent_wallet_fund`, `agent_wallet_status`,
+`agent_wallet_sweep`.
+
+**Badges:** `sui_get_owned_badges`.
 
 ---
 
-## TODO Tracker
+## Roadmap (post-publish)
 
-### Sprint 0 - Foundation (May 27 -> Jun 2)
-
-- [x] Verify hackathon deadline (confirmed by user)
-- [x] Strip old components and 3D code
-- [x] Set up clean app shell (router, providers, theme)
-- [x] Brand design brief ready to feed Claude Design (`docs/design/SUISEI_BRIEF.md` + `BRAND_DESIGNER_PROMPT.txt`)
-- [ ] Apply for Enoki API access
-- [x] Implement zkLogin sign-in flow (Quest 1 step 1) - `AuthButton` + EnokiRegistrar
-- [ ] Implement Sponsored Tx wrapper (Quest 1 step 2) - pending Enoki keys
-- [x] Build minimal Suisei chat panel (right side, persistent) - `SuiseiChat.tsx`
-- [x] Author first Move module: `suisei_badge` (soulbound) - `move/suisei_badge`
-- [ ] Publish `suisei_badge` to testnet + set `VITE_BADGE_PACKAGE_ID`
-- [x] Mint badge on Quest 1 completion (Quest 1 step 3) - real-when-configured, mocked when not
-- [x] Landing page placeholder
-- [x] Quest hub UI - `QuestHub.tsx`, linear unlock from `badges` count
-- [x] Quest 1 vertical slice - `quests/Quest1ZkLogin.tsx` (intro -> interact -> badge -> done)
-- [ ] Suisei agent system prompt v1 (Claude Haiku via proxy) - scripted lines in place, LLM proxy still TBD
-
-### Sprint 1 - Core Quests (Jun 3 -> Jun 9)
-
-- [ ] Embed PlayMove iframe + wire postMessage protocol
-- [ ] Quest 2: Sponsored Tx + Object Model
-- [ ] Quest 3: Move Abilities (deploy a struct, see compiler reject)
-- [ ] Quest 4: Capability Pattern (admin-gated mint)
-- [ ] Soulbound badge for each quest
-- [ ] Walrus + MemWal integration for progress storage
-- [ ] Suisei agent system prompt v2 with quest context
-
-### Sprint 2 - Advanced + MCP (Jun 10 -> Jun 14)
-
-- [ ] Quest 5: Soulbound NFT (mint, try to transfer, fail)
-- [ ] Quest 6: PTBs (drag-build atomic 5-op tx)
-- [ ] Quest 7: Walrus + Seal (encrypt, NFT-gated decrypt)
-- [ ] MCP server scaffolding (`@suisei-mcp/mcp`)
-- [ ] All Sui skills tools implemented
-- [ ] npm publish + Claude Desktop config snippet
-- [ ] README + docs
-
-### Sprint 3 - Graduate + Polish (Jun 15 -> Jun 18)
-
-- [ ] Graduate quest: DeepBook trading bot
-- [ ] "Sui Stack Graduate" NFT mint
-- [ ] Leaderboard page (top 100 + this week)
-- [ ] Profile pages (/u/0x...)
-- [ ] Share-card OG image generator
-- [ ] Landing page final design (with Suisei mascot)
-- [ ] Mobile responsive sweep
-
-### Sprint 4 - Ship (Jun 19 -> Jun 20)
-
-- [ ] Demo video (90 sec)
-- [ ] GitHub README with run instructions
-- [ ] Submission via DeepSurge
-- [ ] Live tweet announcement
-- [ ] Discord post in Sui developer channel
+| Item | Status | Notes |
+|---|---|---|
+| `@suisei-mcp/mcp` 0.1.0 on npm | done | metadata only at 0.1.2 (URLs, docs) |
+| `@suisei-mcp/agent-signer` 0.1.0 on npm | done | same |
+| Publish 0.1.2 (URL + doc fixes) | pending | no new tools; see PUBLISH.md |
+| TxLens v1 | not started | prompt-only; no new code or Move needed |
+| MnemoSui Move module (`move/mnemosui`) | not started | the real blocker for MnemoSui |
+| MnemoSui memory_* helper tools | not started | DX wrappers over `sui_move_call`; optional |
+| Seal encrypt/decrypt tools | not started | v0.3; without it MnemoSui memories are plaintext |
+| Tier 2 Policy Vault (Move) | designed | per-tx / 24h limits, allowlist, expiry |
+| Tier 3 Multisig Co-Signer | designed | 2-of-2 with a policy service as second key |
 
 ---
 
-## Open questions (decide as we build)
+## Demo plan (hackathon video)
 
-- **Agent model:** Claude Haiku (cheap, fast) vs Gemini Flash Lite (free tier). Default Claude, fallback Gemini.
-- **BYOA UX:** API key field in settings, never leaves localStorage, routed client-side.
-- **Mascot:** Keep Suil character from old design? Rebrand as "Suisei the agent's avatar"?
-- **Move package strategy:** One global package with all quest modules, vs. per-quest packages owned by the user?
-- **Leaderboard backend:** Pure onchain query (slow) vs. Vercel cron indexer (faster, requires backend)?
+The hero demo is: **watch an AI agent build a real Sui app live, with
+on-chain results a judge can verify on Sui Explorer.** It proves the
+toolkit is real and complete in a way a finished app cannot.
+
+**Cold open** - the thesis + the Claude Desktop config snippet; the tools
+appear after a restart.
+
+**Act 1 - TxLens (the safety arc).** Paste raw `tx_bytes_base64`; the
+agent calls `sui_decode_tx_bytes` -> `sui_dry_run` -> `sui_get_object` ->
+`sui_query_events` and returns a verdict ("warning - transfers your whole
+gas coin to a wallet 2 hours old"). Zero new Move code.
+
+**Act 2 - MnemoSui (the capability arc).** `walrus_publish` a memory ->
+`sui_move_call` to create + append on a pre-deployed `MemoryBook` (sign
+the bytes with `agent-signer` on camera) -> `sui_get_dynamic_fields` to
+list them back -> `sui_transfer` the book to a second wallet ("the
+agent's brain just changed owners").
+
+**Act 3 - the security spine.** The two non-negotiables on screen; the
+agent-signer flow shown once more.
+
+**Close** - `npm i -g @suisei-mcp/mcp`. It already ships.
+
+### What is prompt-only vs. what needs prep
+
+- **TxLens: prompt-only.** Every tool it needs ships today. A system
+  prompt + the tx bytes to paste is the whole build. Record live.
+- **MnemoSui: needs a pre-deployed Move module.** The MCP can *operate*
+  MnemoSui (via `sui_move_call` + Walrus + dynamic-fields tools) but
+  cannot *deploy* the `MemoryBook` package - there is no deploy tool, by
+  design. Write `move/mnemosui/` and `sui client publish` it before the
+  demo; then the live build is prompt-driven against the deployed
+  package. Memories are plaintext until Seal lands.
+
+### Recording notes
+
+1. Dry-run the whole flow first; record the clean take. "Live" = real
+   tools, real chain, not first attempt on camera.
+2. Have testnet SUI in two wallets (owner + transfer recipient).
+3. Cut to Sui Explorer every time a tx lands - that is the proof.
+4. Keep the unsigned-bytes -> `agent-signer` moment visible; it is the
+   single most differentiating frame.
+5. Speed-ramp installs/faucet waits in the hero cut; keep one unedited
+   long cut as backup.
 
 ---
 
-## Definition of Done (for the hackathon)
+## Definition of done (for the hackathon)
 
 A judge can:
-1. Open the site, sign in with Google in 5 seconds
-2. Complete the first quest (mint their first object) in under 5 minutes
-3. See the deployed Move package on Sui Explorer
-4. Talk to Suisei via the chat panel
-5. Plug `@suisei-mcp/mcp` into Claude Desktop and ask Claude to mint them an NFT
-6. See themselves on the leaderboard with their badges
 
-If all 6 work end-to-end on testnet, we ship.
+1. Add `@suisei-mcp/mcp` to Claude Desktop with the one-line config.
+2. Ask Claude to read a balance, build a transfer, and dry-run it - and
+   see real testnet results on Sui Explorer.
+3. Watch the agent build TxLens live: paste tx bytes, get a verdict,
+   with no new code.
+4. Watch the agent run MnemoSui against the pre-deployed module: store a
+   memory on Walrus, append it on-chain, transfer the MemoryBook.
+5. See that signing happens in `agent-signer`, never in the MCP or the
+   agent's context.
+
+If those five work end-to-end on testnet, we ship.
+
+---
+
+## Open questions
+
+- **TxLens hosting for v1:** chat-command-only (just the prompt) for the
+  demo, or a thin hosted page? Prompt-only is enough to record.
+- **MnemoSui Move strategy:** one package with `memory_book`, vs. folding
+  into a broader showcase package.
+- **Seal:** ship MnemoSui plaintext for the demo and add Seal after, or
+  block MnemoSui on Seal? (Recommend: demo plaintext, label it clearly.)
+- **memory_* helper tools:** worth adding for DX, or keep MnemoSui on raw
+  `sui_move_call` for the demo? (Recommend: raw `sui_move_call` for the
+  demo; wrappers later.)
