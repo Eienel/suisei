@@ -170,7 +170,7 @@ P("This MCP server is the product: plug it into Claude Desktop, Cursor, Windsurf
   "MCP-aware agent and you get one-line tools for reading chain state, building any Sui "
   "transaction, simulating it, submitting it, and storing data on Walrus. <b>Suisei</b> &mdash; "
   "the Sui teaching agent &mdash; is a showcase of it: a working app built entirely on these "
-  "tools, demonstrating what an agent can do once it speaks Sui.", "lead")
+  "tools, showing what an agent can do once it speaks Sui.", "lead")
 
 # ---- 1. What it is --------------------------------------------------------
 H2("1. What it is")

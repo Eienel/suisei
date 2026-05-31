@@ -147,7 +147,7 @@ damage is still capped and revocable.
    `agent_wallet_fund` / `agent_wallet_sweep` / `agent_wallet_status` (keyless
    builders in the MCP) + `@suisei-mcp/agent-signer` (encrypted local keystore,
    create / address / sign CLI). Next: a "create agent wallet" UI flow in the
-   Suisei app and an end-to-end testnet stake demo from chat.
+   Suisei app and an end-to-end testnet stake flow from chat.
 2. **Move `agent_wallet` module** - `Vault`, `OwnerCap`, `Policy`, grants,
    spends. Move tests.
 3. **Tier 2 MCP wrappers** - keyless builders for grant/revoke/spend.
