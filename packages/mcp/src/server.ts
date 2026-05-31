@@ -229,7 +229,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_get_validator',
     description:
-      'One validator with APY merged: name, address, commission, total stake, voting power, project URL, and the live APY the chain computes from recent rewards. Fuses sui_get_validators + sui_get_validators_apy into a single read so a staking app doesn't join them by hand.',
+      "One validator with APY merged: name, address, commission, total stake, voting power, project URL, and the live APY the chain computes from recent rewards. Fuses sui_get_validators + sui_get_validators_apy into a single read so a staking app doesn't join them by hand.",
     inputSchema: z.object({
       validator_address: z.string().describe('Validator 0x address.'),
       network: networkSchema,
