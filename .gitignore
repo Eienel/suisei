@@ -35,3 +35,7 @@ pnpm-debug.log*
 # Move build cache
 move/**/build/
 move/**/Move.lock
+
+# Python
+__pycache__/
+*.pyc
