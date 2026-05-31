@@ -94,18 +94,32 @@ agent-signer create
 
 Then the loop:
 
-1. Agent calls `agent_wallet_fund` (owner-signed). Your real wallet
-   sends SUI to the agent address. That's the allowance.
+1. Fund the agent wallet (the allowance). This is a normal transfer from
+   **your real wallet** to the agent address - `agent-signer` does **not**
+   do this, because it holds the *agent* key, not your owner key. Pick
+   whichever is easiest:
+   - Just send SUI to the agent address from Sui Wallet / Suiet (simplest).
+   - `sui client transfer-sui --to <agent-addr> --amount <mist>` if your
+     wallet is in the Sui CLI.
+   - `agent_wallet_fund` drafts the transfer as unsigned bytes for you, but
+     you still sign those with your *owner* key (Sui CLI or a connected
+     browser wallet) - this path mainly makes sense inside a web app.
 2. Agent builds the tx it wants to run (stake, swap, transfer, etc.). MCP
    returns `tx_bytes_base64`.
-3. You sign locally:
+3. You sign that locally with the **agent** key:
    ```bash
    agent-signer sign <tx_bytes_base64>
    ```
 4. Agent submits with `sui_execute_signed_tx`.
 
-To revoke: ask the agent for `agent_wallet_sweep`, sign it, submit. The
-agent wallet is drained back to you and the allowance is gone.
+There are two keys in play, which is the usual point of confusion: your
+**owner** key (your real wallet) signs *funding* and the final *sweep*;
+the **agent** key (`agent-signer`) signs everything the agent does with its
+allowance. `agent-signer` never touches your owner key.
+
+To revoke: ask the agent for `agent_wallet_sweep`, sign it with your owner
+key, submit. The agent wallet is drained back to you and the allowance is
+gone.
 
 ## Remote MCP (Claude web + mobile)
 
