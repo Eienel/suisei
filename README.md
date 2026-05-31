@@ -21,6 +21,31 @@ Two packages on npm, the same toolkit any agent can plug into:
    and logs. That's why signing lives in `agent-signer`, a separate
    local process, not the server.
 
+## Quickstart: Claude Code (CLI)
+
+One command registers the server; `npx` fetches it on demand, so there is
+nothing to install:
+
+```bash
+claude mcp add suisei -- npx -y @suisei-mcp/mcp
+```
+
+Confirm it connected:
+
+```bash
+claude mcp list
+```
+
+Add `-s user` to make it available in every project, not just the current
+one:
+
+```bash
+claude mcp add -s user suisei -- npx -y @suisei-mcp/mcp
+```
+
+The `sui_*` and `walrus_*` tools are now available in your Claude Code
+sessions. Skip to [Talk to it](#talk-to-it) below.
+
 ## Quickstart: Claude Desktop
 
 Edit `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -37,14 +62,22 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`
 }
 ```
 
-Restart Claude. You can now ask things like:
+Restart Claude.
+
+## Talk to it
+
+Reads work immediately, with no key and no other setup. Just ask in
+plain language:
 
 > "What's the balance of `alice.sui`?"
 > "Show the top 10 Sui validators by APY."
+> "Decode these tx bytes and tell me what they do: `<base64>`"
 > "Build a tx that stakes 1 SUI to validator X, but don't sign it, I want to dry-run first."
 > "Publish this paragraph to Walrus and give me the blob id."
 
 The agent picks the tool, you see the JSON, you decide what to sign.
+Building a transaction returns unsigned `tx_bytes_base64`; to actually
+submit it, sign locally with `agent-signer` (next section).
 
 ## Quickstart: agent wallet (Tier 1)
 
