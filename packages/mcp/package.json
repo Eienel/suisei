@@ -1,7 +1,7 @@
 {
   "name": "@suisei-mcp/mcp",
   "version": "0.1.2",
-  "description": "Suisei — the Sui Stack as one-line tools, exposed over the Model Context Protocol so any agent can build on Sui.",
+  "description": "Suisei - the Sui Stack as one-line tools, exposed over the Model Context Protocol so any agent can build on Sui.",
   "license": "MIT",
   "type": "module",
   "homepage": "https://github.com/eienel/suisei/tree/main/packages/mcp",

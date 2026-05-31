@@ -12,7 +12,7 @@ interface Args {
 
 /**
  * Build (do not sign) a transaction that calls ANY Move entry function.
- * This is the universal write primitive — the generic form of every
+ * This is the universal write primitive - the generic form of every
  * purpose-built mint/transfer tool.
  *
  * Each argument is a string in one of these forms:
@@ -24,7 +24,7 @@ interface Args {
  *   - `pure:u8|u16|u32|u64|u128|u256:<number>`
  *
  * Vector and nested-struct arguments are intentionally out of scope for
- * the generic tool — write a dedicated tool for those so the schema
+ * the generic tool - write a dedicated tool for those so the schema
  * stays unambiguous for the calling agent.
  */
 export async function suiMoveCall(raw: unknown): Promise<string> {

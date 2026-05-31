@@ -26,7 +26,7 @@ export async function agentWalletSweep(raw: unknown): Promise<string> {
   const tx = new Transaction();
   tx.setSender(agent);
   // Transferring the gas coin sends its remaining balance (after gas) to
-  // the owner — i.e. sweeps all native SUI.
+  // the owner - i.e. sweeps all native SUI.
   const toMove = [tx.gas, ...(object_ids ?? []).map((id) => tx.object(id))];
   tx.transferObjects(toMove, tx.pure.address(owner));
 

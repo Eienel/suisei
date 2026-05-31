@@ -2,14 +2,14 @@ import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { defaultPath, saveSecret, loadSecret, keystoreExists } from './keystore.js';
 
 /**
- * @suisei-mcp/agent-signer — the non-custodial signer for a Tier-1 Sui agent
+ * @suisei-mcp/agent-signer - the non-custodial signer for a Tier-1 Sui agent
  * wallet.
  *
  * The MCP toolkit builds unsigned tx bytes and never holds a key. This is
  * the only piece that does: it generates the agent keypair, stores it
  * encrypted on the user's machine, and signs tx bytes. The plaintext key
  * is created here, used here, and never returned across a process boundary
- * — in particular it never travels through an MCP response or an LLM
+ * - in particular it never travels through an MCP response or an LLM
  * context.
  *
  * Pair the signature this produces with sui_execute_signed_tx to submit.
@@ -54,7 +54,7 @@ export function walletAddress(opts: { passphrase: string; path?: string }): stri
 /**
  * Reveal the raw bech32 `suiprivkey...` secret so the user can back it up
  * or import the agent wallet into a standard wallet (Sui Wallet, Suiet,
- * `sui keytool import`). This is the user's escape hatch — it proves they,
+ * `sui keytool import`). This is the user's escape hatch - it proves they,
  * not us, own the key. Handle the output carefully: anyone with this string
  * controls the wallet.
  */

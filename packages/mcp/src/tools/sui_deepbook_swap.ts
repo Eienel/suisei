@@ -21,8 +21,8 @@ interface Args {
 
 /**
  * Build (do not sign) a DeepBook v3 market swap. Mirrors the exact PTB the
- * official @mysten/deepbook-v3 SDK emits — pool::swap_exact_base_for_quote
- * / swap_exact_quote_for_base — but on @mysten/sui v1, so the toolkit
+ * official @mysten/deepbook-v3 SDK emits - pool::swap_exact_base_for_quote
+ * / swap_exact_quote_for_base - but on @mysten/sui v1, so the toolkit
  * stays non-custodial and on its current SDK.
  *
  * Amounts are raw smallest-unit strings (like MIST): the caller handles

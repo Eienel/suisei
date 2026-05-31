@@ -10,7 +10,7 @@ interface Args {
 /**
  * Live coin metadata: symbol, name, decimals, description, icon URL. Pass
  * coin_type (e.g. "0x2::sui::SUI") or symbol (e.g. "USDC"). With symbol,
- * the local registry resolves to a coin_type first — this works even when
+ * the local registry resolves to a coin_type first - this works even when
  * the on-chain CoinMetadata is absent or slow.
  *
  * Decimals are critical for every DeFi flow: a "5 USDC" transfer is 5e6

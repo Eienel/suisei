@@ -257,7 +257,7 @@ table([
     ["name_or_address", "string", "yes", "A SuiNS name or 0x address"],
     ["network", "enum", "no", "default testnet"],
 ], [0.30 * W, 0.16 * W, 0.12 * W, 0.42 * W])
-code(['&rarr; { "address": "0x…", "source": "suins", "name": "alice.sui" }'])
+code(['&rarr; { "address": "0x...", "source": "suins", "name": "alice.sui" }'])
 
 P("sui_get_balance / sui_get_all_balances", "h4")
 P("<font name='Courier' size=9>sui_get_balance</font> returns the native SUI balance for one "
@@ -269,8 +269,8 @@ code(['&rarr; { "coin_type": "0x2::sui::SUI", "total_mist": "1500000000",',
 P("sui_get_object", "h4")
 P("The general read primitive &mdash; every other read tool is a special case of it. Returns Move "
   "type, owner, version, digest, content fields, and Display metadata for any object id.")
-code(['&rarr; { "type": "0x…::badge::Badge", "owner": {…}, "version": "…",',
-      '    "fields": {…}, "display": {…} }'])
+code(['&rarr; { "type": "0x...::badge::Badge", "owner": {...}, "version": "...",',
+      '    "fields": {...}, "display": {...} }'])
 
 P("sui_get_owned_objects", "h4")
 P("Lists objects owned by an address, optionally filtered to a single fully-qualified Move struct "
@@ -288,21 +288,21 @@ P("sui_get_owned_badges", "h4")
 P("Lists Suisei badges (soulbound quest-completion NFTs) owned by an address &mdash; useful for "
   "showing curriculum progress. Resolves the badge package from the badge_package argument, the "
   "SUISEI_BADGE_PACKAGE env var, or a built-in per-network default.")
-code(['&rarr; { "count": 3, "badges": [ { "object_id": "…",',
-      '    "quest_id": "zklogin", "quest_number": 1, "minted_at_ms": "…" } ] }'])
+code(['&rarr; { "count": 3, "badges": [ { "object_id": "...",',
+      '    "quest_id": "zklogin", "quest_number": 1, "minted_at_ms": "..." } ] }'])
 
 P("sui_get_coins", "h4")
 P("Unlike sui_get_balance (which sums), this returns the concrete coin_object_id values an agent "
   "needs to spend or split in a transaction. Defaults to native SUI; pass coin_type for any other "
   "coin. Paginated.")
 code(['&rarr; { "coin_type": "0x2::sui::SUI", "count": 4, "has_next_page": false,',
-      '    "coins": [ { "coin_object_id": "…", "balance": "1000000000" }, … ] }'])
+      '    "coins": [ { "coin_object_id": "...", "balance": "1000000000" }, ... ] }'])
 
 P("sui_get_transaction", "h4")
 P("Fetch a finalized transaction by digest &mdash; the same digest sui_execute_signed_tx returns. "
   "Returns status, gas used, balance changes, timestamp, and event count.")
-code(['&rarr; { "digest": "…", "status": "success", "timestamp_ms": "…",',
-      '    "gas_used": {…}, "balance_changes": [...], "events_count": 1 }'])
+code(['&rarr; { "digest": "...", "status": "success", "timestamp_ms": "...",',
+      '    "gas_used": {...}, "balance_changes": [...], "events_count": 1 }'])
 
 P("sui_get_reference_gas_price / sui_get_dynamic_fields", "h4")
 P("sui_get_reference_gas_price returns the current network gas price in MIST (takes only network). "
@@ -341,8 +341,8 @@ table([
     ["sender", "string", "yes", "0x address that will sign &amp; pay"],
     ["network", "enum", "no", "default testnet"],
 ], [0.26 * W, 0.16 * W, 0.10 * W, 0.48 * W])
-code(['&rarr; { "tx_bytes_base64": "…", "target": "0x…::m::f",',
-      '    "sender": "0x…", "next_step": "Dry-run, then sign and submit." }'])
+code(['&rarr; { "tx_bytes_base64": "...", "target": "0x...::m::f",',
+      '    "sender": "0x...", "next_step": "Dry-run, then sign and submit." }'])
 
 P("sui_transfer", "h4")
 P("Provide amount_mist to send SUI (split from the gas coin) and/or object_ids to send whole "
@@ -379,7 +379,7 @@ table([
 ], [0.26 * W, 0.16 * W, 0.10 * W, 0.48 * W])
 
 P("sui_deepbook_quote", "h4")
-P("Read-only DeepBook v3 quote via devInspect — no gas, no signing, no funds. Given an input "
+P("Read-only DeepBook v3 quote via devInspect - no gas, no signing, no funds. Given an input "
   "amount and direction, returns the expected output and the DEEP fee required, so an agent can "
   "size min_out before building a swap. Same pool selection as the swap (known key, or explicit "
   "pool_id + base_type + quote_type). All values are raw smallest-units, so expected_out feeds "
@@ -416,12 +416,12 @@ table([
 P("sui_dry_run", "h4")
 P("Simulates an unsigned transaction without spending gas, so an agent can verify a builder result "
   "before asking the host to sign. Takes tx_bytes_base64.")
-code(['&rarr; { "status": "success", "gas_used": {…}, "balance_changes": [...],',
+code(['&rarr; { "status": "success", "gas_used": {...}, "balance_changes": [...],',
       '    "object_changes_count": 2, "events_count": 0 }'])
 P("sui_execute_signed_tx", "h4")
 P("Submits a host-signed transaction. Takes the same tx_bytes_base64 that were signed plus one or "
   "more base64 signatures. The toolkit holds no keys &mdash; signing happens in the host.")
-code(['&rarr; { "digest": "…", "status": "success", "gas_used": {…},',
+code(['&rarr; { "digest": "...", "status": "success", "gas_used": {...},',
       '    "balance_changes": [...], "events_count": 1 }'])
 
 P("5.4 Walrus storage", "h3")
@@ -463,12 +463,12 @@ P("&copy; 2026 Suisei &middot; @suisei/sui-skills-mcp v0.1.0 &middot; MIT Licens
 
 def footer(canvas, doc):
     canvas.saveState()
-    # Cream "paper" surface across the whole page — the site's docs background.
+    # Cream "paper" surface across the whole page - the site's docs background.
     canvas.setFillColor(PAPER)
     canvas.rect(0, 0, A4[0], A4[1], stroke=0, fill=1)
     canvas.setFont("Helvetica", 7.5)
     canvas.setFillColor(MUTE)
-    canvas.drawString(16 * mm, 10 * mm, "Sui Skills MCP · Capability Reference")
+    canvas.drawString(16 * mm, 10 * mm, "Sui Skills MCP / Capability Reference")
     canvas.drawRightString(A4[0] - 16 * mm, 10 * mm, "Page %d" % doc.page)
     canvas.setStrokeColor(PAPER_LINE)
     canvas.line(16 * mm, 13 * mm, A4[0] - 16 * mm, 13 * mm)

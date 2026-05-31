@@ -1,5 +1,5 @@
 /**
- * @suisei-mcp/mcp — server factory.
+ * @suisei-mcp/mcp - server factory.
  *
  * Builds the Suisei MCP server with the full Sui-stack tool registry.
  * Transport is chosen by the entrypoint: `index.ts` (stdio) for local
@@ -7,7 +7,7 @@
  * remote hosts like Claude's Custom Connectors (web + mobile). Both call
  * createServer() so there is exactly one tool registry.
  *
- * Write tools never hold keys — they return unsigned tx bytes for the
+ * Write tools never hold keys - they return unsigned tx bytes for the
  * host to sign, then sui_execute_signed_tx submits the signed result.
  *
  * The server identifies itself as "suisei" over the MCP protocol; tool
@@ -65,7 +65,7 @@ interface ToolDef {
   handler: (args: unknown) => Promise<string>;
 }
 
-/** Shared network selector — every tool defaults to testnet. */
+/** Shared network selector - every tool defaults to testnet. */
 const networkSchema = z
   .enum(['testnet', 'mainnet', 'devnet'])
   .default('testnet')
@@ -77,7 +77,7 @@ const tools: ToolDef[] = [
     description:
       'Resolve a Sui address from a SuiNS name (e.g. "alice.sui") or echo back a 0x address if already canonical. Use this whenever the user gives you a human-readable name.',
     inputSchema: z.object({
-      name_or_address: z.string().describe('A SuiNS name or 0x… address.'),
+      name_or_address: z.string().describe('A SuiNS name or 0x... address.'),
       network: networkSchema,
     }),
     handler: suiResolveAddress,
@@ -105,7 +105,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_get_object',
     description:
-      "Read any on-chain object: its Move type, owner, version, content fields, and Display metadata. The general read primitive — use it to inspect any object id.",
+      "Read any on-chain object: its Move type, owner, version, content fields, and Display metadata. The general read primitive - use it to inspect any object id.",
     inputSchema: z.object({
       object_id: z.string().describe('The 0x object id to read.'),
       network: networkSchema,
@@ -115,7 +115,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_get_owned_objects',
     description:
-      'List objects owned by an address, optionally filtered to one Move struct type (e.g. "0x2::coin::Coin<0x2::sui::SUI>"). Paginated — pass the returned next_cursor to continue.',
+      'List objects owned by an address, optionally filtered to one Move struct type (e.g. "0x2::coin::Coin<0x2::sui::SUI>"). Paginated - pass the returned next_cursor to continue.',
     inputSchema: z.object({
       address: z.string().describe('Wallet address whose objects to list.'),
       struct_type: z
@@ -182,7 +182,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_get_dynamic_fields',
     description:
-      'List the dynamic fields attached to a parent object — how Sui stores Tables, Bags, and other on-chain collections. Returns each field name, type, and child object id. Paginated.',
+      'List the dynamic fields attached to a parent object - how Sui stores Tables, Bags, and other on-chain collections. Returns each field name, type, and child object id. Paginated.',
     inputSchema: z.object({
       parent_id: z.string().describe('Object id whose dynamic fields to list.'),
       cursor: z.string().optional().describe('Pagination cursor from a previous call.'),
@@ -229,7 +229,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_get_validator',
     description:
-      'One validator with APY merged: name, address, commission, total stake, voting power, project URL, and the live APY the chain computes from recent rewards. Fuses sui_get_validators + sui_get_validators_apy into a single read so a staking app doesn’t join them by hand.',
+      'One validator with APY merged: name, address, commission, total stake, voting power, project URL, and the live APY the chain computes from recent rewards. Fuses sui_get_validators + sui_get_validators_apy into a single read so a staking app doesn't join them by hand.',
     inputSchema: z.object({
       validator_address: z.string().describe('Validator 0x address.'),
       network: networkSchema,
@@ -239,7 +239,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_query_events',
     description:
-      'Query historical Move events. Powers reactive agents — react to swaps, mints, transfers, anything that emits an event. Filter by event_type (full type), package+module (both required together), sender, or transaction. Paginated; pass back next_cursor_tx_digest + next_cursor_event_seq to continue. At least one filter is required.',
+      'Query historical Move events. Powers reactive agents - react to swaps, mints, transfers, anything that emits an event. Filter by event_type (full type), package+module (both required together), sender, or transaction. Paginated; pass back next_cursor_tx_digest + next_cursor_event_seq to continue. At least one filter is required.',
     inputSchema: z.object({
       event_type: z.string().optional().describe('Full Move event type, e.g. "0x2::coin::CurrencyCreated<0x2::sui::SUI>".'),
       package: z.string().optional().describe('Package id to filter by.'),
@@ -257,7 +257,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_get_coin_metadata',
     description:
-      "Live coin metadata: symbol, name, decimals, description, icon URL. Pass coin_type ('0x…') or symbol ('USDC'); a symbol resolves via the local registry first. Decimals are critical for every DeFi flow — '5 USDC' = 5e6 smallest units (6 decimals), not 5e9.",
+      "Live coin metadata: symbol, name, decimals, description, icon URL. Pass coin_type ('0x...') or symbol ('USDC'); a symbol resolves via the local registry first. Decimals are critical for every DeFi flow - '5 USDC' = 5e6 smallest units (6 decimals), not 5e9.",
     inputSchema: z.object({
       coin_type: z.string().optional().describe('Fully-qualified coin type.'),
       symbol: z.string().optional().describe('Symbol to look up in the local registry (e.g. "USDC").'),
@@ -268,7 +268,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_resolve_coin',
     description:
-      'Resolve a coin symbol (e.g. "USDC", "DEEP", "SUI") to its fully-qualified coin type on the chosen network, or — with no symbol — list every known symbol. Stops agents from hallucinating coin types.',
+      'Resolve a coin symbol (e.g. "USDC", "DEEP", "SUI") to its fully-qualified coin type on the chosen network, or - with no symbol - list every known symbol. Stops agents from hallucinating coin types.',
     inputSchema: z.object({
       symbol: z.string().optional().describe('Symbol to resolve. Omit to list known symbols.'),
       network: networkSchema,
@@ -293,7 +293,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_move_call',
     description:
-      'Build (do not sign) a transaction calling ANY Move entry function — the universal write primitive. Each argument is a string: "object:<id>", or "pure:<type>:<value>" where type is address|id|bool|string|u8|u16|u32|u64|u128|u256. Vectors/structs are out of scope; use a dedicated tool for those. Returns base64 tx bytes.',
+      'Build (do not sign) a transaction calling ANY Move entry function - the universal write primitive. Each argument is a string: "object:<id>", or "pure:<type>:<value>" where type is address|id|bool|string|u8|u16|u32|u64|u128|u256. Vectors/structs are out of scope; use a dedicated tool for those. Returns base64 tx bytes.',
     inputSchema: z.object({
       target: z
         .string()
@@ -388,7 +388,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_deepbook_swap',
     description:
-      'Build (do not sign) a DeepBook v3 market swap — the universal liquidity primitive. Pass a known pool key (e.g. "SUI_DBUSDC" on testnet, "SUI_USDC" on mainnet) or explicit pool_id + base_type + quote_type. amount and min_out are raw smallest-unit strings (caller handles decimals and slippage). DeepBook charges fees in DEEP: whitelisted pools take deep_amount "0", others require the sender to hold DEEP. Returns base64 tx bytes.',
+      'Build (do not sign) a DeepBook v3 market swap - the universal liquidity primitive. Pass a known pool key (e.g. "SUI_DBUSDC" on testnet, "SUI_USDC" on mainnet) or explicit pool_id + base_type + quote_type. amount and min_out are raw smallest-unit strings (caller handles decimals and slippage). DeepBook charges fees in DEEP: whitelisted pools take deep_amount "0", others require the sender to hold DEEP. Returns base64 tx bytes.',
     inputSchema: z.object({
       sender: z.string().describe('0x address that will sign, pay, and receive the output.'),
       direction: z
@@ -429,7 +429,7 @@ const tools: ToolDef[] = [
   {
     name: 'agent_wallet_fund',
     description:
-      "Build (do not sign) a tx that funds an agent wallet: split amount_mist from the OWNER's gas and send it to the agent address. The owner signs this with their own wallet — the agent never touches the owner's key. This sets the agent's allowance: its spending power is bounded by what's funded here. Returns base64 tx bytes.",
+      "Build (do not sign) a tx that funds an agent wallet: split amount_mist from the OWNER's gas and send it to the agent address. The owner signs this with their own wallet - the agent never touches the owner's key. This sets the agent's allowance: its spending power is bounded by what's funded here. Returns base64 tx bytes.",
     inputSchema: z.object({
       owner: z.string().describe("0x address of the owner funding (signs and pays)."),
       agent: z.string().describe('0x address of the agent wallet to fund.'),
@@ -466,7 +466,7 @@ const tools: ToolDef[] = [
   {
     name: 'sui_decode_tx_bytes',
     description:
-      'Decode unsigned tx bytes (from any builder tool) into a structured, human-readable summary: sender, gas data, inputs, and a step-by-step list of commands ("split N MIST from gas", "transfer to 0x…", "call pkg::module::fn(…)"). The "look before you sign" tool — verifies a built tx matches its stated intent. Pure offline decode, no RPC.',
+      'Decode unsigned tx bytes (from any builder tool) into a structured, human-readable summary: sender, gas data, inputs, and a step-by-step list of commands ("split N MIST from gas", "transfer to 0x...", "call pkg::module::fn(...)"). The "look before you sign" tool - verifies a built tx matches its stated intent. Pure offline decode, no RPC.',
     inputSchema: z.object({
       tx_bytes_base64: z.string().describe('Base64 tx bytes from a builder tool.'),
     }),
@@ -578,7 +578,7 @@ export function createServer(): Server {
 }
 
 /**
- * Minimal Zod → JSON-Schema converter for the inputs we actually use
+ * Minimal Zod -> JSON-Schema converter for the inputs we actually use
  * here. Avoids pulling a 50KB schema library into a server that just
  * needs to describe a handful of flat tool-input objects.
  */

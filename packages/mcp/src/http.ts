@@ -1,5 +1,5 @@
 /**
- * Remote (Streamable HTTP) entrypoint — Web Standards flavour.
+ * Remote (Streamable HTTP) entrypoint - Web Standards flavour.
  *
  * `handleMcpRequest(request)` is a runtime-agnostic Fetch handler: it runs
  * on Vercel Edge, Cloudflare Workers, Deno, Bun, and Node 18+. Wire it to
@@ -8,7 +8,7 @@
  *
  * Stateless: a fresh server + transport per request (no session store),
  * which is what serverless wants. Reads work great over a remote
- * connector; transaction-building tools return unsigned bytes — signing
+ * connector; transaction-building tools return unsigned bytes - signing
  * still happens host-side, so a remote host needs its own signing path.
  */
 
@@ -19,7 +19,7 @@ export interface McpHttpOptions {
   /**
    * If set, requests must carry `Authorization: Bearer <token>`. Falls
    * back to the SUISEI_MCP_TOKEN env var (with SUI_SKILLS_MCP_TOKEN kept
-   * as a compatibility alias). Leave unset only for local testing — a
+   * as a compatibility alias). Leave unset only for local testing - a
    * public endpoint without a token is open to the world.
    */
   authToken?: string;

@@ -16,14 +16,14 @@ interface Args {
 
 /**
  * Query historical events. Powers reactive agents: react to swaps on a
- * pool, badge mints, NFT transfers — anything that emits a Move event.
- * Filter by full event_type, by Move module (package + module — both
+ * pool, badge mints, NFT transfers - anything that emits a Move event.
+ * Filter by full event_type, by Move module (package + module - both
  * required together), by sender, or by transaction. Paginated; pass back
  * next_cursor_* to continue.
  *
  * Sui's event index requires at least one filter; an unfiltered scan
  * would return the whole chain. Package-only filtering is not supported
- * by the fullnode — pair package with module.
+ * by the fullnode - pair package with module.
  */
 export async function suiQueryEvents(raw: unknown): Promise<string> {
   const a = raw as Args;

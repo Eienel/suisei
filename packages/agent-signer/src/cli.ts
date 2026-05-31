@@ -9,7 +9,7 @@ import {
 } from './index.js';
 
 /**
- * agent-signer CLI — the manual signing path for a Tier-1 agent wallet.
+ * agent-signer CLI - the manual signing path for a Tier-1 agent wallet.
  *
  *   agent-signer create [--overwrite]      generate + encrypt a new agent key
  *   agent-signer import <suiprivkey>       seal an existing key as the wallet
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
     default:
       process.stdout.write(
         [
-          'agent-signer — non-custodial signer for a Tier-1 Sui agent wallet',
+          'agent-signer - non-custodial signer for a Tier-1 Sui agent wallet',
           '',
           'Commands:',
           '  create [--overwrite]     generate + encrypt a new agent key',

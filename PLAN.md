@@ -1,32 +1,32 @@
-# Suisei — Build Plan
+# Suisei - Build Plan
 
 > Sui's agent toolkit. Showcase by Suisei.
-> Built for Sui Overflow 2026 · Agentic Web track · Deadline TBD (target June 20)
+> Built for Sui Overflow 2026 / Agentic Web track / Deadline TBD (target June 20)
 
 ---
 
 ## Vision
 
-A **niche AI agent** that lives on Sui, **uses the full Sui Stack** (zkLogin, Sponsored Tx, Move, PTBs, Walrus, Seal, randomness, native staking) to teach the Sui Stack — through 7-8 quests, each ending in a real testnet deployment.
+A **niche AI agent** that lives on Sui, **uses the full Sui Stack** (zkLogin, Sponsored Tx, Move, PTBs, Walrus, Seal, randomness, native staking) to teach the Sui Stack - through 7-8 quests, each ending in a real testnet deployment.
 
-But the agent is just the showcase. The real product is the **MCP server (Sui Skills)** — an open toolkit that any AI agent can plug into to do real Sui work: deploy Move modules, compose PTBs, mint NFTs, query objects, stake SUI, swap on DeepBook, store on Walrus, encrypt with Seal.
+But the agent is just the showcase. The real product is the **MCP server (Sui Skills)** - an open toolkit that any AI agent can plug into to do real Sui work: deploy Move modules, compose PTBs, mint NFTs, query objects, stake SUI, swap on DeepBook, store on Walrus, encrypt with Seal.
 
 **Three-layer architecture:**
 
-1. **Sui Skills (MCP server)** — open-source toolkit. Any agent (Claude Desktop, Cursor, ChatGPT custom GPT, custom Python/TS agents) can plug in.
-2. **Suisei (web product)** — the first agent built on Sui Skills. Teaches users by guided quests.
-3. **Leaderboard (community layer)** — onchain badge holders ranked, social proof, viral mechanics.
+1. **Sui Skills (MCP server)** - open-source toolkit. Any agent (Claude Desktop, Cursor, ChatGPT custom GPT, custom Python/TS agents) can plug in.
+2. **Suisei (web product)** - the first agent built on Sui Skills. Teaches users by guided quests.
+3. **Leaderboard (community layer)** - onchain badge holders ranked, social proof, viral mechanics.
 
 ---
 
 ## Why this wins
 
-- **Agentic Web track ($30K)** — Suisei IS an agent that transacts onchain. Sui's own Agentic Web vision asks for: shared verifiable state, portable permissions, atomic execution, cryptographic proof. We demonstrate all four.
-- **Walrus track stacking ($70K pool)** — agent memory + lesson progress stored via MemWal; Quest 7 uses Walrus + Seal directly.
-- **DeepBook track stacking ($70K pool)** — Graduate quest builds a real DeepBook trading bot.
-- **Community Award ($25K)** — leaderboard + viral "I'm now a Sui Stack Graduate" mechanic.
-- **Not a wrapper** — every quest deploys real Move code via embedded WASM compiler (PlayMove). Real on-chain package IDs verifiable on Sui Explorer.
-- **MCP server is ecosystem infra** — judges love things that make Sui easier for everyone, not just one app.
+- **Agentic Web track ($30K)** - Suisei IS an agent that transacts onchain. Sui's own Agentic Web vision asks for: shared verifiable state, portable permissions, atomic execution, cryptographic proof. We demonstrate all four.
+- **Walrus track stacking ($70K pool)** - agent memory + lesson progress stored via MemWal; Quest 7 uses Walrus + Seal directly.
+- **DeepBook track stacking ($70K pool)** - Graduate quest builds a real DeepBook trading bot.
+- **Community Award ($25K)** - leaderboard + viral "I'm now a Sui Stack Graduate" mechanic.
+- **Not a wrapper** - every quest deploys real Move code via embedded WASM compiler (PlayMove). Real on-chain package IDs verifiable on Sui Explorer.
+- **MCP server is ecosystem infra** - judges love things that make Sui easier for everyone, not just one app.
 
 ---
 
@@ -83,7 +83,7 @@ Distribution:
 - npm package + GitHub repo
 - Claude Desktop config snippet (one-liner to install)
 - Cursor IDE snippet
-- Python SDK wrapper (`pip install sui-skills`) — bonus
+- Python SDK wrapper (`pip install sui-skills`) - bonus
 
 ---
 
@@ -114,14 +114,14 @@ Distribution:
 
 | Window | Deliverable |
 |---|---|
-| **May 27 → Jun 2** | Foundation: strip repo, set up clean shell, Enoki zkLogin + Sponsored Tx working, Quest 1 vertical slice (sign-in → first object → first badge) |
-| **Jun 3 → Jun 9** | Quests 2-4 (object model, Move abilities, capability pattern). PlayMove embedded. Suisei chat panel + agent integration |
-| **Jun 10 → Jun 14** | Quests 5-7 (soulbound, PTBs, Walrus+Seal). MCP server v1 published to npm |
-| **Jun 15 → Jun 18** | Graduate quest (DeepBook). Leaderboard. Landing page redesign with Suisei mascot |
-| **Jun 19 → Jun 20** | Demo video, submission package, polish |
+| **May 27 -> Jun 2** | Foundation: strip repo, set up clean shell, Enoki zkLogin + Sponsored Tx working, Quest 1 vertical slice (sign-in -> first object -> first badge) |
+| **Jun 3 -> Jun 9** | Quests 2-4 (object model, Move abilities, capability pattern). PlayMove embedded. Suisei chat panel + agent integration |
+| **Jun 10 -> Jun 14** | Quests 5-7 (soulbound, PTBs, Walrus+Seal). MCP server v1 published to npm |
+| **Jun 15 -> Jun 18** | Graduate quest (DeepBook). Leaderboard. Landing page redesign with Suisei mascot |
+| **Jun 19 -> Jun 20** | Demo video, submission package, polish |
 
 **Hard cuts if behind:**
-- Drop Graduate quest (DeepBook) → forfeit DeepBook bounty stack but ship 7 core quests
+- Drop Graduate quest (DeepBook) -> forfeit DeepBook bounty stack but ship 7 core quests
 - Ship MCP server as "concept + repo" not as polished npm release
 - Skip leaderboard, ship just badge collection page
 
@@ -129,25 +129,25 @@ Distribution:
 
 ## TODO Tracker
 
-### Sprint 0 — Foundation (May 27 → Jun 2)
+### Sprint 0 - Foundation (May 27 -> Jun 2)
 
 - [x] Verify hackathon deadline (confirmed by user)
 - [x] Strip old components and 3D code
 - [x] Set up clean app shell (router, providers, theme)
 - [x] Brand design brief ready to feed Claude Design (`docs/design/SUISEI_BRIEF.md` + `BRAND_DESIGNER_PROMPT.txt`)
 - [ ] Apply for Enoki API access
-- [x] Implement zkLogin sign-in flow (Quest 1 step 1) — `AuthButton` + EnokiRegistrar
-- [ ] Implement Sponsored Tx wrapper (Quest 1 step 2) — pending Enoki keys
-- [x] Build minimal Suisei chat panel (right side, persistent) — `SuiseiChat.tsx`
-- [x] Author first Move module: `suisei_badge` (soulbound) — `move/suisei_badge`
+- [x] Implement zkLogin sign-in flow (Quest 1 step 1) - `AuthButton` + EnokiRegistrar
+- [ ] Implement Sponsored Tx wrapper (Quest 1 step 2) - pending Enoki keys
+- [x] Build minimal Suisei chat panel (right side, persistent) - `SuiseiChat.tsx`
+- [x] Author first Move module: `suisei_badge` (soulbound) - `move/suisei_badge`
 - [ ] Publish `suisei_badge` to testnet + set `VITE_BADGE_PACKAGE_ID`
-- [x] Mint badge on Quest 1 completion (Quest 1 step 3) — real-when-configured, mocked when not
+- [x] Mint badge on Quest 1 completion (Quest 1 step 3) - real-when-configured, mocked when not
 - [x] Landing page placeholder
-- [x] Quest hub UI — `QuestHub.tsx`, linear unlock from `badges` count
-- [x] Quest 1 vertical slice — `quests/Quest1ZkLogin.tsx` (intro → interact → badge → done)
-- [ ] Suisei agent system prompt v1 (Claude Haiku via proxy) — scripted lines in place, LLM proxy still TBD
+- [x] Quest hub UI - `QuestHub.tsx`, linear unlock from `badges` count
+- [x] Quest 1 vertical slice - `quests/Quest1ZkLogin.tsx` (intro -> interact -> badge -> done)
+- [ ] Suisei agent system prompt v1 (Claude Haiku via proxy) - scripted lines in place, LLM proxy still TBD
 
-### Sprint 1 — Core Quests (Jun 3 → Jun 9)
+### Sprint 1 - Core Quests (Jun 3 -> Jun 9)
 
 - [ ] Embed PlayMove iframe + wire postMessage protocol
 - [ ] Quest 2: Sponsored Tx + Object Model
@@ -157,7 +157,7 @@ Distribution:
 - [ ] Walrus + MemWal integration for progress storage
 - [ ] Suisei agent system prompt v2 with quest context
 
-### Sprint 2 — Advanced + MCP (Jun 10 → Jun 14)
+### Sprint 2 - Advanced + MCP (Jun 10 -> Jun 14)
 
 - [ ] Quest 5: Soulbound NFT (mint, try to transfer, fail)
 - [ ] Quest 6: PTBs (drag-build atomic 5-op tx)
@@ -167,7 +167,7 @@ Distribution:
 - [ ] npm publish + Claude Desktop config snippet
 - [ ] README + docs
 
-### Sprint 3 — Graduate + Polish (Jun 15 → Jun 18)
+### Sprint 3 - Graduate + Polish (Jun 15 -> Jun 18)
 
 - [ ] Graduate quest: DeepBook trading bot
 - [ ] "Sui Stack Graduate" NFT mint
@@ -177,7 +177,7 @@ Distribution:
 - [ ] Landing page final design (with Suisei mascot)
 - [ ] Mobile responsive sweep
 
-### Sprint 4 — Ship (Jun 19 → Jun 20)
+### Sprint 4 - Ship (Jun 19 -> Jun 20)
 
 - [ ] Demo video (90 sec)
 - [ ] GitHub README with run instructions

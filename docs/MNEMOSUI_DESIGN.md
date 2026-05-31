@@ -1,9 +1,9 @@
-# MnemoSui — a permanent, portable brain for AI agents
+# MnemoSui - a permanent, portable brain for AI agents
 
 A showcase app for `@suisei-mcp/mcp`. The pitch: every AI agent
 forgets, and the memory they do have is locked inside one vendor's app.
-MnemoSui gives an agent a brain it actually owns — conversation history,
-knowledge, embeddings, files — stored on **Walrus**, indexed on **Sui** as
+MnemoSui gives an agent a brain it actually owns - conversation history,
+knowledge, embeddings, files - stored on **Walrus**, indexed on **Sui** as
 a transferable object. Move the agent between Claude, ChatGPT, or your own
 client. Sell, gift, or revoke memories on-chain. Mint a "I remember this
 conversation" badge as proof.
@@ -27,11 +27,11 @@ every Sui hackathon judge will ask.
   lives on Walrus, identified by `blob_id`.
 - The agent retrieves by listing the MemoryBook's dynamic fields and
   `walrus_fetch`-ing the ones that match a tag or recency filter.
-- The user can `sui_transfer` the MemoryBook to someone else — their
+- The user can `sui_transfer` the MemoryBook to someone else - their
   agent now reads the same memories. (NFT semantics, but for personal
   knowledge.)
 - Tier 2 of the agent wallet (when shipped) lets the user set an "append
-  budget" — the agent can write up to N entries per day before needing a
+  budget" - the agent can write up to N entries per day before needing a
   signature.
 
 ## On-chain shape (Move sketch)
@@ -57,10 +57,10 @@ module mnemosui::memory_book {
         encrypted: bool,            // true once Seal is wired in
     }
 
-    public fun create(ctx: &mut TxContext): MemoryBook { /* … */ }
+    public fun create(ctx: &mut TxContext): MemoryBook { /* ... */ }
     public fun append(book: &mut MemoryBook, blob_id: String, tag: String,
-                      content_hash: vector<u8>, encrypted: bool, clock: &Clock, ctx: &mut TxContext) { /* … */ }
-    public entry fun forget(book: &mut MemoryBook, index: u64) { /* … */ }
+                      content_hash: vector<u8>, encrypted: bool, clock: &Clock, ctx: &mut TxContext) { /* ... */ }
+    public entry fun forget(book: &mut MemoryBook, index: u64) { /* ... */ }
 }
 ```
 
@@ -73,8 +73,8 @@ content-addressed `Table<vector<u8>, Memory>` so dedupe is free.
 | ------------------------------------ | --------------------------------------- |
 | Store opaque memory content          | `walrus_publish`                        |
 | Retrieve memory content              | `walrus_fetch`                          |
-| Create the MemoryBook object         | `sui_move_call` → `memory_book::create` |
-| Append a memory                      | `sui_move_call` → `memory_book::append` |
+| Create the MemoryBook object         | `sui_move_call` -> `memory_book::create` |
+| Append a memory                      | `sui_move_call` -> `memory_book::append` |
 | List memories                        | `sui_get_dynamic_fields(parent_id)`     |
 | Read one memory record               | `sui_get_object(child_id)`              |
 | Transfer the book to another wallet  | `sui_transfer`                          |
@@ -84,32 +84,32 @@ content-addressed `Table<vector<u8>, Memory>` so dedupe is free.
 
 ## Gaps to close before MnemoSui actually ships
 
-1. **Seal integration** — `seal_encrypt(plaintext, policy) -> sealed` and
+1. **Seal integration** - `seal_encrypt(plaintext, policy) -> sealed` and
    `seal_decrypt(sealed) -> plaintext`. Without it, memories are public.
    Listed as v0.3 in the MCP roadmap.
-2. **Memory-book helper tools** — `memory_book_create`, `memory_append`,
+2. **Memory-book helper tools** - `memory_book_create`, `memory_append`,
    `memory_list`, `memory_fetch`. We *can* run on `sui_move_call` +
    dynamic-fields plumbing, but a thin wrapper is the DX difference
    between "neat idea" and "first-class app." Build these once the Move
    module exists.
-3. **Bulk Walrus** — multi-blob publish would speed first-time imports
+3. **Bulk Walrus** - multi-blob publish would speed first-time imports
    (e.g. importing a ChatGPT export).
-4. **Embeddings on-chain** — if we want semantic search inside Sui, we'd
+4. **Embeddings on-chain** - if we want semantic search inside Sui, we'd
    need either small embeddings in a dynamic field per memory or a hash
    index. Stretch goal.
 
 ## Build order (when we pick it up)
 
-1. **Move module** (`move/mnemosui/`) — `MemoryBook`, `Memory`, `create`,
+1. **Move module** (`move/mnemosui/`) - `MemoryBook`, `Memory`, `create`,
    `append`, `forget`, events. Move tests.
-2. **MCP helper tools** — the four memory_* wrappers above.
-3. **Frontend** (`apps/mnemosui/`) — Suisei-style React app with three
+2. **MCP helper tools** - the four memory_* wrappers above.
+3. **Frontend** (`apps/mnemosui/`) - Suisei-style React app with three
    pages: a chat that auto-appends memories, a memories browser
    (timeline + tags + search), and a transfer flow.
-4. **Seal** — encrypt memory content before `walrus_publish`, decrypt on
+4. **Seal** - encrypt memory content before `walrus_publish`, decrypt on
    `walrus_fetch`. Per-memory access policies (owner-only by default).
-5. **Demo script** — record a 2-minute video: chat with the agent → walk
-   over to a second machine → transfer the MemoryBook → agent recognises
+5. **Demo script** - record a 2-minute video: chat with the agent -> walk
+   over to a second machine -> transfer the MemoryBook -> agent recognises
    you and continues the conversation.
 
 ## Why not start now

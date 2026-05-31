@@ -34,7 +34,7 @@ export async function suiGetValidators(raw: unknown): Promise<string> {
     voting_power: Number(v.votingPower),
   }));
 
-  // Largest first — a reasonable default for a validator picker.
+  // Largest first - a reasonable default for a validator picker.
   validators.sort(
     (a, b) =>
       Number(BigInt(b.staking_pool_sui_balance_mist) - BigInt(a.staking_pool_sui_balance_mist)),

@@ -8,7 +8,7 @@ Two packages, both scoped under `@suisei`, both publish-ready.
    scope to exist first. Go to <https://www.npmjs.com/org/create>, name it
    `suisei` (lowercase), free plan. Takes 30 seconds.
 2. **Make sure 2FA is set up the way you want it.** If you have 2FA on,
-   `npm publish` will prompt for an OTP each time. That's fine — just have
+   `npm publish` will prompt for an OTP each time. That's fine - just have
    your authenticator open.
 
 ## Per-release checklist
@@ -40,7 +40,7 @@ npm pack --dry-run
 npm publish
 ```
 
-That's it — within a minute the world can:
+That's it - within a minute the world can:
 
 ```bash
 npx -y @suisei-mcp/mcp        # spin up the MCP server
@@ -57,23 +57,23 @@ npm view @suisei-mcp/agent-signer
 ## Bumping versions for the next release
 
 The packages are at `0.1.0` today. Use `npm version` from inside each
-package directory — it updates `package.json` and creates a commit + tag:
+package directory - it updates `package.json` and creates a commit + tag:
 
-- `npm version patch` → `0.1.1` (bug fix)
-- `npm version minor` → `0.2.0` (new tools, no breaking changes)
-- `npm version major` → `1.0.0` (breaking changes; not yet)
+- `npm version patch` -> `0.1.1` (bug fix)
+- `npm version minor` -> `0.2.0` (new tools, no breaking changes)
+- `npm version major` -> `1.0.0` (breaking changes; not yet)
 
 Then `git push --follow-tags` and `npm publish` again.
 
 ## Common pitfalls
 
-- **"402 Payment Required" / "scope not found"** — the `suisei` org doesn't
+- **"402 Payment Required" / "scope not found"** - the `suisei` org doesn't
   exist on npm yet. Step 1 of one-time setup.
-- **"403 Forbidden"** — you're not a member of the `suisei` org, or
+- **"403 Forbidden"** - you're not a member of the `suisei` org, or
   `publishConfig.access` isn't `public`. Both are already set in
   `package.json`; the cause is org membership.
-- **"You must sign up for private packages"** — same as above; the
+- **"You must sign up for private packages"** - same as above; the
   `access: "public"` line in `publishConfig` is what fixes this for
   scoped packages on the free plan.
-- **`agent-signer` install warns about peer deps** — fine. It only depends
+- **`agent-signer` install warns about peer deps** - fine. It only depends
   on `@mysten/sui`, which has no peers.

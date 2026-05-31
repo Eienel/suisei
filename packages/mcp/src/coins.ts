@@ -1,7 +1,7 @@
 import type { Network } from './sui-client.js';
 
 /**
- * Coin metadata registry — the "what is USDC's coin type" table. Static
+ * Coin metadata registry - the "what is USDC's coin type" table. Static
  * because mainnet/testnet coin types are upgrade-stable; if Sui ever
  * redeploys one, override the type explicitly in any tool that takes
  * coin_type, or update this file. Decimals are cached here so an agent

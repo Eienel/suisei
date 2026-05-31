@@ -8,12 +8,12 @@ interface Args {
 /**
  * Decode unsigned tx bytes (from any builder tool) back into a structured,
  * human-readable summary: sender, gas data, inputs, and a step-by-step
- * list of commands ("split N MIST from gas", "transfer to 0x…",
+ * list of commands ("split N MIST from gas", "transfer to 0x...",
  * "call pkg::module::function with [args]").
  *
  * The "look before you sign" tool. A wallet shows the user what they're
- * authorising; this lets an agent — or a person reading the agent's
- * output — verify a built tx matches the stated intent. Pairs naturally
+ * authorising; this lets an agent - or a person reading the agent's
+ * output - verify a built tx matches the stated intent. Pairs naturally
  * with sui_dry_run for cost; this one is about *meaning*.
  *
  * Works offline (no RPC). All addresses are kept full-form so the caller
@@ -45,7 +45,7 @@ export async function suiDecodeTxBytes(raw: unknown): Promise<string> {
     command_count: commands.length,
     commands,
     plain_english: commands.map((c) => `${c.index + 1}. ${c.summary}`).join('\n'),
-    note: 'Decoded from BCS offline. Compare against the agent’s stated intent before signing.',
+    note: 'Decoded from BCS offline. Compare against the agent's stated intent before signing.',
   });
 }
 

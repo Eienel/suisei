@@ -15,9 +15,9 @@ export type Network = 'testnet' | 'mainnet' | 'devnet';
  * resolution* (resolving object refs and gas coins). As of @mysten/sui
  * 1.45.x that is implemented only for the JSON-RPC `SuiClient`. Verified
  * against testnet:
- *   - SuiGrpcClient     → "Transaction resolution is not supported with
+ *   - SuiGrpcClient -> "Transaction resolution is not supported with
  *                          the GRPC client"
- *   - SuiGraphQLClient  → "GraphQL client does not support transaction
+ *   - SuiGraphQLClient -> "GraphQL client does not support transaction
  *                          resolution yet"
  * So every transaction-building tool (move_call, transfer, stake,
  * unstake, mint_badge) must stay on JSON-RPC until the SDK ships build
@@ -26,7 +26,7 @@ export type Network = 'testnet' | 'mainnet' | 'devnet';
  * Migration trigger: once `tx.build({ client: grpcClientFor(net) })`
  * succeeds on a current SDK, switch `clientFor` to return the gRPC client
  * and delete this note. Reads already work over gRPC today via
- * `grpcClientFor()` below — wire individual read tools to it whenever we
+ * `grpcClientFor()` below - wire individual read tools to it whenever we
  * choose to move them off JSON-RPC ahead of the cutoff.
  */
 
@@ -54,7 +54,7 @@ export function clientFor(network: Network): SuiClient {
 }
 
 /**
- * gRPC client — the forward-looking transport. Reads (balances, coins,
+ * gRPC client - the forward-looking transport. Reads (balances, coins,
  * owned objects, dynamic fields, gas price, getTransaction, dryRun,
  * execute) work today; transaction *building* does not yet. Exposed so
  * read tools can migrate incrementally and so the eventual cutover is a

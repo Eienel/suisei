@@ -2,7 +2,7 @@
 ///
 /// One soulbound object per (player, quest_id). No `store` ability, so
 /// it cannot be wrapped or transferred after minting. The mint entry
-/// is permissionless — verification that the player actually finished
+/// is permissionless - verification that the player actually finished
 /// the quest happens off-chain via the in-app PTB sequence (each prior
 /// quest's required deploy + interact step is recorded on-chain in its
 /// own package).
@@ -10,7 +10,7 @@ module suisei::badge {
     use std::string::{Self, String};
     use sui::event;
 
-    /// Soulbound. Note the absence of `store` — only `key`.
+    /// Soulbound. Note the absence of `store` - only `key`.
     public struct Badge has key {
         id: UID,
         quest_id: String,

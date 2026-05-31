@@ -2,7 +2,7 @@
  * Node HTTP bridge for the Streamable HTTP transport.
  *
  * `handleMcpRequest` (http.ts) speaks the Web Fetch API. This adapter lets
- * it serve Node `http`-style handlers — used by both the standalone server
+ * it serve Node `http`-style handlers - used by both the standalone server
  * (serve.ts) and a Vercel Node serverless function. Node runtime is needed
  * (not Edge) because some tools use the Node `Buffer` global.
  */

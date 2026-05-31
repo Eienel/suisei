@@ -13,8 +13,8 @@ interface Args {
  * or pass `badge_package` explicitly.
  */
 const DEFAULT_BADGE_PACKAGE: Partial<Record<Network, string>> = {
-  // testnet: '0x…',  // paste published package id here
-  // mainnet: '0x…',
+  // testnet: '0x...',  // paste published package id here
+  // mainnet: '0x...',
 };
 
 export async function suiGetOwnedBadges(raw: unknown): Promise<string> {

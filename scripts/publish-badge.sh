@@ -12,7 +12,7 @@
 #   ./scripts/publish-badge.sh                 # publish to current `sui client` env
 #   ./scripts/publish-badge.sh --gas-budget 200000000
 #
-# After it prints "Published package: 0x…", set that value as
+# After it prints "Published package: 0x...", set that value as
 # VITE_BADGE_PACKAGE_ID in .env (local) and in the Vercel project env,
 # then redeploy. Every quest's badge mint becomes a real on-chain tx.
 

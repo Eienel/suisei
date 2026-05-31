@@ -17,7 +17,7 @@ interface Args {
 
 /**
  * Read-only DeepBook v3 quote. Calls pool::get_quote_quantity_out (selling
- * base) or get_base_quantity_out (selling quote) via devInspect — no gas,
+ * base) or get_base_quantity_out (selling quote) via devInspect - no gas,
  * no signing, no funds. Returns the expected output and the DEEP fee
  * required, so an agent can size min_out for sui_deepbook_swap before
  * building the real transaction.

@@ -5,7 +5,7 @@ name: Publish @suisei-mcp/mcp
 # packages/mcp and publishes with provenance.
 #
 # Setup once: add an npm automation token as the NPM_TOKEN repo secret
-# (Settings → Secrets and variables → Actions). The token needs publish
+# (Settings -> Secrets and variables -> Actions). The token needs publish
 # rights on the @suisei-mcp scope.
 
 on:

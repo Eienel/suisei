@@ -10,7 +10,7 @@ const toSui = (mist: string | number | bigint) => Number(BigInt(mist)) / 1e9;
 /**
  * List an address's active native stakes, grouped by validator. For each
  * StakedSui the chain returns the principal, the (estimated) rewards
- * accrued so far, and the activation epoch — everything a staking app
+ * accrued so far, and the activation epoch - everything a staking app
  * needs to show "you staked X, you've earned Y". Read-only: no gas, no
  * signing.
  *

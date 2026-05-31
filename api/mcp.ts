@@ -1,5 +1,5 @@
 /**
- * Remote MCP endpoint — exposes the Suisei MCP over Streamable HTTP so it
+ * Remote MCP endpoint - exposes the Suisei MCP over Streamable HTTP so it
  * can be added to Claude as a Custom Connector (web + mobile).
  *
  * Node runtime (not Edge): some tools use the Node `Buffer` global.

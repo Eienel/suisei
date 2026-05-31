@@ -11,7 +11,7 @@ sui move build
 sui client publish --gas-budget 200000000
 ```
 
-Copy the **Created Object → Package ID** into `.env.local`:
+Copy the **Created Object -> Package ID** into `.env.local`:
 
 ```
 VITE_BADGE_PACKAGE_ID=0x...

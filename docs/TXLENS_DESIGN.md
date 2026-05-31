@@ -1,7 +1,7 @@
-# TxLens — "look before you sign" wallet guard
+# TxLens - "look before you sign" wallet guard
 
 A showcase app for `@suisei-mcp/mcp`. The pitch: half of Web3
-hacks happen because users sign transactions they don't understand —
+hacks happen because users sign transactions they don't understand -
 wallet UIs show "Approve transaction" with a hash, and people click
 through. TxLens is a chat-native (and later browser-extension) pre-flight
 check: paste any unsigned tx bytes from any dApp, an agent decodes them
@@ -13,10 +13,10 @@ Implementation lives in `apps/txlens/` whenever we build it.
 
 ## Why this is a strong demo for the MCP
 
-It is the *defensive* agent — the use case crypto-curious normies
+It is the *defensive* agent - the use case crypto-curious normies
 immediately understand. It also flexes the new `sui_decode_tx_bytes`
 tool, which no other Sui MCP has. And it requires **zero new Move code**
-to ship a v1: it's pure MCP composition. That's the best kind of demo —
+to ship a v1: it's pure MCP composition. That's the best kind of demo -
 "look what the existing toolkit can already do."
 
 ## The user model
@@ -28,14 +28,14 @@ to ship a v1: it's pure MCP composition. That's the best kind of demo —
   extension popup, or a hosted page).
 - TxLens replies with: a plain-English step-by-step, a simulated outcome
   (balance changes, objects created/destroyed), and a **verdict** with
-  reasoning ("safe — known DeepBook swap" / "warning — transfers to
-  a wallet less than 24 hours old" / "danger — calls a function that
+  reasoning ("safe - known DeepBook swap" / "warning - transfers to
+  a wallet less than 24 hours old" / "danger - calls a function that
   drains every coin you own").
 - User decides: sign, cancel, or escalate.
 
 The whole flow happens *before* a single byte is signed. Nothing leaves
 the chain because nothing has been submitted; nothing leaves the user
-because no key was ever touched. TxLens never sees the signing key — by
+because no key was ever touched. TxLens never sees the signing key - by
 construction, it doesn't need one.
 
 ## Architecture
@@ -47,11 +47,11 @@ construction, it doesn't need one.
        ▼
     TxLens
        │
-       ├──► sui_decode_tx_bytes      → step-by-step plain-English plan
-       ├──► sui_dry_run              → simulated balance / object changes + gas
-       ├──► sui_get_object(...)      → for each object touched: owner, type, age
-       ├──► sui_get_transaction(...) → for each package called: when was it published?
-       ├──► sui_query_events(...)    → has this package emitted suspicious events recently?
+       ├──► sui_decode_tx_bytes -> step-by-step plain-English plan
+       ├──► sui_dry_run -> simulated balance / object changes + gas
+       ├──► sui_get_object(...) -> for each object touched: owner, type, age
+       ├──► sui_get_transaction(...) -> for each package called: when was it published?
+       ├──► sui_query_events(...) -> has this package emitted suspicious events recently?
        │
        ▼
    risk engine (rules + LLM reasoning)
@@ -83,12 +83,11 @@ explainable signals. Rules to start:
 
 - **Object drains.** Any `TransferObjects` where the address is *not* the
   sender and the object set is "large" (>N owned objects, especially
-  whole gas coin transfer to a non-self address) → loud warning.
+  whole gas coin transfer to a non-self address) -> loud warning.
 - **Sweeping move-calls.** Function names matching `drain`, `withdraw_all`,
-  `unstake_all`, `set_owner` are surfaced verbatim — the agent doesn't
+  `unstake_all`, `set_owner` are surfaced verbatim - the agent doesn't
   rule on intent, it just makes the user read what they're about to do.
-- **Fresh contracts.** Package published less than `T` hours ago →
-  caution. Brand-new doesn't mean malicious, but the user should know.
+- **Fresh contracts.** Package published less than `T` hours ago -> caution. Brand-new doesn't mean malicious, but the user should know.
 - **No prior interactions.** If the sender has never touched this
   package before and the package has had fewer than `N` recent events,
   flag for review.
@@ -97,10 +96,10 @@ explainable signals. Rules to start:
 - **SuiNS displacement.** A recipient that looks like a confusable
   homoglyph of a known address gets flagged.
 - **Self-signed read-only.** Pure read patterns (devInspect-shaped txs)
-  get marked **safe** quickly — fast path.
+  get marked **safe** quickly - fast path.
 
 The LLM step on top: take the decoded plan + the heuristic flags + the
-contract metadata, produce a 2–3 sentence summary the user actually
+contract metadata, produce a 2-3 sentence summary the user actually
 reads. The agent is the *narrator*, not the rulebook.
 
 ## v1 vs v2
@@ -112,7 +111,7 @@ existing toolkit.
 **v2**: browser extension that intercepts the wallet's tx-bytes popup,
 auto-pastes, shows the verdict inline. Same backend, better UX.
 
-**v3** (optional, Move): a community `TxRiskRegistry` — anyone can flag a
+**v3** (optional, Move): a community `TxRiskRegistry` - anyone can flag a
 package id with evidence (a tx digest, a screenshot blob on Walrus), and
 the registry stores `{ package_id, flagger, reason_blob_id, votes }`.
 TxLens consults the registry for an extra signal. Adds a "Yelp for smart
@@ -135,12 +134,12 @@ contracts" element. Not v1.
 
 We're publishing the MCP to npm first. TxLens is the strongest
 demonstration that the published toolkit is enough to build a real
-product on — so it makes more sense as the post-publish showcase
+product on - so it makes more sense as the post-publish showcase
 alongside MnemoSui. Two showcases:
 
-- **MnemoSui** — what an agent can *do* with Sui (storage, ownership,
+- **MnemoSui** - what an agent can *do* with Sui (storage, ownership,
   transfer).
-- **TxLens** — what an agent can *protect you from* on Sui.
+- **TxLens** - what an agent can *protect you from* on Sui.
 
 Together they cover the two arcs every hackathon judge cares about:
 new capability and safety.

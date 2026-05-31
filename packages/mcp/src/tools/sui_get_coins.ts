@@ -19,7 +19,7 @@ export async function suiGetCoins(raw: unknown): Promise<string> {
 
   const res = await client.getCoins({
     owner: address,
-    coinType: coin_type, // undefined → native 0x2::sui::SUI
+    coinType: coin_type, // undefined -> native 0x2::sui::SUI
     cursor: cursor ?? null,
     limit,
   });

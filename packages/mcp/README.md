@@ -1,15 +1,15 @@
-# @suisei-mcp/mcp — Suisei MCP
+# @suisei-mcp/mcp - Suisei MCP
 
 The Sui Stack as one-line tools, exposed over the Model Context Protocol
-— so any MCP-aware client (Claude Desktop, Cursor, Windsurf, your own
+- so any MCP-aware client (Claude Desktop, Cursor, Windsurf, your own
 agent) can build on Sui. The server identifies itself as **Suisei** to
 the agent. Tool names keep the `sui_` prefix because they wrap the Sui
-chain — Suisei is the agent toolkit; Sui is the chain it speaks.
+chain - Suisei is the agent toolkit; Sui is the chain it speaks.
 Suisei (the teaching agent) is a showcase built entirely on these tools.
 
-> **Status:** Alpha. Thirty-three tools spanning the core build loop —
+> **Status:** Alpha. Thirty-three tools spanning the core build loop -
 > read chain state, build any transaction, simulate it, decode it,
-> submit it — plus native staking (stake, unstake, live APY, validator
+> submit it - plus native staking (stake, unstake, live APY, validator
 > set, position tracking), DeepBook quotes & swaps, batch payouts,
 > historical events, coin metadata + symbol registry, Tier-1
 > agent-wallet lifecycle, and Walrus storage. Next up: the on-chain
@@ -18,7 +18,7 @@ Suisei (the teaching agent) is a showcase built entirely on these tools.
 ## Why
 
 Most Sui SDKs assume you're writing application code. This package
-assumes you're writing **agent** code — short tool calls, structured
+assumes you're writing **agent** code - short tool calls, structured
 JSON in, structured JSON out, no React, no UI. The agent decides what
 to do; the tool does it.
 
@@ -47,7 +47,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`
 Restart Claude Desktop. You can now ask the agent things like:
 
 > "What's the balance of `alice.sui`?"
-> "Mint a badge to `0x1234…` for completing the zkLogin quest."
+> "Mint a badge to `0x1234...` for completing the zkLogin quest."
 > "Publish this paragraph to Walrus and give me the blob id."
 
 The agent picks the right tool. You see the result.
@@ -57,7 +57,7 @@ The agent picks the right tool. You see the result.
 Stdio only works where the host can spawn a local process (Claude
 Desktop, Cursor). To use the toolkit from the **Claude web and mobile
 apps**, run it as a **remote MCP server** and add the URL as a Custom
-Connector (Settings → Connectors).
+Connector (Settings -> Connectors).
 
 Host it anywhere with the bundled HTTP server:
 
@@ -66,23 +66,23 @@ PORT=8787 SUISEI_MCP_TOKEN=your-secret npx suisei-mcp-serve
 # serves Streamable HTTP at http://localhost:8787/  (front with HTTPS in prod)
 ```
 
-On serverless, import the runtime-agnostic Fetch handler directly — it
+On serverless, import the runtime-agnostic Fetch handler directly - it
 runs on Vercel Edge, Cloudflare Workers, Deno, and Bun:
 
 ```ts
-// api/mcp.ts (Vercel Edge)  — needs `@suisei-mcp/mcp` as a dependency
+// api/mcp.ts (Vercel Edge)  - needs `@suisei-mcp/mcp` as a dependency
 export const config = { runtime: 'edge' };
 import { handleMcpRequest } from '@suisei-mcp/mcp/http';
 export default (req: Request) => handleMcpRequest(req);
 ```
 
 Set `SUISEI_MCP_TOKEN` so the endpoint requires
-`Authorization: Bearer <token>` — a public MCP URL without a token is
+`Authorization: Bearer <token>` - a public MCP URL without a token is
 open to the world.
 
 **Signing caveat.** Reads (balances, coins, objects, transactions,
 dynamic fields, gas, Walrus) work over a remote connector immediately.
-The transaction-building tools still return *unsigned* bytes — signing
+The transaction-building tools still return *unsigned* bytes - signing
 happens host-side, and a remote host (mobile) has no local wallet, so it
 needs its own signing path (e.g. an Enoki-sponsored flow or a wallet
 deep-link) to submit.
@@ -93,7 +93,7 @@ deep-link) to submit.
 
 | Tool                    | What it does                                                 |
 | ----------------------- | ------------------------------------------------------------ |
-| `sui_resolve_address`   | SuiNS name → 0x address (idempotent on 0x inputs)            |
+| `sui_resolve_address`   | SuiNS name -> 0x address (idempotent on 0x inputs)            |
 | `sui_get_balance`       | SUI balance (in MIST + human-readable SUI)                   |
 | `sui_get_all_balances`  | Every coin balance a wallet holds, not just SUI             |
 | `sui_get_object`        | Any object's type, owner, fields, and Display               |
@@ -109,15 +109,15 @@ deep-link) to submit.
 | `sui_get_validator`     | One validator, with APY + commission + stake merged         |
 | `sui_query_events`      | Historical events: filter by type / module / sender / tx    |
 | `sui_get_coin_metadata` | Live coin metadata (symbol, decimals, name, icon URL)       |
-| `sui_resolve_coin`      | Symbol → coin type from a built-in registry (USDC, DEEP, …) |
+| `sui_resolve_coin`      | Symbol -> coin type from a built-in registry (USDC, DEEP, ...) |
 | `sui_deepbook_quote`    | Read-only DeepBook v3 quote: expected out + DEEP fee        |
 | `agent_wallet_status`   | An agent wallet's SUI balance + whether it's funded         |
 
-**Build a transaction (never signed — bytes returned for the host)**
+**Build a transaction (never signed - bytes returned for the host)**
 
 | Tool                    | What it does                                                 |
 | ----------------------- | ------------------------------------------------------------ |
-| `sui_move_call`         | Build a call to ANY Move entry function — the universal write |
+| `sui_move_call`         | Build a call to ANY Move entry function - the universal write |
 | `sui_transfer`          | Build a transfer of SUI and/or whole objects                |
 | `sui_pay_many`          | Build a batch payout: N recipients, N amounts, one atomic tx |
 | `sui_stake`             | Build a native staking delegation to a validator            |
@@ -142,8 +142,7 @@ deep-link) to submit.
 | `walrus_publish`        | Publish a blob to Walrus testnet/mainnet                     |
 | `walrus_fetch`          | Fetch a blob from Walrus by id                               |
 
-The build loop is: a `*_build`-style tool returns base64 tx bytes →
-`sui_dry_run` to verify → the host signs → `sui_execute_signed_tx` to
+The build loop is: a `*_build`-style tool returns base64 tx bytes -> `sui_dry_run` to verify -> the host signs -> `sui_execute_signed_tx` to
 submit. The toolkit never holds keys.
 
 All tools return structured JSON in the `text` content block. The
@@ -162,8 +161,8 @@ calling agent is expected to parse it.
 ## Transport &amp; deprecation
 
 Sui is deprecating public JSON-RPC fullnode endpoints (~mid-2026) in
-favour of gRPC and GraphQL. Transport is chosen in one place —
-`src/sui-client.ts` — so the rest of the toolkit never imports a client
+favour of gRPC and GraphQL. Transport is chosen in one place -
+`src/sui-client.ts` - so the rest of the toolkit never imports a client
 directly.
 
 Today `clientFor()` returns the JSON-RPC client, because building a
@@ -174,7 +173,7 @@ supported"/"not supported yet"). Reads already work over gRPC via
 `grpcClientFor()`, also in that file.
 
 When the SDK ships transaction-building over gRPC, the cutover is a
-one-line change in `clientFor()` — no tool touches transport directly.
+one-line change in `clientFor()` - no tool touches transport directly.
 
 ## Development
 

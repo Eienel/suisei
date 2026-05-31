@@ -9,7 +9,7 @@ const toSui = (mist: string | number | bigint) => Number(BigInt(mist)) / 1e9;
 
 /**
  * One validator's full picture, with APY merged: name, address, commission,
- * total stake, voting power, project URL — plus the live APY the chain
+ * total stake, voting power, project URL - plus the live APY the chain
  * computes from recent epoch rewards. Fuses sui_get_validators and
  * sui_get_validators_apy into a single read so a staking app doesn't have
  * to join them by hand.

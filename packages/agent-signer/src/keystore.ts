@@ -101,7 +101,7 @@ export function loadSecret(opts: { path: string; passphrase: string }): {
       decipher.final(),
     ]).toString('utf8');
   } catch {
-    throw new Error('Decryption failed — wrong passphrase or corrupted keystore.');
+    throw new Error('Decryption failed - wrong passphrase or corrupted keystore.');
   }
   return { address: file.address, secretBech32 };
 }

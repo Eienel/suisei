@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Standalone HTTP entrypoint — host the Suisei MCP anywhere.
+ * Standalone HTTP entrypoint - host the Suisei MCP anywhere.
  *
  *   PORT=8787 SUISEI_MCP_TOKEN=secret npx suisei-mcp-serve
  *

@@ -8,7 +8,7 @@ interface Args {
 }
 
 /**
- * List the dynamic fields attached to a parent object — the way Sui
+ * List the dynamic fields attached to a parent object - the way Sui
  * stores Tables, Bags, and other on-chain collections. Returns each
  * field's name, type, and the child object id. Paginated.
  */

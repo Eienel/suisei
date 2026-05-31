@@ -51,6 +51,6 @@ export async function suiPayMany(raw: unknown): Promise<string> {
     total_mist: total,
     total_sui: Number(BigInt(total)) / 1e9,
     next_step:
-      'Dry-run with sui_dry_run, sign, and submit with sui_execute_signed_tx. All N payouts settle atomically — they all land or none do.',
+      'Dry-run with sui_dry_run, sign, and submit with sui_execute_signed_tx. All N payouts settle atomically - they all land or none do.',
   });
 }
