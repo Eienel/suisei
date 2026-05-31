@@ -1,3 +1,0 @@
-# Intentionally empty.
-# This deployment serves only the serverless MCP at /api/mcp.
-# Vercel needs a non-repo-root outputDirectory so the repo source is not served as static files.

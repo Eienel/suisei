@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm --prefix packages/mcp install --include=dev && npm --prefix packages/mcp run build",
-  "buildCommand": "echo 'no frontend; api/mcp.ts is served as a Node serverless function'",
-  "outputDirectory": "public"
+  "framework": "nextjs",
+  "installCommand": "npm --prefix web install",
+  "buildCommand": "npm --prefix web run build",
+  "outputDirectory": "web/.next"
 }

@@ -14,12 +14,13 @@ toolkit** and nothing else:
 - `packages/mcp` - `@suisei-mcp/mcp`, the MCP server (33 tools).
 - `packages/agent-signer` - `@suisei-mcp/agent-signer`, the non-custodial
   local signer.
-- `api/mcp.ts` - the same server as a Vercel Node serverless function.
+- `web/` - the landing page and showcase (Next), which also serves the
+  remote MCP endpoint at `/api/mcp`.
 - `move/suisei_badge` - the soulbound completion badge module.
 - `docs/` - design docs for the showcase apps.
 
-There is no frontend in this repo. The showcase apps, when built, live in
-their own `apps/*` directories.
+The only frontend here is the `web/` landing page. The showcase apps
+themselves, when built, live in their own repositories.
 
 ---
 

@@ -135,9 +135,9 @@ Two ways to host it:
 
 - Self-hosted: `npx suisei-mcp-serve` starts an HTTP server you can
   front with HTTPS.
-- Serverless: this repo's [`api/mcp.ts`](api/mcp.ts) runs as a Vercel
-  Node function. Set `SUISEI_MCP_TOKEN` in the project env; callers must
-  then send `Authorization: Bearer <token>`.
+- Serverless: the [`web/`](web) Next app serves the endpoint at
+  `/api/mcp` (alongside the landing page). Set `SUISEI_MCP_TOKEN` in the
+  project env; callers must then send `Authorization: Bearer <token>`.
 
 ## Custom RPC provider (optional)
 
@@ -160,8 +160,7 @@ endpoint. See [`.env.example`](.env.example) for all options.
 packages/
   mcp/                    # @suisei-mcp/mcp: the MCP server (33 tools)
   agent-signer/           # @suisei-mcp/agent-signer: non-custodial local signer
-api/
-  mcp.ts                  # Vercel Node serverless wrapper around the MCP
+web/                      # Landing page + showcase (Next), serves /api/mcp
 move/
   suisei_badge/           # Soulbound completion badge for the teaching agent
 docs/
