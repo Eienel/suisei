@@ -45,7 +45,7 @@ export async function suiDecodeTxBytes(raw: unknown): Promise<string> {
     command_count: commands.length,
     commands,
     plain_english: commands.map((c) => `${c.index + 1}. ${c.summary}`).join('\n'),
-    note: 'Decoded from BCS offline. Compare against the agent's stated intent before signing.',
+    note: "Decoded from BCS offline. Compare against the agent's stated intent before signing.",
   });
 }
 
