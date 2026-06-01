@@ -119,12 +119,13 @@ function Hero() {
       <Reveal className="relative min-w-0">
         <div
           aria-hidden="true"
-          className="float pointer-events-none mx-auto mb-[-2.5rem] h-44 w-44 select-none sm:h-52 sm:w-52 md:mb-[-3rem] md:ml-auto md:mr-[-1rem] md:h-64 md:w-64"
+          className="float pointer-events-none mx-auto mb-[-2rem] w-full max-w-sm select-none md:mb-[-2.5rem] md:max-w-md"
         >
           <SlotImage
-            src="/images/hero-comet.png"
+            src="/images/hero-comet2.png"
             alt=""
-            aspect="1 / 1"
+            aspect="3 / 2"
+            fit="contain"
             label="comet"
             className="border-0 bg-transparent shadow-none"
           />

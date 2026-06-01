@@ -15,12 +15,14 @@ export function SlotImage({
   aspect = '4 / 3',
   className = '',
   label,
+  fit = 'cover',
 }: {
   src: string;
   alt: string;
   aspect?: string;
   className?: string;
   label?: string;
+  fit?: 'cover' | 'contain';
 }) {
   const [failed, setFailed] = useState(false);
 
@@ -35,7 +37,7 @@ export function SlotImage({
           src={src}
           alt={alt}
           onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
+          className={`h-full w-full ${fit === 'contain' ? 'object-contain' : 'object-cover'}`}
         />
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center">
