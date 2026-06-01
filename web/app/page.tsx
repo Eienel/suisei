@@ -7,6 +7,7 @@ import {
   Plus,
 } from '@phosphor-icons/react/dist/ssr';
 import { Reveal } from '@/components/Reveal';
+import { RotatingEyebrow } from '@/components/RotatingEyebrow';
 import { AnimatedTerminal } from '@/components/AnimatedTerminal';
 import { Clients } from '@/components/Clients';
 import { FlowDiagram } from '@/components/FlowDiagram';
@@ -82,32 +83,29 @@ function Hero() {
   return (
     <header
       id="top"
-      className="mx-auto grid max-w-6xl items-center gap-12 px-5 pt-14 pb-20 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:pt-20"
+      className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-12 pb-14 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:pt-20 md:pb-20"
     >
-      <div>
-        <span className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-paper-raised px-3 py-1 font-mono text-xs text-muted">
-          <span className="comet-dot" aria-hidden="true" />
-          Built for Sui Overflow 2026
-        </span>
-        <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-5xl lg:text-[4rem]">
+      <div className="min-w-0">
+        <RotatingEyebrow />
+        <h1 className="mt-5 text-[2.1rem] font-semibold leading-[1.06] tracking-tight sm:text-5xl lg:text-[3.75rem] lg:leading-[1.04]">
           The Sui Stack as{' '}
           <span className="ink-underline text-accent">one-line tools</span>.
         </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
+        <p className="mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
           Suisei puts Sui behind the Model Context Protocol, so any AI agent
           can read, build, simulate, sign, and submit on chain.
         </p>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <a
             href={GITHUB}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
           >
             <GithubLogo size={18} weight="fill" />
             Get started on GitHub
           </a>
           <a
             href={NPM_MCP}
-            className="inline-flex items-center gap-2 rounded-lg border border-line-strong bg-paper-raised px-5 py-3 text-sm font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-accent active:translate-y-0"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-line-strong bg-paper-raised px-5 py-3 text-sm font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-accent active:translate-y-0"
           >
             <Package size={18} />
             View on npm
@@ -115,19 +113,23 @@ function Hero() {
         </div>
       </div>
 
-      <Reveal>
-        <div className="relative">
-          <div className="float pointer-events-none absolute -top-10 right-2 hidden h-40 w-40 lg:block">
-            <SlotImage
-              src="/images/hero-comet.png"
-              alt="Suisei comet"
-              aspect="1 / 1"
-              label="comet"
-              className="border-0 bg-transparent"
-            />
-          </div>
-          <AnimatedTerminal />
+      {/* Right column: the comet sits above and to the right as a clear
+          visual, the terminal below it. They overlap only slightly so the
+          comet stays legible. Contained so nothing overflows on mobile. */}
+      <Reveal className="relative min-w-0">
+        <div
+          aria-hidden="true"
+          className="float pointer-events-none mx-auto mb-[-2.5rem] h-44 w-44 select-none sm:h-52 sm:w-52 md:mb-[-3rem] md:ml-auto md:mr-[-1rem] md:h-64 md:w-64"
+        >
+          <SlotImage
+            src="/images/hero-comet.png"
+            alt=""
+            aspect="1 / 1"
+            label="comet"
+            className="border-0 bg-transparent shadow-none"
+          />
         </div>
+        <AnimatedTerminal />
       </Reveal>
     </header>
   );
@@ -334,14 +336,24 @@ function FooterLink({
   );
 }
 
-/* The Suisei mark: a comet, a ring with an offset core. */
+/* The Suisei mark: a small comet, sphere plus trail, in the brand accent. */
 function Mark() {
   return (
-    <span
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 32 32"
+      fill="none"
       aria-hidden="true"
-      className="relative inline-block h-5 w-5 rounded-full border-2 border-accent"
+      className="shrink-0"
     >
-      <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent" />
-    </span>
+      <path
+        d="M5 21 Q13 16 23 17 Q15 19 7 24 Z"
+        fill="#4da2ff"
+        opacity="0.55"
+      />
+      <circle cx="21" cy="13" r="6.5" fill="#1746c7" />
+      <circle cx="18.6" cy="10.8" r="1.9" fill="#cfe1ff" opacity="0.75" />
+    </svg>
   );
 }

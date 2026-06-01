@@ -39,6 +39,13 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* Guard against any horizontal overflow leaking a scrollbar on mobile. */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 body {
   background-color: var(--color-paper);
   color: var(--color-ink);

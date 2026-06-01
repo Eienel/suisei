@@ -85,7 +85,7 @@ export function AnimatedTerminal() {
   const visible = reduced ? STEPS.map((_, i) => i) : [active];
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line-strong bg-term-bg font-mono text-[13px] leading-relaxed shadow-lg shadow-black/5">
+    <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-line-strong bg-term-bg font-mono text-[12px] leading-relaxed shadow-lg shadow-black/5 sm:text-[13px]">
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-1.5" aria-hidden="true">
           <span className="h-3 w-3 rounded-full bg-white/15" />
@@ -124,7 +124,7 @@ export function AnimatedTerminal() {
                 <span className="text-term-ink">{step.prompt}</span>
               </p>
               <p className="mt-2 text-term-blue">{step.tool}</p>
-              <pre className="mt-1 whitespace-pre-wrap text-term-ink">
+              <pre className="mt-1 whitespace-pre-wrap break-all text-term-ink">
                 {step.result}
               </pre>
             </div>
