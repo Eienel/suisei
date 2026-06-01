@@ -83,7 +83,7 @@ function Hero() {
   return (
     <header
       id="top"
-      className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-4 pb-14 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:pt-8 md:pb-20"
+      className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-12 pb-14 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:pt-20 md:pb-20"
     >
       <div className="min-w-0">
         <RotatingEyebrow />
