@@ -1,13 +1,13 @@
 /*
- * "Works with" row using real brand logos from Simple Icons (verified to
- * exist: claude, cursor, sui). Rendered grayscale via CSS so they sit
- * quietly on the paper; "Any MCP client" stays as a text chip. Logos only,
- * no category labels.
+ * "Works with" row of real MCP clients (apps that connect to the server),
+ * logos from Simple Icons (verified: claude, cursor, windsurf). Sui is the
+ * chain the toolkit talks to, not an MCP client, so it does not belong here.
+ * Grayscale so the logos sit quietly on the paper. Logos only, no labels.
  */
 const LOGOS = [
   { slug: 'claude', label: 'Claude' },
   { slug: 'cursor', label: 'Cursor' },
-  { slug: 'sui', label: 'Sui' },
+  { slug: 'windsurf', label: 'Windsurf' },
 ];
 
 export function Clients() {

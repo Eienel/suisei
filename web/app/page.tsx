@@ -116,15 +116,15 @@ function Hero() {
       {/* Right column: the comet sits above and to the right as a clear
           visual, the terminal below it. They overlap only slightly so the
           comet stays legible. Contained so nothing overflows on mobile. */}
-      <Reveal className="relative min-w-0">
+      <Reveal className="relative min-w-0 md:self-start">
         <div
           aria-hidden="true"
-          className="float pointer-events-none mx-auto mb-[-2rem] w-full max-w-sm select-none md:mb-[-2.5rem] md:max-w-md"
+          className="float pointer-events-none mx-auto mb-[-1rem] w-full max-w-sm select-none md:mb-[-1.5rem] md:max-w-md"
         >
           <SlotImage
-            src="/images/hero-comet2.png"
+            src="/images/hero-comet-trim.png"
             alt=""
-            aspect="3 / 2"
+            aspect="653 / 339"
             fit="contain"
             label="comet"
             className="border-0 bg-transparent shadow-none"
