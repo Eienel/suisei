@@ -4,7 +4,7 @@
   "description": "Local, non-custodial signer for a Tier-1 Sui agent wallet. Generates and encrypts an agent keypair on the user's machine and signs tx bytes from @suisei-mcp/mcp. The key never leaves the host and never enters an agent's context.",
   "license": "MIT",
   "type": "module",
-  "homepage": "https://github.com/eienel/suisei/tree/main/packages/agent-signer",
+  "homepage": "https://suisei.vercel.app",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eienel/suisei.git",

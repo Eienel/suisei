@@ -2,6 +2,7 @@
 
 > *Suisei* (彗星) is Japanese for *comet*.
 
+[![website](https://img.shields.io/badge/website-suisei.vercel.app-1746c7?logo=vercel&logoColor=white)](https://suisei.vercel.app)
 [![@suisei-mcp/mcp](https://img.shields.io/npm/v/@suisei-mcp/mcp?label=%40suisei-mcp%2Fmcp&color=cb3837&logo=npm)](https://www.npmjs.com/package/@suisei-mcp/mcp)
 [![@suisei-mcp/agent-signer](https://img.shields.io/npm/v/@suisei-mcp/agent-signer?label=%40suisei-mcp%2Fagent-signer&color=cb3837&logo=npm)](https://www.npmjs.com/package/@suisei-mcp/agent-signer)
 [![license](https://img.shields.io/npm/l/@suisei-mcp/mcp?color=blue)](LICENSE)
@@ -9,6 +10,8 @@
 > Sui's agent toolkit. The Sui Stack as one-line tools, exposed over the
 > Model Context Protocol so any AI agent (Claude Desktop, Cursor, your
 > own bot) can read, build, simulate, sign, and submit on Sui.
+
+**Website: [suisei.vercel.app](https://suisei.vercel.app)**
 
 Two packages on npm, the same toolkit any agent can plug into:
 
