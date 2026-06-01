@@ -46,6 +46,13 @@ function Nav() {
         <a href="#top" className="flex items-center gap-2.5">
           <Mark />
           <span className="font-semibold tracking-tight">Suisei</span>
+          <span
+            lang="ja"
+            className="text-sm text-faint"
+            title="suisei, comet"
+          >
+            彗星
+          </span>
         </a>
         <div className="flex items-center gap-6 text-sm text-muted">
           <a href="#security" className="hidden transition-colors hover:text-ink sm:inline">
@@ -284,9 +291,13 @@ function Footer() {
           <div className="flex items-center gap-2.5">
             <Mark />
             <span className="font-semibold tracking-tight">Suisei</span>
+            <span lang="ja" className="text-sm text-faint" title="suisei, comet">
+              彗星
+            </span>
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
-            Sui&apos;s agent toolkit. MIT licensed. Built for Sui Overflow 2026.
+            Sui&apos;s agent toolkit. 彗星 means comet. MIT licensed, built for
+            Sui Overflow 2026.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">

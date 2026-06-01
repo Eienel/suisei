@@ -1,4 +1,6 @@
-# Suisei
+# Suisei 彗星
+
+> *Suisei* (彗星) is Japanese for *comet*.
 
 [![@suisei-mcp/mcp](https://img.shields.io/npm/v/@suisei-mcp/mcp?label=%40suisei-mcp%2Fmcp&color=cb3837&logo=npm)](https://www.npmjs.com/package/@suisei-mcp/mcp)
 [![@suisei-mcp/agent-signer](https://img.shields.io/npm/v/@suisei-mcp/agent-signer?label=%40suisei-mcp%2Fagent-signer&color=cb3837&logo=npm)](https://www.npmjs.com/package/@suisei-mcp/agent-signer)
