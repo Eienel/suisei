@@ -10,7 +10,23 @@ export const metadata: Metadata = {
     title: 'Suisei, the Sui agent toolkit',
     description:
       'The Sui Stack as one-line tools over MCP. Any AI agent can read, build, simulate, sign, and submit on Sui.',
+    url: 'https://suisei.vercel.app',
+    siteName: 'Suisei',
     type: 'website',
+    images: [
+      {
+        url: '/images/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Suisei, the Sui Stack as one-line tools.',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Suisei, the Sui agent toolkit',
+    description:
+      'The Sui Stack as one-line tools over MCP. Any AI agent can read, build, simulate, sign, and submit on Sui.',
     images: ['/images/og.png'],
   },
 };
