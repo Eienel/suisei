@@ -200,6 +200,18 @@ And on the wallet side:
 
 Details in [`PLAN.md`](PLAN.md) and the [`docs/`](docs) design files.
 
+## Roadmap
+
+- **Live now:** the MCP server and the non-custodial signer on npm, the
+  remote endpoint at [suisei.vercel.app](https://suisei.vercel.app), and
+  the soulbound badge module published on Sui testnet
+  ([`0x8dcb...269f`](https://suiscan.xyz/testnet/object/0x8dcb044c983362378234c6c12c5b0fb7ae83f81b63b2e2b0a8b38d63b3e5269f)).
+- **Next:** mainnet deployment of the badge module.
+- **TxLens v2:** a browser extension that intercepts the wallet's
+  sign prompt and shows the verdict inline.
+- **TxRiskRegistry:** an on-chain registry where anyone can flag a
+  package id with evidence, giving TxLens a community signal.
+
 ## Development
 
 ```bash

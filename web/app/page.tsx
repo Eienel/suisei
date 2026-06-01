@@ -1,5 +1,7 @@
 import {
   ArrowUpRight,
+  CheckCircle,
+  Circle,
   GithubLogo,
   Key,
   Lock,
@@ -21,6 +23,9 @@ const NPM_MCP = 'https://www.npmjs.com/package/@suisei-mcp/mcp';
 const NPM_SIGNER = 'https://www.npmjs.com/package/@suisei-mcp/agent-signer';
 const SUBMIT =
   'https://github.com/eienel/suisei/issues/new?labels=showcase&title=%5BShowcase%5D+';
+const BADGE_PKG =
+  '0x8dcb044c983362378234c6c12c5b0fb7ae83f81b63b2e2b0a8b38d63b3e5269f';
+const BADGE_EXPLORER = `https://suiscan.xyz/testnet/object/${BADGE_PKG}`;
 
 export default function Page() {
   return (
@@ -34,6 +39,7 @@ export default function Page() {
         <Flow />
         <Tools />
         <Built />
+        <Roadmap />
       </main>
       <Footer />
     </>
@@ -281,6 +287,81 @@ function Built() {
         <div className="mt-12">
           <Showcase />
         </div>
+      </div>
+    </section>
+  );
+}
+
+function Roadmap() {
+  const live = [
+    'MCP server and non-custodial signer on npm',
+    'Remote endpoint, add it to Claude on web and mobile',
+    'Soulbound badge module published on Sui testnet',
+  ];
+  const next = [
+    'Mainnet deployment of the badge module',
+    'TxLens browser extension, the verdict inline at sign time',
+    'TxRiskRegistry, a community signal for risky packages on-chain',
+  ];
+  return (
+    <section id="roadmap" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <Reveal>
+        <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          Where it is, where it goes.
+        </h2>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
+          The toolkit ships today. The path to mainnet and a safer agentic
+          web is already mapped.
+        </p>
+      </Reveal>
+      <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <Reveal>
+          <div className="h-full rounded-2xl border border-line bg-paper-raised p-7">
+            <p className="font-mono text-xs uppercase tracking-wider text-faint">
+              Live now
+            </p>
+            <ul className="mt-5 space-y-4">
+              {live.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircle
+                    size={20}
+                    weight="fill"
+                    className="mt-0.5 shrink-0 text-accent"
+                  />
+                  <span className="leading-relaxed text-ink">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <a
+              href={BADGE_EXPLORER}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-1 font-mono text-xs text-accent transition-colors hover:text-accent-hover"
+            >
+              View the badge package on Suiscan
+              <ArrowUpRight size={13} />
+            </a>
+          </div>
+        </Reveal>
+        <Reveal delay={90}>
+          <div className="h-full rounded-2xl border border-line bg-paper-raised p-7">
+            <p className="font-mono text-xs uppercase tracking-wider text-faint">
+              Next
+            </p>
+            <ul className="mt-5 space-y-4">
+              {next.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <Circle
+                    size={20}
+                    weight="regular"
+                    className="mt-0.5 shrink-0 text-faint"
+                  />
+                  <span className="leading-relaxed text-muted">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
