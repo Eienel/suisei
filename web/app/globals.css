@@ -123,3 +123,57 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* Small accent dot for the hero eyebrow badge. */
+.comet-dot {
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* Comet mark used in image-slot placeholders. A ring with an offset core. */
+.comet-mark {
+  position: relative;
+  display: inline-block;
+  height: 40px;
+  width: 40px;
+  border: 2px solid var(--color-line-strong);
+  border-radius: 50%;
+}
+.comet-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 10px;
+  width: 10px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+/* Gentle float for the hero visual. Transform only, reduced-motion off. */
+@media (prefers-reduced-motion: no-preference) {
+  .float {
+    animation: float 7s ease-in-out infinite;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Accent underline that draws in when its section reveals. */
+.ink-underline {
+  background-image: linear-gradient(var(--color-accent), var(--color-accent));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 100% 0.12em;
+  padding-bottom: 0.05em;
+}

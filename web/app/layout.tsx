@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://block-builders-drab.vercel.app'),
   title: 'Suisei, the Sui agent toolkit',
   description:
     'The Sui Stack as one-line tools over the Model Context Protocol. Any AI agent can read, build, simulate, sign, and submit on Sui.',
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
     description:
       'The Sui Stack as one-line tools over MCP. Any AI agent can read, build, simulate, sign, and submit on Sui.',
     type: 'website',
+    images: ['/images/og.png'],
   },
 };
 

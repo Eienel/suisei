@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, Warning } from '@phosphor-icons/react';
+import { SlotImage } from './SlotImage';
 
 interface Project {
   name: string;
@@ -9,7 +10,16 @@ interface Project {
   url: string;
   author?: string;
   tags?: string[];
+  image?: string;
 }
+
+// Per-project header art, by name. Seeded projects map to generated slots;
+// submitted ones fall back to the branded placeholder.
+const IMAGE_BY_NAME: Record<string, string> = {
+  TxLens: '/images/showcase-txlens.png',
+  MnemoSui: '/images/showcase-mnemosui.png',
+  'Suisei Tutor': '/images/showcase-tutor.png',
+};
 
 type Load =
   | { state: 'loading' }
@@ -87,8 +97,16 @@ export function Showcase() {
           href={p.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col rounded-2xl border border-line bg-paper-raised p-6 transition-colors hover:border-accent"
+          className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-paper-raised transition-all hover:-translate-y-1 hover:border-accent hover:shadow-lg hover:shadow-black/5"
         >
+          <SlotImage
+            src={p.image ?? IMAGE_BY_NAME[p.name] ?? '/images/_none.png'}
+            alt={`${p.name} preview`}
+            aspect="16 / 9"
+            label={p.name}
+            className="rounded-none border-0 border-b border-line"
+          />
+          <div className="flex flex-1 flex-col p-6">
           <div className="mb-2 flex items-center justify-between gap-2">
             <h3 className="text-lg font-semibold tracking-tight text-ink">
               {p.name}
@@ -116,6 +134,7 @@ export function Showcase() {
           {p.author && (
             <p className="mt-3 text-xs text-faint">by {p.author}</p>
           )}
+          </div>
         </a>
       ))}
     </div>

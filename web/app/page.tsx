@@ -7,7 +7,10 @@ import {
   Plus,
 } from '@phosphor-icons/react/dist/ssr';
 import { Reveal } from '@/components/Reveal';
-import { Terminal } from '@/components/Terminal';
+import { AnimatedTerminal } from '@/components/AnimatedTerminal';
+import { Clients } from '@/components/Clients';
+import { FlowDiagram } from '@/components/FlowDiagram';
+import { SlotImage } from '@/components/SlotImage';
 import { ToolDirectory } from '@/components/ToolDirectory';
 import { Showcase } from '@/components/Showcase';
 import { toolCount } from '@/lib/tools';
@@ -25,7 +28,9 @@ export default function Page() {
       <main>
         <Hero />
         <Clients />
+        <Stats />
         <Security />
+        <Flow />
         <Tools />
         <Built />
       </main>
@@ -36,29 +41,31 @@ export default function Page() {
 
 function Nav() {
   return (
-    <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-      <a href="#top" className="flex items-center gap-2.5">
-        <Mark />
-        <span className="font-semibold tracking-tight">Suisei</span>
-      </a>
-      <div className="flex items-center gap-6 text-sm text-muted">
-        <a href="#tools" className="hidden transition-colors hover:text-ink sm:inline">
-          Tools
+    <nav className="sticky top-0 z-40 border-b border-line/70 bg-paper/80 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+        <a href="#top" className="flex items-center gap-2.5">
+          <Mark />
+          <span className="font-semibold tracking-tight">Suisei</span>
         </a>
-        <a href="#security" className="hidden transition-colors hover:text-ink sm:inline">
-          Security
-        </a>
-        <a href="#showcase" className="hidden transition-colors hover:text-ink sm:inline">
-          Showcase
-        </a>
-        <a
-          href={GITHUB}
-          className="flex items-center gap-1.5 transition-colors hover:text-ink"
-          aria-label="Suisei on GitHub"
-        >
-          <GithubLogo size={18} weight="fill" />
-          <span className="hidden md:inline">GitHub</span>
-        </a>
+        <div className="flex items-center gap-6 text-sm text-muted">
+          <a href="#security" className="hidden transition-colors hover:text-ink sm:inline">
+            Security
+          </a>
+          <a href="#tools" className="hidden transition-colors hover:text-ink sm:inline">
+            Tools
+          </a>
+          <a href="#showcase" className="hidden transition-colors hover:text-ink sm:inline">
+            Showcase
+          </a>
+          <a
+            href={GITHUB}
+            className="flex items-center gap-1.5 transition-colors hover:text-ink"
+            aria-label="Suisei on GitHub"
+          >
+            <GithubLogo size={18} weight="fill" />
+            <span className="hidden md:inline">GitHub</span>
+          </a>
+        </div>
       </div>
     </nav>
   );
@@ -68,63 +75,75 @@ function Hero() {
   return (
     <header
       id="top"
-      className="mx-auto grid max-w-6xl items-center gap-12 px-5 pt-12 pb-20 md:grid-cols-2 md:gap-10 md:pt-20"
+      className="mx-auto grid max-w-6xl items-center gap-12 px-5 pt-14 pb-20 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:pt-20"
     >
       <div>
-        <span className="inline-block rounded-full border border-line-strong px-3 py-1 font-mono text-xs text-muted">
+        <span className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-paper-raised px-3 py-1 font-mono text-xs text-muted">
+          <span className="comet-dot" aria-hidden="true" />
           Built for Sui Overflow 2026
         </span>
-        <h1 className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
-          The Sui Stack as one-line tools.
+        <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-5xl lg:text-[4rem]">
+          The Sui Stack as{' '}
+          <span className="ink-underline text-accent">one-line tools</span>.
         </h1>
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-          Suisei exposes Sui over the Model Context Protocol, so any AI agent
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
+          Suisei puts Sui behind the Model Context Protocol, so any AI agent
           can read, build, simulate, sign, and submit on chain.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <a
             href={GITHUB}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover active:translate-y-px"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
           >
             <GithubLogo size={18} weight="fill" />
             Get started on GitHub
           </a>
           <a
             href={NPM_MCP}
-            className="inline-flex items-center gap-2 rounded-lg border border-line-strong px-5 py-3 text-sm font-medium text-ink transition-colors hover:border-accent active:translate-y-px"
+            className="inline-flex items-center gap-2 rounded-lg border border-line-strong bg-paper-raised px-5 py-3 text-sm font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-accent active:translate-y-0"
           >
             <Package size={18} />
             View on npm
           </a>
         </div>
       </div>
-      <Reveal className="md:pl-4">
-        <Terminal />
+
+      <Reveal>
+        <div className="relative">
+          <div className="float pointer-events-none absolute -top-10 right-2 hidden h-40 w-40 lg:block">
+            <SlotImage
+              src="/images/hero-comet.png"
+              alt="Suisei comet"
+              aspect="1 / 1"
+              label="comet"
+              className="border-0 bg-transparent"
+            />
+          </div>
+          <AnimatedTerminal />
+        </div>
       </Reveal>
     </header>
   );
 }
 
-function Clients() {
-  const clients = [
-    'Claude Desktop',
-    'Claude Code',
-    'Cursor',
-    'Any MCP client',
+function Stats() {
+  const stats = [
+    { value: toolCount.toString(), label: 'tools, one install' },
+    { value: '2', label: 'packages on npm' },
+    { value: '0', label: 'keys held by the toolkit' },
+    { value: '100%', label: 'on real testnet' },
   ];
   return (
-    <section className="border-y border-line bg-paper-raised/60">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-5 py-8 sm:flex-row sm:justify-between">
-        <p className="font-mono text-xs uppercase tracking-wider text-faint">
-          Works with
-        </p>
-        <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {clients.map((c) => (
-            <li key={c} className="text-sm font-medium text-muted">
-              {c}
-            </li>
-          ))}
-        </ul>
+    <section className="mx-auto max-w-6xl px-5 py-14 md:py-16">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="bg-paper-raised px-5 py-8 text-center">
+            <p className="font-mono text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+              {s.value}
+            </p>
+            <p className="mt-2 text-sm text-muted">{s.label}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -144,8 +163,10 @@ function Security() {
       </Reveal>
       <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
         <Reveal>
-          <article className="h-full rounded-2xl border border-line bg-paper-raised p-7">
-            <Lock size={26} weight="duotone" className="text-accent" />
+          <article className="group h-full rounded-2xl border border-line bg-paper-raised p-7 transition-colors hover:border-accent">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent">
+              <Lock size={24} weight="duotone" />
+            </div>
             <h3 className="mt-5 text-xl font-semibold tracking-tight">
               The toolkit never holds keys
             </h3>
@@ -157,9 +178,11 @@ function Security() {
             </p>
           </article>
         </Reveal>
-        <Reveal delay={80}>
-          <article className="h-full rounded-2xl border border-line bg-paper-raised p-7">
-            <Key size={26} weight="duotone" className="text-accent" />
+        <Reveal delay={90}>
+          <article className="group h-full rounded-2xl border border-line bg-paper-raised p-7 transition-colors hover:border-accent">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent">
+              <Key size={24} weight="duotone" />
+            </div>
             <h3 className="mt-5 text-xl font-semibold tracking-tight">
               Keys never enter an agent
             </h3>
@@ -176,25 +199,41 @@ function Security() {
   );
 }
 
-function Tools() {
+function Flow() {
   return (
-    <section
-      id="tools"
-      className="border-t border-line bg-paper-raised/60 py-20 md:py-28"
-    >
+    <section className="border-y border-line bg-paper-raised/60 py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-5">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            {toolCount} tools, ready the moment you connect.
+            One loop, four steps, zero exposed keys.
           </h2>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-            Reads work with no key and no setup. Builders return unsigned bytes
-            you sign locally. One install, the whole Sui Stack.
+            From a plain-language ask to an on-chain result. The signing step
+            is the only one that touches a key, and it stays on your machine.
           </p>
         </Reveal>
         <div className="mt-12">
-          <ToolDirectory />
+          <FlowDiagram />
         </div>
+      </div>
+    </section>
+  );
+}
+
+function Tools() {
+  return (
+    <section id="tools" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <Reveal>
+        <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          {toolCount} tools, ready the moment you connect.
+        </h2>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
+          Reads work with no key and no setup. Builders return unsigned bytes
+          you sign locally. One install, the whole Sui Stack.
+        </p>
+      </Reveal>
+      <div className="mt-12">
+        <ToolDirectory />
       </div>
     </section>
   );
@@ -202,31 +241,36 @@ function Tools() {
 
 function Built() {
   return (
-    <section id="showcase" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
-      <Reveal>
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-              Built with Suisei
-            </h2>
-            <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">
-              Projects that run on the toolkit. Shipped something with it? Add
-              yours, it takes a minute.
-            </p>
+    <section
+      id="showcase"
+      className="border-t border-line bg-paper-raised/60 py-20 md:py-28"
+    >
+      <div className="mx-auto max-w-6xl px-5">
+        <Reveal>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                Built with Suisei
+              </h2>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">
+                Projects that run on the toolkit. Shipped something with it? Add
+                yours, it takes a minute.
+              </p>
+            </div>
+            <a
+              href={SUBMIT}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
+            >
+              <Plus size={17} weight="bold" />
+              Submit your project
+            </a>
           </div>
-          <a
-            href={SUBMIT}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover active:translate-y-px"
-          >
-            <Plus size={17} weight="bold" />
-            Submit your project
-          </a>
+        </Reveal>
+        <div className="mt-12">
+          <Showcase />
         </div>
-      </Reveal>
-      <div className="mt-12">
-        <Showcase />
       </div>
     </section>
   );
@@ -279,7 +323,7 @@ function FooterLink({
   );
 }
 
-/* The Suisei mark: a comet dot. One simple geometric glyph, brand accent. */
+/* The Suisei mark: a comet, a ring with an offset core. */
 function Mark() {
   return (
     <span
