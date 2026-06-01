@@ -83,7 +83,7 @@ function Hero() {
   return (
     <header
       id="top"
-      className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-12 pb-14 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:pt-20 md:pb-20"
+      className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-4 pb-14 md:grid-cols-[1.05fr_0.95fr] md:gap-12 md:pt-8 md:pb-20"
     >
       <div className="min-w-0">
         <RotatingEyebrow />
@@ -337,24 +337,17 @@ function FooterLink({
   );
 }
 
-/* The Suisei mark: a small comet, sphere plus trail, in the brand accent. */
+/* The Suisei mark: the real comet, cropped from the hero render. */
 function Mark() {
   return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 32 32"
-      fill="none"
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/images/comet-logo.png"
+      alt=""
+      width={26}
+      height={26}
       aria-hidden="true"
-      className="shrink-0"
-    >
-      <path
-        d="M5 21 Q13 16 23 17 Q15 19 7 24 Z"
-        fill="#4da2ff"
-        opacity="0.55"
-      />
-      <circle cx="21" cy="13" r="6.5" fill="#1746c7" />
-      <circle cx="18.6" cy="10.8" r="1.9" fill="#cfe1ff" opacity="0.75" />
-    </svg>
+      className="h-6 w-6 shrink-0 select-none"
+    />
   );
 }
