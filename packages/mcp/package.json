@@ -1,6 +1,6 @@
 {
   "name": "@suisei-mcp/mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Suisei - the Sui Stack as one-line tools, exposed over the Model Context Protocol so any agent can build on Sui.",
   "license": "MIT",
   "type": "module",
@@ -24,6 +24,7 @@
     "./node": "./dist/node.js"
   },
   "bin": {
+    "mcp": "dist/index.js",
     "suisei-mcp": "dist/index.js",
     "suisei-mcp-serve": "dist/serve.js"
   },
