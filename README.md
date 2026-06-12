@@ -13,11 +13,37 @@
 
 **Website: [suisei.vercel.app](https://suisei.vercel.app)**
 
+## Why Suisei
+
+Every other Sui SDK is built for **humans writing app code**. Suisei is
+built for **agents that build on their own**. You don't wire up a React
+app and a wallet adapter; you point your agent at the toolkit and it does
+real on-chain work, end to end, without you in the loop for every step.
+
+That's the difference: a human SDK hands you primitives and expects you to
+assemble them. Suisei hands the *agent* the whole Sui Stack as one-line
+tools, so it can reason, decide, and act autonomously, while keys stay on
+your machine and never touch the model. Fully autonomous, fully
+non-custodial.
+
+- **Agent-first, not app-first.** Structured JSON in, structured JSON out.
+  No UI, no boilerplate, no human in the build loop.
+- **Portfolio in one call.** `sui_get_portfolio` returns coins, stakes,
+  rewards, and total SUI exposure. No hand-joined fan-out.
+- **Transaction safety built in.** `sui_explain_tx` decodes, simulates,
+  and judges any tx before a key ever touches it.
+- **Persistent memory.** Agents remember across sessions, indexed on Sui
+  and stored on Walrus, portable between clients.
+- **Bounded autonomy.** The Policy Vault enforces spend limits, recipient
+  allowlists, and expiry on-chain, so you can trust an agent with real funds.
+- **Universal via MCP.** Claude Desktop, Cursor, Claude web/mobile, or your
+  own bot. One install, any agent.
+
 Two packages on npm, the same toolkit any agent can plug into:
 
 | Package | What it is | Install |
 |---|---|---|
-| [`@suisei-mcp/mcp`](packages/mcp) | The MCP server: 35 tools spanning read, build, simulate, submit, staking, DeepBook, Walrus, agent-wallet lifecycle, one-call portfolio, and explain-before-you-sign tx safety. | `npm i -g @suisei-mcp/mcp` |
+| [`@suisei-mcp/mcp`](packages/mcp) | The MCP server: 37 tools spanning read, build, simulate, submit, staking, DeepBook, Walrus, agent-wallet lifecycle, one-call portfolio, persistent agent memory, and explain-before-you-sign tx safety. | `npm i -g @suisei-mcp/mcp` |
 | [`@suisei-mcp/agent-signer`](packages/agent-signer) | A non-custodial local CLI that holds the agent's key, encrypts it under your passphrase, and signs builder bytes. No key ever crosses an MCP response. | `npm i -g @suisei-mcp/agent-signer` |
 
 ## The two non-negotiables
