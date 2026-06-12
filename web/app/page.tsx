@@ -35,6 +35,7 @@ export default function Page() {
         <Hero />
         <Clients />
         <Stats />
+        <Moat />
         <Security />
         <Flow />
         <Tools />
@@ -162,6 +163,59 @@ function Stats() {
             <p className="mt-2 text-sm text-muted">{s.label}</p>
           </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function Moat() {
+  return (
+    <section className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <Reveal>
+        <h2 className="max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
+          Why Suisei, not another SDK.
+        </h2>
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
+          Every other Sui SDK is built for apps. Suisei is built for agents.
+        </p>
+      </Reveal>
+      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Reveal>
+          <div className="rounded-lg border border-line bg-paper-raised p-5">
+            <p className="font-semibold text-ink">Agent-first SDK</p>
+            <p className="mt-2 text-sm text-muted">Not app code. One-line tools. Agents reason over structured JSON, not write React.</p>
+          </div>
+        </Reveal>
+        <Reveal delay={45}>
+          <div className="rounded-lg border border-line bg-paper-raised p-5">
+            <p className="font-semibold text-ink">Portfolio in one call</p>
+            <p className="mt-2 text-sm text-muted">sui_get_portfolio snapshots: coins, stakes, rewards, SUI exposure. Manual fan-out doesn't exist.</p>
+          </div>
+        </Reveal>
+        <Reveal delay={90}>
+          <div className="rounded-lg border border-line bg-paper-raised p-5">
+            <p className="font-semibold text-ink">Transaction safety built-in</p>
+            <p className="mt-2 text-sm text-muted">sui_explain_tx decodes, simulates, judges before you sign. No other SDK does this.</p>
+          </div>
+        </Reveal>
+        <Reveal delay={135}>
+          <div className="rounded-lg border border-line bg-paper-raised p-5">
+            <p className="font-semibold text-ink">Persistent agent memory</p>
+            <p className="mt-2 text-sm text-muted">Agents remember across sessions. Memories indexed on-chain, stored on Walrus, portable.</p>
+          </div>
+        </Reveal>
+        <Reveal delay={180}>
+          <div className="rounded-lg border border-line bg-paper-raised p-5">
+            <p className="font-semibold text-ink">Bounded autonomy</p>
+            <p className="mt-2 text-sm text-muted">Policy Vault: on-chain spending limits, recipient allowlists, expiry. Trust agents with real control.</p>
+          </div>
+        </Reveal>
+        <Reveal delay={225}>
+          <div className="rounded-lg border border-line bg-paper-raised p-5">
+            <p className="font-semibold text-ink">Universal via MCP</p>
+            <p className="mt-2 text-sm text-muted">Works with Claude Desktop, Cursor, Claude web/mobile, custom bots. Not Sui-only.</p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
