@@ -12,7 +12,6 @@ import { Reveal } from '@/components/Reveal';
 import { RotatingEyebrow } from '@/components/RotatingEyebrow';
 import { AnimatedTerminal } from '@/components/AnimatedTerminal';
 import { Clients } from '@/components/Clients';
-import { FlowDiagram } from '@/components/FlowDiagram';
 import { SlotImage } from '@/components/SlotImage';
 import { ToolDirectory } from '@/components/ToolDirectory';
 import { toolCount } from '@/lib/tools';
@@ -36,7 +35,6 @@ export default function Page() {
         <Stats />
         <Moat />
         <Security />
-        <Flow />
         <Tools />
         <Built />
         <Roadmap />
@@ -345,27 +343,6 @@ function Security() {
           );
         })}
         <div className="border-t border-line" />
-      </div>
-    </section>
-  );
-}
-
-function Flow() {
-  return (
-    <section className="border-y border-line bg-paper-raised/60 py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-5">
-        <Reveal>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            One loop, four steps, zero exposed keys.
-          </h2>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-            From a plain-language ask to an on-chain result. The signing step
-            is the only one that touches a key, and it stays on your machine.
-          </p>
-        </Reveal>
-        <div className="mt-12">
-          <FlowDiagram />
-        </div>
       </div>
     </section>
   );
