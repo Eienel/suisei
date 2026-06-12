@@ -169,53 +169,101 @@ function Stats() {
 }
 
 function Moat() {
+  const rows = [
+    {
+      tool: 'agent-first',
+      claim: 'The agent builds, not you.',
+      detail:
+        'Structured JSON in, structured JSON out. No React, no wallet adapter, no human in the build loop.',
+    },
+    {
+      tool: 'sui_get_portfolio',
+      claim: 'A whole wallet in one call.',
+      detail:
+        'Coins, stakes, rewards, and total SUI exposure in a single read. The hand-joined fan-out everyone else writes does not exist here.',
+    },
+    {
+      tool: 'sui_explain_tx',
+      claim: 'It looks before it signs.',
+      detail:
+        'Decode, simulate, and judge any transaction before a key ever touches it. No other Sui SDK ships this.',
+    },
+    {
+      tool: 'mnemosui_*',
+      claim: 'Memory that outlives the session.',
+      detail:
+        'Indexed on Sui, stored on Walrus, portable between clients. The agent remembers what it did and why.',
+    },
+    {
+      tool: 'agent_vault',
+      claim: 'Autonomy you can bound.',
+      detail:
+        'On-chain spend limits, recipient allowlists, and expiry. Hand an agent real funds without handing it your keys.',
+    },
+    {
+      tool: 'MCP',
+      claim: 'Any agent, one install.',
+      detail:
+        'Claude Desktop, Cursor, Claude web and mobile, or your own bot. Not locked to one client, not locked to Sui tooling.',
+    },
+  ];
   return (
-    <section className="mx-auto max-w-6xl px-5 py-20 md:py-28">
-      <Reveal>
-        <h2 className="max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
-          Why Suisei, not another SDK.
-        </h2>
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
-          Every other Sui SDK is built for apps. Suisei is built for agents.
-        </p>
-      </Reveal>
-      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Reveal>
-          <div className="rounded-lg border border-line bg-paper-raised p-5">
-            <p className="font-semibold text-ink">Agent-first SDK</p>
-            <p className="mt-2 text-sm text-muted">Not app code. One-line tools. Agents reason over structured JSON, not write React.</p>
-          </div>
-        </Reveal>
-        <Reveal delay={45}>
-          <div className="rounded-lg border border-line bg-paper-raised p-5">
-            <p className="font-semibold text-ink">Portfolio in one call</p>
-            <p className="mt-2 text-sm text-muted">sui_get_portfolio snapshots: coins, stakes, rewards, SUI exposure. Manual fan-out doesn't exist.</p>
-          </div>
-        </Reveal>
-        <Reveal delay={90}>
-          <div className="rounded-lg border border-line bg-paper-raised p-5">
-            <p className="font-semibold text-ink">Transaction safety built-in</p>
-            <p className="mt-2 text-sm text-muted">sui_explain_tx decodes, simulates, judges before you sign. No other SDK does this.</p>
-          </div>
-        </Reveal>
-        <Reveal delay={135}>
-          <div className="rounded-lg border border-line bg-paper-raised p-5">
-            <p className="font-semibold text-ink">Persistent agent memory</p>
-            <p className="mt-2 text-sm text-muted">Agents remember across sessions. Memories indexed on-chain, stored on Walrus, portable.</p>
-          </div>
-        </Reveal>
-        <Reveal delay={180}>
-          <div className="rounded-lg border border-line bg-paper-raised p-5">
-            <p className="font-semibold text-ink">Bounded autonomy</p>
-            <p className="mt-2 text-sm text-muted">Policy Vault: on-chain spending limits, recipient allowlists, expiry. Trust agents with real control.</p>
-          </div>
-        </Reveal>
-        <Reveal delay={225}>
-          <div className="rounded-lg border border-line bg-paper-raised p-5">
-            <p className="font-semibold text-ink">Universal via MCP</p>
-            <p className="mt-2 text-sm text-muted">Works with Claude Desktop, Cursor, Claude web/mobile, custom bots. Not Sui-only.</p>
-          </div>
-        </Reveal>
+    <section className="border-y border-line bg-paper-raised/40 py-20 md:py-28">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-x-16 gap-y-12 px-5 md:grid-cols-[0.85fr_1.15fr]">
+        {/* Left: the thesis. Sticky on desktop so it anchors the list. */}
+        <div className="md:sticky md:top-24 md:self-start">
+          <Reveal>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+              The difference
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold leading-[1.1] tracking-tight md:text-[2.6rem]">
+              Built for agents,
+              <br />
+              <span className="text-muted">not for humans</span>
+              <br />
+              writing app code.
+            </h2>
+            <p className="mt-6 max-w-sm leading-relaxed text-muted">
+              A human SDK hands you primitives and expects you to assemble them.
+              Suisei hands the agent the whole Sui Stack as one-line tools, so it
+              reasons, decides, and acts on its own.
+            </p>
+            <div className="mt-8 space-y-px overflow-hidden rounded-xl border border-line text-sm">
+              <div className="flex items-center gap-3 bg-paper px-4 py-3">
+                <span className="font-mono text-xs text-faint">others</span>
+                <span className="text-muted">you assemble the primitives</span>
+              </div>
+              <div className="flex items-center gap-3 bg-accent-soft px-4 py-3">
+                <span className="font-mono text-xs text-accent">suisei</span>
+                <span className="font-medium text-ink">the agent assembles itself</span>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* Right: editorial numbered rows on hairlines. */}
+        <ol className="border-t border-line">
+          {rows.map((r, i) => (
+            <Reveal key={r.tool} delay={i * 60}>
+              <li className="group grid grid-cols-[auto_1fr] gap-x-5 border-b border-line py-6 transition-colors hover:bg-paper/60 md:gap-x-8 md:py-7">
+                <span className="font-mono text-sm tabular-nums text-faint">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h3 className="text-lg font-semibold tracking-tight md:text-xl">
+                      {r.claim}
+                    </h3>
+                    <code className="font-mono text-xs text-accent">{r.tool}</code>
+                  </div>
+                  <p className="mt-2 max-w-xl leading-relaxed text-muted">
+                    {r.detail}
+                  </p>
+                </div>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
       </div>
     </section>
   );
