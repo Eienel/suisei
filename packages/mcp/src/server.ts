@@ -52,9 +52,13 @@ import { agentWalletFund } from './tools/agent_wallet_fund.js';
 import { agentWalletSweep } from './tools/agent_wallet_sweep.js';
 import { agentWalletStatus } from './tools/agent_wallet_status.js';
 import { suiDryRun } from './tools/sui_dry_run.js';
+import { suiExplainTx } from './tools/sui_explain_tx.js';
+import { suiGetPortfolio } from './tools/sui_get_portfolio.js';
 import { suiExecuteSignedTx } from './tools/sui_execute_signed_tx.js';
 import { walrusPublish } from './tools/walrus_publish.js';
 import { walrusFetch } from './tools/walrus_fetch.js';
+import { mnemosuiCreate } from './tools/mnemosui_create.js';
+import { mnemosuiSave } from './tools/mnemosui_save.js';
 
 export const PKG_VERSION = '0.1.0';
 
@@ -101,6 +105,16 @@ const tools: ToolDef[] = [
       network: networkSchema,
     }),
     handler: suiGetAllBalances,
+  },
+  {
+    name: 'sui_get_portfolio',
+    description:
+      "A wallet's whole financial picture in one read: every coin balance plus every active stake (principal + accrued rewards), with a single SUI-exposure summary (liquid + staked + rewards). Fuses sui_get_all_balances and sui_get_stakes so 'show me my position' is one call instead of a hand-joined fan-out. Read-only. Non-SUI coins come back raw; resolve symbols with sui_get_coin_metadata as needed.",
+    inputSchema: z.object({
+      address: z.string().describe('Wallet address whose portfolio to summarize.'),
+      network: networkSchema,
+    }),
+    handler: suiGetPortfolio,
   },
   {
     name: 'sui_get_object',
@@ -473,6 +487,20 @@ const tools: ToolDef[] = [
     handler: suiDecodeTxBytes,
   },
   {
+    name: 'sui_explain_tx',
+    description:
+      'Look before you sign: take unsigned tx bytes and return a plain-English plan, a no-spend simulation (gas + balance/object changes), an explainable risk rulebook (drains, sweeping calls, fresh/third-party packages, would-fail-on-chain), and a verdict (safe | caution | danger). Folds sui_decode_tx_bytes + sui_dry_run + heuristics into one call so any agent can judge a transaction before a key ever touches it. Set simulate=false for a pure offline read.',
+    inputSchema: z.object({
+      tx_bytes_base64: z.string().describe('Base64 unsigned tx bytes to explain and judge.'),
+      simulate: z
+        .boolean()
+        .default(true)
+        .describe('Run an on-chain dry-run for cost + balance changes. Set false for offline-only.'),
+      network: networkSchema,
+    }),
+    handler: suiExplainTx,
+  },
+  {
     name: 'sui_execute_signed_tx',
     description:
       'Submit a host-signed transaction. The toolkit holds no keys: the caller signs tx bytes from a builder tool and passes the signature(s) here. Returns the digest and execution effects.',
@@ -520,6 +548,41 @@ const tools: ToolDef[] = [
         .describe('Override the Walrus aggregator endpoint.'),
     }),
     handler: walrusFetch,
+  },
+  {
+    name: 'mnemosui_create',
+    description:
+      'Create a new MemoryBook - an agent brain for persistent memory. The book is transferred to you; memories are indexed on-chain and stored on Walrus. Once you have a book, use mnemosui_save to append memories (after walrus_publish).',
+    inputSchema: z.object({
+      sender: z.string().describe('0x address creating the MemoryBook.'),
+      network: networkSchema,
+      mnemosui_package: z
+        .string()
+        .optional()
+        .describe('MnemoSui package id (defaults to canonical on the network).'),
+    }),
+    handler: mnemosuiCreate,
+  },
+  {
+    name: 'mnemosui_save',
+    description:
+      'Append a memory to a MemoryBook. Use after walrus_publish: publish content to Walrus, get blob_id, then call this to index it on-chain. The memory belongs to you and can be transferred with the book.',
+    inputSchema: z.object({
+      memory_book_id: z.string().describe('The 0x object id of the MemoryBook.'),
+      sender: z.string().describe('0x address that owns the MemoryBook.'),
+      blob_id: z.string().describe('Walrus blob id from walrus_publish.'),
+      tag: z.string().describe('Label for the memory (e.g. "conversation", "fact", "plan").'),
+      content_hash: z
+        .string()
+        .optional()
+        .describe('Hash of the content (for integrity; optional until Seal is wired in).'),
+      network: networkSchema,
+      mnemosui_package: z
+        .string()
+        .optional()
+        .describe('MnemoSui package id (defaults to canonical on the network).'),
+    }),
+    handler: mnemosuiSave,
   },
 ];
 

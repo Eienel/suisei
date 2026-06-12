@@ -7,11 +7,12 @@ the agent. Tool names keep the `sui_` prefix because they wrap the Sui
 chain - Suisei is the agent toolkit; Sui is the chain it speaks.
 Suisei (the teaching agent) is a showcase built entirely on these tools.
 
-> **Status:** Alpha. Thirty-three tools spanning the core build loop -
+> **Status:** Alpha. Thirty-five tools spanning the core build loop -
 > read chain state, build any transaction, simulate it, decode it,
-> submit it - plus native staking (stake, unstake, live APY, validator
-> set, position tracking), DeepBook quotes & swaps, batch payouts,
-> historical events, coin metadata + symbol registry, Tier-1
+> explain-and-judge it before you sign, submit it - plus native staking
+> (stake, unstake, live APY, validator set, position tracking), a
+> one-call whole-wallet portfolio, DeepBook quotes & swaps, batch
+> payouts, historical events, coin metadata + symbol registry, Tier-1
 > agent-wallet lifecycle, and Walrus storage. Next up: the on-chain
 > policy vault and Seal.
 
@@ -96,6 +97,7 @@ deep-link) to submit.
 | `sui_resolve_address`   | SuiNS name -> 0x address (idempotent on 0x inputs)            |
 | `sui_get_balance`       | SUI balance (in MIST + human-readable SUI)                   |
 | `sui_get_all_balances`  | Every coin balance a wallet holds, not just SUI             |
+| `sui_get_portfolio`     | Whole-wallet picture in one call: coins + stakes + SUI-exposure summary |
 | `sui_get_object`        | Any object's type, owner, fields, and Display               |
 | `sui_get_owned_objects` | List objects by owner, filterable by struct type, paginated |
 | `sui_get_owned_badges`  | List a wallet's Suisei completion badges                    |
@@ -133,6 +135,7 @@ deep-link) to submit.
 | ----------------------- | ------------------------------------------------------------ |
 | `sui_dry_run`           | Simulate built tx bytes (status + gas, no spend)            |
 | `sui_decode_tx_bytes`   | Offline decode: turn unsigned bytes into a human-readable plan |
+| `sui_explain_tx`        | Decode + simulate + risk rulebook + a verdict (safe/caution/danger) before you sign |
 | `sui_execute_signed_tx` | Submit host-signed tx bytes, return digest + effects        |
 
 **Walrus storage**

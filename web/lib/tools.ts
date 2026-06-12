@@ -8,10 +8,11 @@ export interface ToolGroup {
 export const toolGroups: ToolGroup[] = [
   {
     label: 'Read: balances and coins',
-    blurb: 'Resolve names, list coins, read balances and metadata.',
+    blurb: 'Resolve names, list coins, read balances, metadata, and a whole-wallet portfolio.',
     tools: [
       'sui_get_balance',
       'sui_get_all_balances',
+      'sui_get_portfolio',
       'sui_get_coins',
       'sui_get_coin_metadata',
       'sui_resolve_coin',
@@ -59,8 +60,13 @@ export const toolGroups: ToolGroup[] = [
   },
   {
     label: 'Simulate, submit, inspect',
-    blurb: 'Dry-run, decode raw bytes to a plan, execute a signed tx.',
-    tools: ['sui_dry_run', 'sui_decode_tx_bytes', 'sui_execute_signed_tx'],
+    blurb: 'Dry-run, decode raw bytes to a plan, explain-and-judge before signing, execute a signed tx.',
+    tools: [
+      'sui_dry_run',
+      'sui_decode_tx_bytes',
+      'sui_explain_tx',
+      'sui_execute_signed_tx',
+    ],
   },
   {
     label: 'Walrus',
@@ -71,6 +77,11 @@ export const toolGroups: ToolGroup[] = [
     label: 'Agent wallet (Tier 1)',
     blurb: 'Fund a bounded allowance, read its status, sweep it back.',
     tools: ['agent_wallet_fund', 'agent_wallet_status', 'agent_wallet_sweep'],
+  },
+  {
+    label: 'MnemoSui: agent memory',
+    blurb: 'Create a MemoryBook brain and save persistent memories (indexed on-chain, stored on Walrus).',
+    tools: ['mnemosui_create', 'mnemosui_save'],
   },
   {
     label: 'Badges',
