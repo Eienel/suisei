@@ -101,7 +101,7 @@ function Hero() {
           Suisei puts Sui behind the Model Context Protocol, so any AI agent
           can read, build, simulate, sign, and submit on chain. Full portfolio
           visibility, persistent memory, transaction safety, and boundless agent
-          autonomy—all non-custodial.
+          autonomy - all non-custodial.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <a
@@ -247,7 +247,7 @@ function Tools() {
         </h2>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
           Portfolio snapshots. Transaction safety. Persistent agent memory.
-          Validator comparisons. Everything agents need to act autonomously—all
+          Validator comparisons. Everything agents need to act autonomously - all
           read-only until explicitly signed.
         </p>
       </Reveal>
