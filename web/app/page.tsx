@@ -147,21 +147,27 @@ function Hero() {
 
 function Stats() {
   const stats = [
-    { value: toolCount.toString(), label: 'tools, one install' },
+    { value: toolCount.toString(), label: 'tools, one install', accent: true },
     { value: '2', label: 'packages on npm' },
     { value: '0', label: 'keys held by the toolkit' },
     { value: '100%', label: 'on real testnet' },
   ];
   return (
     <section className="mx-auto max-w-6xl px-5 py-14 md:py-16">
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className="bg-paper-raised px-5 py-8 text-center">
-            <p className="font-mono text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-              {s.value}
-            </p>
-            <p className="mt-2 text-sm text-muted">{s.label}</p>
-          </div>
+      <div className="grid grid-cols-2 border-y border-line md:grid-cols-4 md:divide-x md:divide-line">
+        {stats.map((s, i) => (
+          <Reveal key={s.label} delay={i * 70}>
+            <div className="px-1 py-8 md:px-7">
+              <p
+                className={`font-mono text-4xl font-semibold tracking-tight tabular-nums md:text-5xl ${
+                  s.accent ? 'text-accent' : 'text-ink'
+                }`}
+              >
+                {s.value}
+              </p>
+              <p className="mt-3 text-sm leading-snug text-muted">{s.label}</p>
+            </div>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -270,10 +276,39 @@ function Moat() {
 }
 
 function Security() {
+  const rules = [
+    {
+      icon: Lock,
+      title: 'The toolkit never holds keys.',
+      body: (
+        <>
+          Every transaction-building tool returns unsigned{' '}
+          <code className="font-mono text-sm text-ink">tx_bytes_base64</code>.
+          The host signs, the toolkit submits. A tool that holds a key is a
+          tool that can spend money.
+        </>
+      ),
+    },
+    {
+      icon: Key,
+      title: 'Keys never enter an agent.',
+      body: (
+        <>
+          Key generation is not a tool, because that would land the secret in
+          the model prompt and logs. Signing lives in{' '}
+          <code className="font-mono text-sm text-ink">agent-signer</code>, a
+          separate local process.
+        </>
+      ),
+    },
+  ];
   return (
     <section id="security" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
       <Reveal>
-        <h2 className="max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+          Non-negotiable
+        </p>
+        <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight md:text-4xl">
           A toolkit you would trust an agent with.
         </h2>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
@@ -281,39 +316,31 @@ function Security() {
           act on chain without ever holding the keys that move money.
         </p>
       </Reveal>
-      <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <Reveal>
-          <article className="group h-full rounded-2xl border border-line bg-paper-raised p-7 transition-colors hover:border-accent">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent">
-              <Lock size={24} weight="duotone" />
-            </div>
-            <h3 className="mt-5 text-xl font-semibold tracking-tight">
-              The toolkit never holds keys
-            </h3>
-            <p className="mt-3 leading-relaxed text-muted">
-              Every transaction-building tool returns unsigned{' '}
-              <code className="font-mono text-sm text-ink">tx_bytes_base64</code>
-              . The host signs, the toolkit submits. A tool that holds a key is
-              a tool that can spend money.
-            </p>
-          </article>
-        </Reveal>
-        <Reveal delay={90}>
-          <article className="group h-full rounded-2xl border border-line bg-paper-raised p-7 transition-colors hover:border-accent">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent">
-              <Key size={24} weight="duotone" />
-            </div>
-            <h3 className="mt-5 text-xl font-semibold tracking-tight">
-              Keys never enter an agent
-            </h3>
-            <p className="mt-3 leading-relaxed text-muted">
-              Key generation is not a tool, because that would land the secret
-              in the model prompt and logs. Signing lives in{' '}
-              <code className="font-mono text-sm text-ink">agent-signer</code>,
-              a separate local process.
-            </p>
-          </article>
-        </Reveal>
+      <div className="mt-14 space-y-px">
+        {rules.map((rule, i) => {
+          const Icon = rule.icon;
+          return (
+            <Reveal key={rule.title} delay={i * 90}>
+              <article className="group grid grid-cols-[auto_1fr] items-start gap-x-6 border-t border-line py-9 md:grid-cols-[auto_auto_1fr] md:gap-x-10 md:py-11">
+                <span className="font-mono text-5xl font-semibold leading-none tabular-nums text-line-strong transition-colors group-hover:text-accent md:text-7xl">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent md:flex">
+                  <Icon size={26} weight="duotone" />
+                </div>
+                <div className="border-l border-line pl-6 md:pl-8">
+                  <h3 className="text-xl font-semibold tracking-tight md:text-2xl">
+                    {rule.title}
+                  </h3>
+                  <p className="mt-3 max-w-2xl leading-relaxed text-muted">
+                    {rule.body}
+                  </p>
+                </div>
+              </article>
+            </Reveal>
+          );
+        })}
+        <div className="border-t border-line" />
       </div>
     </section>
   );
@@ -419,13 +446,13 @@ function Roadmap() {
           web is already mapped.
         </p>
       </Reveal>
-      <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-2">
+      <div className="mt-14 grid grid-cols-1 gap-x-16 gap-y-12 md:grid-cols-2">
         <Reveal>
-          <div className="h-full rounded-2xl border border-line bg-paper-raised p-7">
-            <p className="font-mono text-xs uppercase tracking-wider text-faint">
+          <div className="border-t-2 border-accent pt-5">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
               Live now
             </p>
-            <ul className="mt-5 space-y-4">
+            <ul className="mt-6 space-y-5">
               {live.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <CheckCircle
@@ -441,7 +468,7 @@ function Roadmap() {
               href={BADGE_EXPLORER}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-1 font-mono text-xs text-accent transition-colors hover:text-accent-hover"
+              className="mt-6 inline-flex items-center gap-1 font-mono text-xs text-accent transition-colors hover:text-accent-hover"
             >
               View the badge package on Suiscan
               <ArrowUpRight size={13} />
@@ -449,11 +476,11 @@ function Roadmap() {
           </div>
         </Reveal>
         <Reveal delay={90}>
-          <div className="h-full rounded-2xl border border-line bg-paper-raised p-7">
-            <p className="font-mono text-xs uppercase tracking-wider text-faint">
+          <div className="border-t-2 border-line pt-5">
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-faint">
               Next
             </p>
-            <ul className="mt-5 space-y-4">
+            <ul className="mt-6 space-y-5">
               {next.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <Circle
