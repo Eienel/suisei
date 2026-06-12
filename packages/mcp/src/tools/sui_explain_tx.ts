@@ -20,18 +20,22 @@ interface Signal {
 /**
  * "Look before you sign" as a single tool. Folds three primitives the
  * toolkit already has - sui_decode_tx_bytes (what it does),
- * sui_dry_run (what it costs and changes), and a risk rulebook - into
- * one verdict an agent can act on before asking a host to sign.
+ * sui_dry_run (what it costs and changes), and explainable signals - into
+ * one call so an agent can understand a transaction before asking to sign it.
  *
  * This is the whole point of the toolkit being non-custodial: every
  * transaction can be understood and judged *before* a key ever touches
- * it. Any agent on the MCP gets this for free, so users stop blind-
- * signing tx bytes they can't read - the single biggest cause of
- * avoidable Web3 losses.
+ * it. Any agent on the MCP gets this for free.
  *
- * The rulebook is deliberately explainable (no ML): each signal names a
- * concrete reason. The agent is the narrator on top; this tool gives it
- * crisp, structured facts to narrate.
+ * Signals are conservative:
+ * - "danger": simulation will fail on-chain (unambiguous - don't sign)
+ * - "caution": simulation succeeded but produced unexpected output
+ *   (may be intentional; human should verify)
+ * - "info": informational (decoded plan, notable contracts, net flows)
+ *
+ * The agent is the narrator. This tool gives it crisp, structured facts.
+ * No auto-verdict on function names, address types, or transfer patterns -
+ * the data doesn't support strong claims there. Only simulation tells truth.
  */
 export async function suiExplainTx(raw: unknown): Promise<string> {
   const { tx_bytes_base64, network, simulate = true } = raw as Args;
@@ -77,12 +81,17 @@ export async function suiExplainTx(raw: unknown): Promise<string> {
       : 'safe';
 
   const verdict_reason =
-    verdict === 'safe'
-      ? 'No risk signals fired. Still confirm the plan matches your intent.'
-      : signals
-          .filter((s) => s.level === (verdict === 'danger' ? 'danger' : 'caution'))
+    verdict === 'danger'
+      ? signals
+          .filter((s) => s.level === 'danger')
           .map((s) => s.message)
-          .join(' ');
+          .join(' ')
+      : verdict === 'caution'
+        ? signals
+            .filter((s) => s.level === 'caution')
+            .map((s) => s.message)
+            .join(' ')
+        : 'Simulation succeeded. Review the decoded plan above and confirm it matches what you intended to do.';
 
   return JSON.stringify({
     network,
@@ -99,17 +108,6 @@ export async function suiExplainTx(raw: unknown): Promise<string> {
   });
 }
 
-/** Sweeping function names worth surfacing verbatim to the user. */
-const SWEEP_RE = /(drain|withdraw_all|claim_all|unstake_all|transfer_all|set_owner|set_admin|self_destruct)/i;
-
-/** Packages that are part of the chain / well-known infra - low surprise. */
-const KNOWN_PACKAGES: Record<string, string> = {
-  '0x1': 'Move stdlib',
-  '0x2': 'Sui framework',
-  '0x3': 'Sui system (staking)',
-  '0xdee9': 'DeepBook',
-};
-
 function assessRisk(
   decoded: {
     sender: string | null;
@@ -121,116 +119,81 @@ function assessRisk(
   const signals: Signal[] = [];
   const sender = (decoded.sender ?? '').toLowerCase();
 
-  // Resolve an argument ref to a pure value when it's a transaction Input.
-  const resolveRef = (ref: unknown): unknown => {
-    if (ref && typeof ref === 'object' && (ref as { $kind?: string }).$kind === 'Input') {
-      const idx = (ref as { Input: number }).Input;
-      return decoded.inputs[idx]?.value;
-    }
-    return undefined;
-  };
-
-  let hasWrite = false;
-
-  for (const cmd of decoded.commands) {
-    const raw = cmd.raw as Record<string, unknown>;
-
-    if (cmd.kind === 'TransferObjects') {
-      hasWrite = true;
-      const t = raw.TransferObjects as { objects: unknown[]; address: unknown };
-      const dest = resolveRef(t.address);
-      const destStr = typeof dest === 'string' ? dest.toLowerCase() : null;
-      const transfersGasCoin = t.objects.some(
-        (o) => o && typeof o === 'object' && (o as { $kind?: string }).$kind === 'GasCoin',
-      );
-      const toSelf = destStr !== null && destStr === sender;
-
-      if (destStr !== null && !toSelf) {
-        if (transfersGasCoin) {
-          signals.push({
-            level: 'danger',
-            code: 'gas_coin_to_other',
-            message: `This sends your remaining SUI (the gas coin) to ${dest}, not back to you. That can empty the wallet.`,
-          });
-        } else {
-          signals.push({
-            level: 'caution',
-            code: 'transfer_to_other',
-            message: `This transfers ${t.objects.length} object(s) to ${dest}, a different address than the sender. Confirm you mean to send to it.`,
-          });
-        }
-      }
-    }
-
-    if (cmd.kind === 'MoveCall') {
-      hasWrite = true;
-      const mc = raw.MoveCall as { package: string; module: string; function: string };
-      const pkgShort = mc.package.replace(/^0x0*/, '0x');
-      const known = KNOWN_PACKAGES[pkgShort] ?? KNOWN_PACKAGES[mc.package];
-      if (SWEEP_RE.test(mc.function)) {
-        signals.push({
-          level: 'caution',
-          code: 'sweeping_call',
-          message: `Calls ${mc.module}::${mc.function} - a function whose name suggests it moves everything. Read what it does before signing.`,
-        });
-      }
-      if (!known) {
-        signals.push({
-          level: 'info',
-          code: 'third_party_package',
-          message: `Calls third-party package ${mc.package}. Not a system package - verify you trust its publisher.`,
-        });
-      }
-    }
-
-    if (cmd.kind === 'Publish' || cmd.kind === 'Upgrade') {
-      hasWrite = true;
-      signals.push({
-        level: 'caution',
-        code: cmd.kind === 'Publish' ? 'publishes_package' : 'upgrades_package',
-        message: `This ${cmd.kind === 'Publish' ? 'publishes a new' : 'upgrades a'} Move package. Unusual for a routine user action.`,
-      });
-    }
-
-    if (cmd.kind === 'SplitCoins' || cmd.kind === 'MergeCoins' || cmd.kind === 'MakeMoveVec') {
-      hasWrite = true;
-    }
-  }
-
-  // Simulation-derived signals.
+  // Only flag what we know for certain from simulation results.
+  // Everything else is informational - the decoded plan speaks for itself.
   if (simulation) {
+    // Simulation failure = unambiguous danger: tx will fail on-chain.
     if (simulation.status && simulation.status !== 'success') {
       signals.push({
         level: 'danger',
         code: 'simulation_failed',
-        message: `Simulation says this transaction would FAIL on-chain (${simulation.error ?? 'unknown error'}). Signing it would waste gas at best.`,
+        message: `This transaction will FAIL on-chain: ${simulation.error ?? 'unknown error'}. Signing wastes gas.`,
+      });
+      return signals; // Fail fast; no point analyzing further.
+    }
+
+    // Check for zero output (unexpected outcome despite success).
+    const objChanges = (simulation.object_changes_count as number) ?? 0;
+    const balChanges = (simulation.balance_changes as { owner: unknown; coinType: string; amount: string }[]) ?? [];
+    const hasOutputToSender = balChanges.some((c) => {
+      const ownerAddr =
+        c.owner && typeof c.owner === 'object'
+          ? ((c.owner as { AddressOwner?: string }).AddressOwner ?? '').toLowerCase()
+          : '';
+      return ownerAddr === sender && BigInt(c.amount) > 0n;
+    });
+
+    // If we expected swaps/transfers but simulation shows zero objects created and nothing sent back to sender,
+    // that's unexpected (caution, not danger - might be intentional like a burn).
+    if (objChanges === 0 && !hasOutputToSender && decoded.commands.some((c) => c.kind === 'MoveCall')) {
+      signals.push({
+        level: 'caution',
+        code: 'zero_output',
+        message:
+          'Simulation succeeded but produced no objects and no funds returned to sender. Confirm this is what you intended.',
       });
     }
-    // Net SUI leaving the sender (beyond gas) is worth showing plainly.
-    const changes = (simulation.balance_changes as { owner: unknown; coinType: string; amount: string }[]) ?? [];
-    for (const c of changes) {
+
+    // Net SUI outflow: informational only (it's explicit in simulation).
+    const suiOut = balChanges.reduce((sum, c) => {
       const ownerAddr =
         c.owner && typeof c.owner === 'object'
           ? ((c.owner as { AddressOwner?: string }).AddressOwner ?? '').toLowerCase()
           : '';
       if (ownerAddr === sender && c.coinType === '0x2::sui::SUI' && BigInt(c.amount) < 0n) {
-        const outSui = Number(-BigInt(c.amount)) / 1e9;
-        if (outSui >= 1) {
-          signals.push({
-            level: 'info',
-            code: 'sui_outflow',
-            message: `Net ~${outSui.toFixed(4)} SUI leaves your wallet in this transaction (including gas).`,
-          });
-        }
+        return sum + Number(-BigInt(c.amount));
       }
+      return sum;
+    }, 0);
+    if (suiOut >= 1e9) {
+      signals.push({
+        level: 'info',
+        code: 'sui_outflow',
+        message: `Net ~${(suiOut / 1e9).toFixed(4)} SUI leaves your wallet (including gas).`,
+      });
     }
   }
 
+  // Informational: is this read-only or does it change state?
+  const hasWrite = decoded.commands.some((c) => {
+    return ['TransferObjects', 'SplitCoins', 'MergeCoins', 'MakeMoveVec', 'MoveCall', 'Publish', 'Upgrade'].includes(
+      c.kind,
+    );
+  });
   if (!hasWrite) {
     signals.push({
       level: 'info',
       code: 'read_only',
-      message: 'No state-changing commands detected - this looks read-only / inspection-shaped.',
+      message: 'No state-changing commands. This looks read-only.',
+    });
+  }
+
+  // Informational: flag Publish/Upgrade as unusual (users rarely do these).
+  if (decoded.commands.some((c) => c.kind === 'Publish' || c.kind === 'Upgrade')) {
+    signals.push({
+      level: 'info',
+      code: 'package_operation',
+      message: 'This publishes or upgrades a Move package - unusual for end users.',
     });
   }
 
