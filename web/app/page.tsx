@@ -15,7 +15,6 @@ import { Clients } from '@/components/Clients';
 import { FlowDiagram } from '@/components/FlowDiagram';
 import { SlotImage } from '@/components/SlotImage';
 import { ToolDirectory } from '@/components/ToolDirectory';
-import { Showcase } from '@/components/Showcase';
 import { toolCount } from '@/lib/tools';
 
 const GITHUB = 'https://github.com/eienel/suisei';
@@ -107,7 +106,7 @@ function Hero() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <a
             href={GITHUB}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
+            className="elevate-accent inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
           >
             <GithubLogo size={18} weight="fill" />
             Get started on GitHub
@@ -234,7 +233,7 @@ function Moat() {
               Suisei hands the agent the whole Sui Stack as one-line tools, so it
               reasons, decides, and acts on its own.
             </p>
-            <div className="mt-8 space-y-px overflow-hidden rounded-xl border border-line text-sm">
+            <div className="elevate mt-8 space-y-px overflow-hidden rounded-xl border border-line text-sm">
               <div className="flex items-center gap-3 bg-paper px-4 py-3">
                 <span className="font-mono text-xs text-faint">others</span>
                 <span className="text-muted">you assemble the primitives</span>
@@ -395,30 +394,27 @@ function Built() {
     >
       <div className="mx-auto max-w-6xl px-5">
         <Reveal>
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
+          <div className="elevate relative flex flex-col items-start gap-6 rounded-2xl border border-line bg-paper-raised px-7 py-12 text-center sm:items-center md:py-16">
+            <div className="sm:max-w-xl">
               <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                Built with Suisei
+                Build the first thing on Suisei.
               </h2>
-              <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted">
-                Projects that run on the toolkit. Shipped something with it? Add
-                yours, it takes a minute.
+              <p className="mt-4 text-lg leading-relaxed text-muted">
+                The toolkit is live and the canvas is open. Ship something an
+                agent does on Sui, then put your name on it.
               </p>
             </div>
             <a
               href={SUBMIT}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
+              className="elevate-accent inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
             >
               <Plus size={17} weight="bold" />
               Submit your project
             </a>
           </div>
         </Reveal>
-        <div className="mt-12">
-          <Showcase />
-        </div>
       </div>
     </section>
   );

@@ -176,6 +176,52 @@ body {
   }
 }
 
+/*
+  Depth utilities. The page is mostly flat editorial; these lift only the
+  surfaces that should read as raised (CTAs, the terminal, callout cards).
+  Soft, layered, low-opacity. Never a hard drop shadow.
+*/
+.elevate {
+  box-shadow:
+    0 1px 2px rgba(22, 24, 29, 0.04),
+    0 10px 30px -14px rgba(22, 24, 29, 0.16);
+}
+.elevate-hover {
+  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.elevate-hover:hover {
+  box-shadow:
+    0 2px 4px rgba(22, 24, 29, 0.05),
+    0 20px 45px -18px rgba(22, 24, 29, 0.22);
+}
+/* Accent-tinted glow for the primary action and highlighted moments. */
+.elevate-accent {
+  box-shadow:
+    0 1px 2px rgba(23, 70, 199, 0.12),
+    0 16px 38px -16px rgba(23, 70, 199, 0.30);
+}
+/* Soft smoke fade: a faint vignette under a raised block to seat it on the
+   paper without a visible edge. Pair with .elevate on the same element. */
+.smoke::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1.5rem;
+  z-index: -1;
+  height: 3rem;
+  width: 86%;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: radial-gradient(
+    closest-side,
+    rgba(22, 24, 29, 0.14),
+    transparent
+  );
+  filter: blur(12px);
+  pointer-events: none;
+}
+
 /* Accent underline that draws in when its section reveals. */
 .ink-underline {
   background-image: linear-gradient(var(--color-accent), var(--color-accent));
