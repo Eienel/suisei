@@ -106,16 +106,19 @@ function Hero() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <a
             href={GITHUB}
-            className="elevate-accent inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
+            className="btn-shine elevate-accent inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
           >
             <GithubLogo size={18} weight="fill" />
             Get started on GitHub
           </a>
           <a
             href={NPM_MCP}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-line-strong bg-paper-raised px-5 py-3 text-sm font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-accent active:translate-y-0"
+            className="elevate-hover group inline-flex items-center justify-center gap-2 rounded-lg border border-line-strong bg-paper-raised px-5 py-3 text-sm font-medium text-ink transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:text-accent active:translate-y-0"
           >
-            <Package size={18} />
+            <Package
+              size={18}
+              className="transition-transform duration-300 group-hover:-rotate-12"
+            />
             View on npm
           </a>
         </div>
@@ -138,7 +141,9 @@ function Hero() {
             className="border-0 bg-transparent shadow-none"
           />
         </div>
-        <AnimatedTerminal />
+        <div className="smoke">
+          <AnimatedTerminal />
+        </div>
       </Reveal>
     </header>
   );
@@ -394,7 +399,7 @@ function Built() {
     >
       <div className="mx-auto max-w-6xl px-5">
         <Reveal>
-          <div className="elevate relative flex flex-col items-start gap-6 rounded-2xl border border-line bg-paper-raised px-7 py-12 text-center sm:items-center md:py-16">
+          <div className="elevate smoke flex flex-col items-start gap-6 rounded-2xl border border-line bg-paper-raised px-7 py-12 text-center sm:items-center md:py-16">
             <div className="sm:max-w-xl">
               <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
                 Build the first thing on Suisei.
@@ -408,7 +413,7 @@ function Built() {
               href={SUBMIT}
               target="_blank"
               rel="noopener noreferrer"
-              className="elevate-accent inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
+              className="btn-shine elevate-accent inline-flex shrink-0 items-center gap-2 rounded-lg bg-accent px-5 py-3 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-accent-hover active:translate-y-0"
             >
               <Plus size={17} weight="bold" />
               Submit your project
