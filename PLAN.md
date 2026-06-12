@@ -11,7 +11,7 @@ The BlockBuilders teaching game that used to live here has been stripped
 out (preserved in a separate backup). This repo is now the **Suisei MCP
 toolkit** and nothing else:
 
-- `packages/mcp` - `@suisei-mcp/mcp`, the MCP server (33 tools).
+- `packages/mcp` - `@suisei-mcp/mcp`, the MCP server (35 tools).
 - `packages/agent-signer` - `@suisei-mcp/agent-signer`, the non-custodial
   local signer.
 - `web/` - the landing page and showcase (Next), which also serves the
@@ -44,8 +44,10 @@ toolkit is enough to build real products:
 - **Suisei (teaching agent)** - an AI agent that uses the Sui Stack to
   teach the Sui Stack. The original concept; brought back as a showcase,
   not as the submitted product.
-- **TxLens** - "look before you sign" tx guard. Pure MCP composition,
-  zero new Move code.
+- **TxLens** - "look before you sign" tx guard. The core capability now
+  ships *inside* the MCP as the `sui_explain_tx` tool (decode + simulate +
+  risk verdict in one call), so every agent on the toolkit gets it for
+  free; a standalone app/extension on top is optional, not the product.
 - **MnemoSui** - an agent's memory as a transferable NFT (Walrus + Sui).
   Needs its own Move module deployed first.
 
@@ -57,10 +59,11 @@ Built for the Sui Overflow 2026 hackathon.
 
 ---
 
-## The 33 tools (shipped today)
+## The 35 tools (shipped today)
 
 **Read - balances & coins:** `sui_get_balance`, `sui_get_all_balances`,
-`sui_get_coins`, `sui_get_coin_metadata`, `sui_resolve_coin`.
+`sui_get_portfolio`, `sui_get_coins`, `sui_get_coin_metadata`,
+`sui_resolve_coin`.
 
 **Read - objects & chain state:** `sui_get_object`,
 `sui_get_owned_objects`, `sui_get_dynamic_fields`, `sui_get_transaction`,
@@ -75,7 +78,7 @@ Built for the Sui Overflow 2026 hackathon.
 **DeepBook:** `sui_deepbook_quote`, `sui_deepbook_swap`.
 
 **Simulate / submit / inspect:** `sui_dry_run`, `sui_decode_tx_bytes`,
-`sui_execute_signed_tx`.
+`sui_explain_tx`, `sui_execute_signed_tx`.
 
 **Walrus:** `walrus_publish`, `walrus_fetch`.
 

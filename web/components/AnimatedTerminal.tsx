@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CopyButton } from './CopyButton';
+import { toolCount } from '@/lib/tools';
 
 /*
  * A terminal that cycles through a real Suisei sequence: read, build, sign,
@@ -102,7 +103,7 @@ export function AnimatedTerminal() {
           </p>
           <CopyButton value={INSTALL} label="Copy install command" />
         </div>
-        <p className="text-term-muted">Added MCP server suisei. 33 tools.</p>
+        <p className="text-term-muted">Added MCP server suisei. {toolCount} tools.</p>
 
         <div className="relative min-h-[200px] pt-1">
           {STEPS.map((step, i) => (

@@ -17,7 +17,7 @@ Two packages on npm, the same toolkit any agent can plug into:
 
 | Package | What it is | Install |
 |---|---|---|
-| [`@suisei-mcp/mcp`](packages/mcp) | The MCP server: 33 tools spanning read, build, simulate, submit, staking, DeepBook, Walrus, and agent-wallet lifecycle. | `npm i -g @suisei-mcp/mcp` |
+| [`@suisei-mcp/mcp`](packages/mcp) | The MCP server: 35 tools spanning read, build, simulate, submit, staking, DeepBook, Walrus, agent-wallet lifecycle, one-call portfolio, and explain-before-you-sign tx safety. | `npm i -g @suisei-mcp/mcp` |
 | [`@suisei-mcp/agent-signer`](packages/agent-signer) | A non-custodial local CLI that holds the agent's key, encrypts it under your passphrase, and signs builder bytes. No key ever crosses an MCP response. | `npm i -g @suisei-mcp/agent-signer` |
 
 ## The two non-negotiables
@@ -163,7 +163,7 @@ endpoint. See [`.env.example`](.env.example) for all options.
 
 ```
 packages/
-  mcp/                    # @suisei-mcp/mcp: the MCP server (33 tools)
+  mcp/                    # @suisei-mcp/mcp: the MCP server (35 tools)
   agent-signer/           # @suisei-mcp/agent-signer: non-custodial local signer
 web/                      # Landing page + showcase (Next), serves /api/mcp
 move/
