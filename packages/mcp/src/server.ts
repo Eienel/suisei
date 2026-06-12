@@ -57,6 +57,8 @@ import { suiGetPortfolio } from './tools/sui_get_portfolio.js';
 import { suiExecuteSignedTx } from './tools/sui_execute_signed_tx.js';
 import { walrusPublish } from './tools/walrus_publish.js';
 import { walrusFetch } from './tools/walrus_fetch.js';
+import { mnemosuiCreate } from './tools/mnemosui_create.js';
+import { mnemosuiSave } from './tools/mnemosui_save.js';
 
 export const PKG_VERSION = '0.1.0';
 
@@ -546,6 +548,41 @@ const tools: ToolDef[] = [
         .describe('Override the Walrus aggregator endpoint.'),
     }),
     handler: walrusFetch,
+  },
+  {
+    name: 'mnemosui_create',
+    description:
+      'Create a new MemoryBook - an agent brain for persistent memory. The book is transferred to you; memories are indexed on-chain and stored on Walrus. Once you have a book, use mnemosui_save to append memories (after walrus_publish).',
+    inputSchema: z.object({
+      sender: z.string().describe('0x address creating the MemoryBook.'),
+      network: networkSchema,
+      mnemosui_package: z
+        .string()
+        .optional()
+        .describe('MnemoSui package id (defaults to canonical on the network).'),
+    }),
+    handler: mnemosuiCreate,
+  },
+  {
+    name: 'mnemosui_save',
+    description:
+      'Append a memory to a MemoryBook. Use after walrus_publish: publish content to Walrus, get blob_id, then call this to index it on-chain. The memory belongs to you and can be transferred with the book.',
+    inputSchema: z.object({
+      memory_book_id: z.string().describe('The 0x object id of the MemoryBook.'),
+      sender: z.string().describe('0x address that owns the MemoryBook.'),
+      blob_id: z.string().describe('Walrus blob id from walrus_publish.'),
+      tag: z.string().describe('Label for the memory (e.g. "conversation", "fact", "plan").'),
+      content_hash: z
+        .string()
+        .optional()
+        .describe('Hash of the content (for integrity; optional until Seal is wired in).'),
+      network: networkSchema,
+      mnemosui_package: z
+        .string()
+        .optional()
+        .describe('MnemoSui package id (defaults to canonical on the network).'),
+    }),
+    handler: mnemosuiSave,
   },
 ];
 

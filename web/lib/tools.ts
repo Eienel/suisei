@@ -79,6 +79,11 @@ export const toolGroups: ToolGroup[] = [
     tools: ['agent_wallet_fund', 'agent_wallet_status', 'agent_wallet_sweep'],
   },
   {
+    label: 'MnemoSui: agent memory',
+    blurb: 'Create a MemoryBook brain and save persistent memories (indexed on-chain, stored on Walrus).',
+    tools: ['mnemosui_create', 'mnemosui_save'],
+  },
+  {
     label: 'Badges',
     blurb: 'List the soulbound badges an address owns.',
     tools: ['sui_get_owned_badges'],
