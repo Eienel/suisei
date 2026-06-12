@@ -39,3 +39,4 @@ move/**/Move.lock
 # Python
 __pycache__/
 *.pyc
+deploy.log
